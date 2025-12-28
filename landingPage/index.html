@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Landing Page - Customizable</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Theme & Layout Selector Panel -->
+    <div class="control-panel">
+        <button class="toggle-panel-btn" onclick="toggleControlPanel()">
+            <i class="fas fa-cog"></i> Customize
+        </button>
+        <div class="panel-content">
+            <h3>Customize Your Landing Page</h3>
+
+            <!-- Color Theme Selector -->
+            <div class="theme-selector">
+                <h4>Select Color Theme:</h4>
+                <div class="theme-options">
+                    <button class="theme-btn active" data-theme="theme-1" onclick="changeTheme('theme-1')">
+                        <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)"></span>
+                        Purple Gradient
+                    </button>
+                    <button class="theme-btn" data-theme="theme-2" onclick="changeTheme('theme-2')">
+                        <span style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"></span>
+                        Pink Gradient
+                    </button>
+                    <button class="theme-btn" data-theme="theme-3" onclick="changeTheme('theme-3')">
+                        <span style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"></span>
+                        Blue Gradient
+                    </button>
+                    <button class="theme-btn" data-theme="theme-4" onclick="changeTheme('theme-4')">
+                        <span style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"></span>
+                        Green Gradient
+                    </button>
+                    <button class="theme-btn" data-theme="theme-5" onclick="changeTheme('theme-5')">
+                        <span style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%)"></span>
+                        Warm Sunset
+                    </button>
+                    <button class="theme-btn" data-theme="theme-6" onclick="changeTheme('theme-6')">
+                        <span style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%)"></span>
+                        Ocean Deep
+                    </button>
+                </div>
+            </div>
+
+            <!-- Section Layout Selectors -->
+            <div class="layout-selectors">
+                <div class="section-layout-control" data-section="hero">
+                    <h4>Hero Section Layout:</h4>
+                    <select onchange="changeLayout('hero', this.value)">
+                        <option value="layout-1">Layout 1 - Centered</option>
+                        <option value="layout-2">Layout 2 - Split Screen</option>
+                        <option value="layout-3">Layout 3 - Asymmetric</option>
+                    </select>
+                </div>
+
+                <div class="section-layout-control" data-section="about">
+                    <h4>About Section Layout:</h4>
+                    <select onchange="changeLayout('about', this.value)">
+                        <option value="layout-1">Layout 1 - Side by Side</option>
+                        <option value="layout-2">Layout 2 - Card Style</option>
+                        <option value="layout-3">Layout 3 - Overlapping</option>
+                    </select>
+                </div>
+
+                <div class="section-layout-control" data-section="categories">
+                    <h4>Event Categories Layout:</h4>
+                    <select onchange="changeLayout('categories', this.value)">
+                        <option value="layout-1">Layout 1 - Grid Cards</option>
+                        <option value="layout-2">Layout 2 - List with Icons</option>
+                        <option value="layout-3">Layout 3 - Carousel</option>
+                    </select>
+                </div>
+
+                <div class="section-layout-control" data-section="timeline">
+                    <h4>Timeline Layout:</h4>
+                    <select onchange="changeLayout('timeline', this.value)">
+                        <option value="layout-1">Layout 1 - Horizontal</option>
+                        <option value="layout-2">Layout 2 - Vertical Stepper</option>
+                        <option value="layout-3">Layout 3 - Card Timeline</option>
+                    </select>
+                </div>
+
+                <div class="section-layout-control" data-section="prizes">
+                    <h4>Prizes & Benefits Layout:</h4>
+                    <select onchange="changeLayout('prizes', this.value)">
+                        <option value="layout-1">Layout 1 - Centered Cards</option>
+                        <option value="layout-2">Layout 2 - Split Benefits</option>
+                        <option value="layout-3">Layout 3 - Icon Grid</option>
+                    </select>
+                </div>
+
+                <div class="section-layout-control" data-section="jury">
+                    <h4>Jury & Speakers Layout:</h4>
+                    <select onchange="changeLayout('jury', this.value)">
+                        <option value="layout-1">Layout 1 - Grid Cards</option>
+                        <option value="layout-2">Layout 2 - Carousel</option>
+                        <option value="layout-3">Layout 3 - Staggered</option>
+                    </select>
+                </div>
+
+                <div class="section-layout-control" data-section="documentation">
+                    <h4>Documentation Layout:</h4>
+                    <select onchange="changeLayout('documentation', this.value)">
+                        <option value="layout-1">Layout 1 - Gallery Grid</option>
+                        <option value="layout-2">Layout 2 - Masonry</option>
+                        <option value="layout-3">Layout 3 - Slideshow</option>
+                    </select>
+                </div>
+
+                <div class="section-layout-control" data-section="sponsors">
+                    <h4>Sponsors Layout:</h4>
+                    <select onchange="changeLayout('sponsors', this.value)">
+                        <option value="layout-1">Layout 1 - Simple Grid</option>
+                        <option value="layout-2">Layout 2 - Tiered</option>
+                        <option value="layout-3">Layout 3 - Carousel</option>
+                    </select>
+                </div>
+
+                <div class="section-layout-control" data-section="contact">
+                    <h4>Contact Layout:</h4>
+                    <select onchange="changeLayout('contact', this.value)">
+                        <option value="layout-1">Layout 1 - Two Column</option>
+                        <option value="layout-2">Layout 2 - Card Style</option>
+                        <option value="layout-3">Layout 3 - Centered</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="hero" class="section-hero layout-1">
+        <div class="hero-content">
+            <div class="hero-logo">
+                <img src="https://via.placeholder.com/150" alt="Event Logo">
+            </div>
+            <h1 class="hero-title">Innovation Challenge 2024</h1>
+            <p class="hero-tagline">Empowering Innovation Through Competition</p>
+            <div class="hero-details">
+                <p><i class="fas fa-calendar"></i> 15-20 Januari 2024</p>
+                <p><i class="fas fa-map-marker-alt"></i> Jakarta Convention Center</p>
+            </div>
+            <div class="hero-cta">
+                <button class="btn-primary">Daftar Sekarang</button>
+                <button class="btn-secondary">Lihat Detail</button>
+            </div>
+        </div>
+        <div class="hero-background">
+            <div class="hero-image"></div>
+        </div>
+    </section>
+
+    <!-- About / Overview Section -->
+    <section id="about" class="section-about layout-1">
+        <div class="container">
+            <div class="about-poster">
+                <img src="https://via.placeholder.com/500x700" alt="Event Poster">
+            </div>
+            <div class="about-content">
+                <h2>Tentang Event</h2>
+                <div class="about-description">
+                    <p>Innovation Challenge 2024 adalah kompetisi bergengsi yang menghadirkan platform bagi para inovator muda untuk mengembangkan ide-ide kreatif mereka. Event ini dirancang untuk mendorong semangat kewirausahaan dan inovasi di berbagai bidang.</p>
+                </div>
+                <div class="about-theme">
+                    <h3>Tema Event</h3>
+                    <p>"Teknologi untuk Masa Depan Berkelanjutan" - Menghadirkan solusi inovatif untuk tantangan global melalui teknologi dan kreativitas.</p>
+                </div>
+                <div class="about-vision">
+                    <h3>Visi</h3>
+                    <p>Menjadi wadah terdepan bagi generasi muda Indonesia untuk mengembangkan potensi dan menciptakan dampak positif bagi masyarakat melalui inovasi dan teknologi.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Event Categories Section -->
+    <section id="categories" class="section-categories layout-1">
+        <div class="container">
+            <h2>Kategori Lomba</h2>
+            <p class="section-subtitle">Pilih kategori yang sesuai dengan keahlian Anda</p>
+            <div class="categories-grid">
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-paint-brush"></i>
+                    </div>
+                    <h3>UI/UX Design</h3>
+                    <p>Desain interface dan user experience untuk aplikasi atau website</p>
+                    <ul class="category-requirements">
+                        <li>Tim: 1-3 orang</li>
+                        <li>Tools: Bebas</li>
+                        <li>Durasi: 3 hari</li>
+                    </ul>
+                    <button class="btn-outline">Lihat Detail</button>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3>Competitive Programming</h3>
+                    <p>Pemecahan masalah algoritmik dan pemrograman kompetitif</p>
+                    <ul class="category-requirements">
+                        <li>Tim: 1-3 orang</li>
+                        <li>Bahasa: C++, Java, Python</li>
+                        <li>Durasi: 5 jam</li>
+                    </ul>
+                    <button class="btn-outline">Lihat Detail</button>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h3>Business Plan</h3>
+                    <p>Rencana bisnis untuk startup atau produk inovatif</p>
+                    <ul class="category-requirements">
+                        <li>Tim: 3-5 orang</li>
+                        <li>Format: Presentasi & Dokumen</li>
+                        <li>Durasi: 2 minggu</li>
+                    </ul>
+                    <button class="btn-outline">Lihat Detail</button>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-pen-fancy"></i>
+                    </div>
+                    <h3>Essay Competition</h3>
+                    <p>Menulis esai tentang tema inovasi dan teknologi</p>
+                    <ul class="category-requirements">
+                        <li>Tim: Individual</li>
+                        <li>Panjang: 1500-2000 kata</li>
+                        <li>Bahasa: Indonesia/Inggris</li>
+                    </ul>
+                    <button class="btn-outline">Lihat Detail</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section id="timeline" class="section-timeline layout-1">
+        <div class="container">
+            <h2>Timeline Event</h2>
+            <p class="section-subtitle">Jadwal lengkap pelaksanaan kompetisi</p>
+            <div class="timeline-container">
+                <div class="timeline-item">
+                    <div class="timeline-marker">
+                        <i class="fas fa-flag"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>Pendaftaran Dibuka</h3>
+                        <p class="timeline-date">1 November - 15 Desember 2023</p>
+                        <p>Peserta dapat mendaftar melalui website resmi dan mengumpulkan berkas pendaftaran.</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-marker">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>Seleksi Administrasi</h3>
+                        <p class="timeline-date">16 - 22 Desember 2023</p>
+                        <p>Tim panitia akan melakukan verifikasi berkas dan menyeleksi peserta yang memenuhi syarat.</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-marker">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>Babak Penyisihan</h3>
+                        <p class="timeline-date">5 - 10 Januari 2024</p>
+                        <p>Peserta mengikuti babak penyisihan sesuai kategori lomba masing-masing.</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-marker">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>Semifinal</h3>
+                        <p class="timeline-date">15 Januari 2024</p>
+                        <p>20 tim terbaik dari setiap kategori akan berkompetisi di babak semifinal.</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-marker">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>Grand Final</h3>
+                        <p class="timeline-date">20 Januari 2024</p>
+                        <p>Babak final dan pengumuman pemenang dengan hadiah total ratusan juta rupiah.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prizes & Benefits Section -->
+    <section id="prizes" class="section-prizes layout-1">
+        <div class="container">
+            <h2>Hadiah & Benefit</h2>
+            <p class="section-subtitle">Raih kesempatan memenangkan hadiah dan benefit menarik</p>
+
+            <div class="prizes-total">
+                <div class="total-prize-card">
+                    <i class="fas fa-trophy"></i>
+                    <h3>Total Hadiah</h3>
+                    <p class="prize-amount">Rp 500.000.000</p>
+                    <p>Tersebar di semua kategori lomba</p>
+                </div>
+            </div>
+
+            <div class="prizes-grid">
+                <div class="prize-card">
+                    <i class="fas fa-medal"></i>
+                    <h3>Uang Tunai</h3>
+                    <p>Juara 1: Rp 50 juta<br>Juara 2: Rp 30 juta<br>Juara 3: Rp 20 juta</p>
+                </div>
+
+                <div class="prize-card">
+                    <i class="fas fa-certificate"></i>
+                    <h3>Sertifikat</h3>
+                    <p>Sertifikat resmi untuk semua finalis yang ditandatangani oleh penyelenggara</p>
+                </div>
+
+                <div class="prize-card">
+                    <i class="fas fa-handshake"></i>
+                    <h3>Mentorship</h3>
+                    <p>Program mentoring 3 bulan dengan para profesional industry</p>
+                </div>
+
+                <div class="prize-card">
+                    <i class="fas fa-bullhorn"></i>
+                    <h3>Media Exposure</h3>
+                    <p>Publikasi karya di media partner dan platform digital</p>
+                </div>
+
+                <div class="prize-card">
+                    <i class="fas fa-network-wired"></i>
+                    <h3>Networking</h3>
+                    <p>Kesempatan bertemu dengan investor dan startup founders</p>
+                </div>
+
+                <div class="prize-card">
+                    <i class="fas fa-briefcase"></i>
+                    <h3>Kesempatan Kerja</h3>
+                    <p>Lowongan kerja dari perusahaan sponsor dan partner</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Jury & Speakers Section -->
+    <section id="jury" class="section-jury layout-1">
+        <div class="container">
+            <h2>Juri & Pembicara</h2>
+            <p class="section-subtitle">Bertemu dengan para ahli dan profesional terkemuka</p>
+
+            <div class="jury-grid">
+                <div class="jury-card">
+                    <div class="jury-image">
+                        <img src="https://via.placeholder.com/300" alt="Jury 1">
+                    </div>
+                    <h3>Dr. Ahmad Santoso</h3>
+                    <p class="jury-position">CEO Tech Innovation Inc.</p>
+                    <div class="jury-social">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div class="jury-card">
+                    <div class="jury-image">
+                        <img src="https://via.placeholder.com/300" alt="Jury 2">
+                    </div>
+                    <h3>Sarah Wijaya, M.Sc</h3>
+                    <p class="jury-position">Head of Design, Creative Studio</p>
+                    <div class="jury-social">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div class="jury-card">
+                    <div class="jury-image">
+                        <img src="https://via.placeholder.com/300" alt="Jury 3">
+                    </div>
+                    <h3>Budi Hartono</h3>
+                    <p class="jury-position">Founder & CTO, Startup Unicorn</p>
+                    <div class="jury-social">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div class="jury-card">
+                    <div class="jury-image">
+                        <img src="https://via.placeholder.com/300" alt="Jury 4">
+                    </div>
+                    <h3>Diana Kusuma, MBA</h3>
+                    <p class="jury-position">Business Development Director</p>
+                    <div class="jury-social">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation Section -->
+    <section id="documentation" class="section-documentation layout-1">
+        <div class="container">
+            <h2>Dokumentasi Tahun Lalu</h2>
+            <p class="section-subtitle">Momen-momen berharga dari event sebelumnya</p>
+
+            <div class="documentation-gallery">
+                <div class="gallery-item large">
+                    <img src="https://via.placeholder.com/600x400" alt="Documentation 1">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/300x400" alt="Documentation 2">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/300x400" alt="Documentation 3">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/300x200" alt="Documentation 4">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/300x200" alt="Documentation 5">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+                <div class="gallery-item video">
+                    <img src="https://via.placeholder.com/600x300" alt="Aftermovie">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-play-circle"></i>
+                        <p>Aftermovie 2023</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="winners-section">
+                <h3>Pemenang Tahun Lalu</h3>
+                <div class="winners-grid">
+                    <div class="winner-card">
+                        <img src="https://via.placeholder.com/250x250" alt="Winner Team">
+                        <h4>Team Innovators</h4>
+                        <p>Juara 1 - UI/UX Design</p>
+                        <p class="winner-project">"EcoTrack - Sustainable Living App"</p>
+                    </div>
+                    <div class="winner-card">
+                        <img src="https://via.placeholder.com/250x250" alt="Winner Team">
+                        <h4>Code Masters</h4>
+                        <p>Juara 1 - Programming</p>
+                        <p class="winner-project">Champion Algorithm Challenge</p>
+                    </div>
+                    <div class="winner-card">
+                        <img src="https://via.placeholder.com/250x250" alt="Winner Team">
+                        <h4>Startup Heroes</h4>
+                        <p>Juara 1 - Business Plan</p>
+                        <p class="winner-project">"AgriTech Solutions"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sponsors & Media Partners Section -->
+    <section id="sponsors" class="section-sponsors layout-1">
+        <div class="container">
+            <h2>Sponsor & Media Partner</h2>
+            <p class="section-subtitle">Didukung oleh perusahaan dan media terkemuka</p>
+
+            <div class="sponsors-container">
+                <div class="sponsors-tier">
+                    <h3>Platinum Sponsor</h3>
+                    <div class="sponsors-grid platinum">
+                        <div class="sponsor-logo">
+                            <img src="https://via.placeholder.com/200x100" alt="Sponsor 1">
+                        </div>
+                        <div class="sponsor-logo">
+                            <img src="https://via.placeholder.com/200x100" alt="Sponsor 2">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sponsors-tier">
+                    <h3>Gold Sponsor</h3>
+                    <div class="sponsors-grid gold">
+                        <div class="sponsor-logo">
+                            <img src="https://via.placeholder.com/150x80" alt="Sponsor 3">
+                        </div>
+                        <div class="sponsor-logo">
+                            <img src="https://via.placeholder.com/150x80" alt="Sponsor 4">
+                        </div>
+                        <div class="sponsor-logo">
+                            <img src="https://via.placeholder.com/150x80" alt="Sponsor 5">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sponsors-tier">
+                    <h3>Media Partner</h3>
+                    <div class="sponsors-grid media">
+                        <div class="sponsor-logo">
+                            <img src="https://via.placeholder.com/120x60" alt="Media 1">
+                        </div>
+                        <div class="sponsor-logo">
+                            <img src="https://via.placeholder.com/120x60" alt="Media 2">
+                        </div>
+                        <div class="sponsor-logo">
+                            <img src="https://via.placeholder.com/120x60" alt="Media 3">
+                        </div>
+                        <div class="sponsor-logo">
+                            <img src="https://via.placeholder.com/120x60" alt="Media 4">
+                        </div>
+                        <div class="sponsor-logo">
+                            <img src="https://via.placeholder.com/120x60" alt="Media 5">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact & Help Section -->
+    <section id="contact" class="section-contact layout-1">
+        <div class="container">
+            <h2>Kontak & Bantuan</h2>
+            <p class="section-subtitle">Hubungi kami untuk informasi lebih lanjut</p>
+
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fab fa-whatsapp"></i>
+                        <div>
+                            <h3>WhatsApp</h3>
+                            <p>+62 812-3456-7890</p>
+                            <a href="#" class="btn-contact">Chat Sekarang</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h3>Email</h3>
+                            <p>info@innovationchallenge.com</p>
+                            <a href="#" class="btn-contact">Kirim Email</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <i class="fas fa-book"></i>
+                        <div>
+                            <h3>Guidebook</h3>
+                            <p>Panduan lengkap kompetisi</p>
+                            <a href="#" class="btn-contact">Download PDF</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-section">
+                    <h3>FAQ - Frequently Asked Questions</h3>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <h4>Bagaimana cara mendaftar?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Klik tombol "Daftar Sekarang" di atas, isi formulir pendaftaran, dan upload berkas yang diperlukan. Setelah itu, Anda akan menerima email konfirmasi.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <h4>Berapa biaya pendaftaran?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Biaya pendaftaran adalah Rp 100.000 per tim untuk semua kategori. Biaya sudah termasuk akses ke workshop dan seminar.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <h4>Apakah boleh mendaftar lebih dari satu kategori?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Ya, peserta diperbolehkan mendaftar di lebih dari satu kategori dengan mendaftar dan membayar secara terpisah untuk setiap kategori.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <h4>Apakah ada batasan usia peserta?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Kompetisi terbuka untuk pelajar SMA/SMK dan mahasiswa S1/D3 yang masih aktif berkuliah pada tahun ajaran 2023/2024.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer / CTA Section -->
+    <footer id="footer" class="section-footer">
+        <div class="footer-cta">
+            <h2>Siap Bergabung?</h2>
+            <p>Daftarkan diri Anda sekarang dan raih kesempatan menjadi juara!</p>
+            <button class="btn-primary-large">Daftar Sekarang</button>
+        </div>
+
+        <div class="footer-content">
+            <div class="footer-info">
+                <h3>Innovation Challenge 2024</h3>
+                <p>Kompetisi inovasi terbesar untuk generasi muda Indonesia</p>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Event</h4>
+                    <ul>
+                        <li><a href="#about">Tentang</a></li>
+                        <li><a href="#categories">Kategori</a></li>
+                        <li><a href="#timeline">Timeline</a></li>
+                        <li><a href="#prizes">Hadiah</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Informasi</h4>
+                    <ul>
+                        <li><a href="#jury">Juri & Pembicara</a></li>
+                        <li><a href="#documentation">Dokumentasi</a></li>
+                        <li><a href="#sponsors">Sponsor</a></li>
+                        <li><a href="#contact">Kontak</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Guidebook</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 Innovation Challenge. All rights reserved. | Organized by Tech Innovation Foundation</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

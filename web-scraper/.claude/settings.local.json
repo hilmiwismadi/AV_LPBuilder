@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(dir:*)",
+      "Bash(npm rebuild:*)",
+      "Bash(node --version:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(sqlite3:*)",
+      "Bash(node -e:*)",
+      "Bash(node check-phones.js:*)",
+      "Bash(node migrate-phone-numbers.js:*)",
+      "Bash(npm run server:*)",
+      "Bash(curl:*)",
+      "Bash(node reparse-phone-numbers.js:*)",
+      "Bash(node test-phone-extraction.js:*)",
+      "Bash(node test-tagged-scraper.js:*)",
+      "Bash(node add-tagged-columns.js:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

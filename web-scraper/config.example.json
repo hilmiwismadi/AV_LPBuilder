@@ -1,0 +1,12 @@
+{
+  "instagram": {
+    "username": "YOUR_INSTAGRAM_USERNAME",
+    "password": "YOUR_INSTAGRAM_PASSWORD"
+  },
+  "scraping": {
+    "targetAccounts": ["infolomba.sch"],
+    "startDate": "2024-12-01",
+    "endDate": "2025-05-31",
+    "maxScrolls": 30
+  }
+}

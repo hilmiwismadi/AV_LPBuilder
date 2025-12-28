@@ -1,0 +1,327 @@
+● Perfect! I've fixed the error and created a credential file system for     
+  you. Here's what changed:
+
+  ✅ Fixed Issues
+
+  1. Fixed the waitForTimeout error - Replaced with proper delay function    
+  2. Created config.json - Now you can store your Instagram credentials      
+  3. Automatic login - No more manual login, it reads from config file       
+  4. Better error handling - Clear messages if something goes wrong
+
+  🚀 Quick Setup (3 Steps)
+
+  Step 1: Edit config.json
+
+  Open the file at: web-scraper/config.json
+
+  Replace with YOUR credentials:
+
+  {
+    "instagram": {
+      "username": "your_actual_instagram_username",
+      "password": "your_actual_instagram_password"
+    },
+    "scraping": {
+      "targetAccounts": ["infolomba.sch"],
+      "startDate": "2024-12-01",
+      "endDate": "2025-05-31",
+      "maxScrolls": 30
+    }
+  }
+
+  Step 2: Run the Scraper
+
+  cd web-scraper
+  npm start
+
+  Step 3: View Results
+
+  npm run view
+
+  🎯 How It Works Now
+
+  1. Browser opens automatically
+  2. Reads your credentials from config.json
+  3. Logs in automatically - no manual input needed!
+  4. Saves session - next time, no login required
+  5. Starts scraping - collects posts, extracts phone numbers, filters       
+  free events
+  6. Saves to database - events.db
+
+  🔒 Security
+
+  - config.json is ignored by git (won't be committed)
+  - Your credentials stay local only
+  - Session saved in instagram-cookies.json (also ignored by git)
+  - One-time login - session persists across runs
+
+  Files Created
+
+  web-scraper/
+  ├── config.json              ← ADD YOUR CREDENTIALS HERE
+  ├── config.example.json      ← Reference template
+  ├── scraper.js               ← Fixed version with auto-login
+  ├── QUICK-START.md           ← Simple 3-step guide
+  ├── README.md                ← Full documentation
+  └── ... other files
+
+  Just edit config.json with your Instagram username and password, then      
+  run npm start!
+
+> okay because most of the first 1000 post mostly not in date range, now     
+skip the first 1000 post and tell me what date in the 1001 post 
+
+● I'll create a quick utility script to skip the first 1000 posts and        
+  show you the date of post 1001:
+
+● Write(web-scraper\check-date.js)
+  ⎿  Wrote 1 lines to web-scraper\check-date.js
+     import puppeteer from 'puppeteer';
+     import { existsSync, readFileSync } from 'fs';
+     import { fileURLToPath } from 'url';
+     import { dirname, join } from 'path';
+     const __filename = fileURLToPath(import.meta.url);
+     const __dirname = dirname(__filename);
+     const cookiesPath = join(__dirname, 'instagram-cookies.json');
+     const configPath = join(__dirname, 'config.json');
+
+● Read(web-scraper\package.json)
+  ⎿  Read 22 lines
+
+● Update(web-scraper\package.json)
+  ⎿  Updated web-scraper\package.json with 2 additions and 1 removal
+        7      "scripts": {
+        8        "start": "node scraper.js",
+        9        "init-db": "node init-db.js",
+       10 -      "view": "node view-data.js"
+       10 +      "view": "node view-data.js",
+       11 +      "check-date": "node check-date.js"
+       12      },
+       13      "dependencies": {
+       14        "@prisma/client": "^6.18.0",
+
+● Perfect! I've created a date checker utility. Run this command to check    
+   what date is at post 1001:
+
+  npm run check-date
+
+  This script will:
+  1. Login automatically (using your credentials from config.json)
+  2. Navigate to @infolomba.sch
+  3. Scroll down to collect 1000+ posts
+  4. Show you the date of post #1001
+  5. Also show dates of posts #996-1005 for context
+
+  This will help us understand if we need to:
+  - Skip the first X posts
+  - Adjust the date range in config
+  - Change the scrolling strategy
+
+  The script will take a few minutes to scroll and collect all those
+  posts. Just run it and it will tell you the exact date of post 1001!       
+
+> this account have 7.528 post, but scraper only 36 post because of 
+pagination
+
+Navigating to Instagram...
+✓ Session loaded
+✓ Logged in!
+
+Navigating to @infolomba.sch...
+Collecting posts (targeting 1001+)...
+
+Reached end of page
+
+============================================================
+Total posts collected: 36
+============================================================
+
+⚠ Only found 36 posts total.
+The account may not have 1000+ posts.
+
+Checking last post (36)...
+Last post date: 10/17/2025
+
+============================================================
+
+find a way so it can scroll past the 1.000 post and tell me the post date    
+ of 1.001 post 
+
+● I see the issue - Instagram's lazy loading is stopping after 36 posts.     
+  Let me create an improved scraper that can handle Instagram's
+  pagination better:
+
+● Write(web-scraper\check-date-improved.js)
+  ⎿  Wrote 1 lines to web-scraper\check-date-improved.js
+     import puppeteer from 'puppeteer';
+     import { existsSync, readFileSync } from 'fs';
+     import { fileURLToPath } from 'url';
+     import { dirname, join } from 'path';
+     const __filename = fileURLToPath(import.meta.url);
+     const __dirname = dirname(__filename);
+     const cookiesPath = join(__dirname, 'instagram-cookies.json');
+     const configPath = join(__dirname, 'config.json');
+
+● Update(web-scraper\package.json)
+  ⎿  Updated web-scraper\package.json with 2 additions and 1 removal
+        8        "start": "node scraper.js",
+        9        "init-db": "node init-db.js",
+       10        "view": "node view-data.js",
+       11 -      "check-date": "node check-date.js"
+       11 +      "check-date": "node check-date.js",
+       12 +      "deep-scroll": "node check-date-improved.js"
+       13      },
+       14      "dependencies": {
+       15        "@prisma/client": "^6.18.0",
+
+● Perfect! I've created an improved version with aggressive scrolling        
+  techniques to handle Instagram's pagination. Run this:
+
+  npm run deep-scroll
+
+  🚀 Key Improvements to Handle 7,528 Posts:
+
+  1. Triple Scroll Method
+
+  - Scrolls to bottom of page
+  - Scrolls by 3000px increments
+  - Scrolls to last article element
+  - Uses all three methods together!
+
+  2. Much Longer Delays
+
+  - 2000ms delay after each scroll (vs 1000ms before)
+  - Extra 5 second pause every 50 scrolls to avoid rate limiting
+  - Gives Instagram time to load new content
+
+  3. Smarter Detection
+
+  - Uses Map to avoid duplicate posts
+  - Stops only after 5 consecutive scrolls with no new posts
+  - Can scroll up to 500 times (vs 200 before)
+
+  4. Better Progress Tracking
+
+  - Shows progress every 10 scrolls
+  - Updates you on how many posts collected
+  - Shows when it takes rate-limiting breaks
+
+  5. Deduplication
+
+  - Uses Map instead of Array to automatically remove duplicates
+  - Ensures accurate count
+
+  ⏱️ Expected Runtime
+
+  For 1,000+ posts, expect this to take 10-20 minutes because:
+  - Instagram loads ~3-9 posts per scroll
+  - We need to wait 2+ seconds between scrolls
+  - We take breaks every 50 scrolls
+
+  What You'll See
+
+  📜 Starting aggressive scroll (targeting 1001 posts)...
+  ⏳ This will take several minutes. Please be patient...
+
+  📊 Progress: Scrolled 10x | Collected 87 posts | Target: 1001
+  📊 Progress: Scrolled 20x | Collected 165 posts | Target: 1001
+  📊 Progress: Scrolled 30x | Collected 243 posts | Target: 1001
+  ...
+  ⏸  Taking a short break to avoid rate limiting...
+  ...
+  ✓ Target reached! Collected 1051 posts
+
+  Run it now:
+  npm run deep-scroll
+
+  This will tell you the exact date of post #1001! 🎯
+
+PS D:\Hilmi\Coding\CRM_Tools\web-scraper> npm run deep-scroll
+
+> instagram-event-scraper@1.0.0 deep-scroll
+> node check-date-improved.js
+
+
+🔍 Instagram Deep Scroll Date Checker
+
+Launching browser...
+✓ Browser launched
+
+Navigating to Instagram...
+✓ Session loaded
+✓ Logged in!
+
+Navigating to @infolomba.sch...
+
+📜 Starting aggressive scroll (targeting 1001 posts)...
+
+⏳ This will take several minutes. Please be patient...
+
+  📊 Progress: Scrolled 10x | Collected 252 posts | Target: 1001
+  📊 Progress: Scrolled 20x | Collected 490 posts | Target: 1001
+  📊 Progress: Scrolled 30x | Collected 718 posts | Target: 1001
+  📊 Progress: Scrolled 40x | Collected 945 posts | Target: 1001
+
+✓ Target reached! Collected 1065 posts
+
+📊 Final count: 1065 posts collected after 47 scroll attempts
+
+
+======================================================================       
+  RESULTS FOR @infolomba.sch
+======================================================================       
+  Total posts collected: 1065
+======================================================================       
+
+✅ SUCCESS! Collected enough posts to reach #1001
+
+Checking post #1001...
+URL: https://www.instagram.com/gudanglomba.ind/p/DJb7TSASGv0/
+
+======================================================================       
+  📅 POST #1001 DATE
+======================================================================       
+  Date: Friday, May 9, 2025
+  Time: 9:34:56 PM
+  ISO: 2025-05-09T14:34:56.000Z
+  Caption Preview: gudanglomba.ind and infolomba.sch...
+======================================================================       
+
+📋 Posts around #1001 (samples):
+
+Post #997:
+  📅 Unknown date - https://www.instagram.com/infolomba.sch/p/DJddyKdT29J/   
+Post #998:
+  📅 Unknown date - https://www.instagram.com/infolomba.est/p/DJddP7izcDI/   
+Post #999:
+  📅 Unknown date - https://www.instagram.com/infolomba.sch/p/DJdQh9STXq0/   
+Post #1000:
+  📅 Unknown date - https://www.instagram.com/gudanglomba.ind/p/DJc3_vpzI7p/ 
+Post #1001:
+  📅 Unknown date - https://www.instagram.com/gudanglomba.ind/p/DJb7TSASGv0/ 
+Post #1002:
+  📅 Unknown date - https://www.instagram.com/gudanglomba.ind/p/DJbp3TtS-fB/ 
+Post #1003:
+  📅 Unknown date - https://www.instagram.com/gudanglomba.ind/p/DJa_0xiyqEc/ 
+Post #1004:
+  📅 Unknown date - https://www.instagram.com/gudanglomba.ind/p/DJa_r-GSXOz/ 
+Post #1005:
+  📅 Unknown date - https://www.instagram.com/gudanglomba.ind/p/DJa-45LS58W/ 
+Post #1006:
+  📅 Unknown date - https://www.instagram.com/gudanglomba.ind/p/DJaaQIUywLP/ 
+
+======================================================================       
+
+💡 Tip: If you need to scrape from a specific post number,
+   we can modify the scraper to skip the first N posts.
+
+
+Closing browser...
+
+
+
+Okay so i can see that the post of #1006 date is around may 2025, which mean maybe post around #1000 to #2000 is the date around December 2024 to May 2025. but the proble is the scraper cant read the Unknown date. so i have to do:
+1. fix the date scraping make sure to read the date of the post and save it
+2. Create a DB to save all the data that have to be saved like post Link, Date, Phone number(if there is any in caption) and another data that sales team need to input manually (check CRM tools FE)
+3. Create FE and BE of those data table for tempory check, give 100 data (post #1000 to #1100) so i can check how good the scraper
+4. if the scraped data is good, i plan to add it in main CRM of NovaGate Tab. but will get to it later if claude done correct for step 1 to 3

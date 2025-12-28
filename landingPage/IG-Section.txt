@@ -1,0 +1,83 @@
+import { instagramPosts } from "@/assets/images";
+import { Instagram, ExternalLink } from "lucide-react";
+
+const InstagramFeed = () => {
+  const instagramUrl = "https://www.instagram.com/farmasicup/";
+
+  return (
+    <section className="py-20 bg-gradient-to-b from-muted/30 to-background relative overflow-hidden">
+      {/* Decorative Background Circles */}
+      <div className="absolute top-32 -left-28 w-96 h-96 bg-gradient-to-br from-accent/50 to-primary/50 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+      <div className="absolute bottom-32 -right-36 w-[500px] h-[500px] bg-gradient-to-tl from-primary/50 to-secondary/50 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute top-2/3 -left-16 w-80 h-80 bg-gradient-to-br from-secondary/50 to-accent/50 rounded-full blur-3xl" />
+
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="max-w-6xl mx-auto">
+          {/* Title and Tagline */}
+          <div className="text-center mb-12 animate-fade-in-up">
+            <div className="inline-flex items-center gap-3 mb-4">
+              <Instagram className="w-10 h-10 text-primary" />
+              <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+                Follow Us on Instagram
+              </h2>
+            </div>
+            <p className="text-xl text-muted-foreground mb-6">
+              Want to know more information? Check our Instagram for the latest updates!
+            </p>
+            <a
+              href={instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-semibold text-lg transition-colors duration-300"
+            >
+              @farmasicup
+              <ExternalLink className="w-5 h-5" />
+            </a>
+          </div>
+
+          {/* Instagram Grid - 3x2 layout */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+            {instagramPosts.map((post, index) => (
+              <a
+                key={index}
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative aspect-[4/5] overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 animate-scale-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                {/* Instagram Post Image */}
+                <img
+                  src={post}
+                  alt={`Instagram post ${index + 1}`}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <Instagram className="w-12 h-12 text-primary-foreground" />
+                </div>
+              </a>
+            ))}
+          </div>
+
+          {/* CTA Button */}
+          <div className="text-center">
+            <a
+              href={instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary via-secondary to-accent text-white font-bold text-lg rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+            >
+              <Instagram className="w-6 h-6" />
+              View More on Instagram
+              <ExternalLink className="w-5 h-5" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default InstagramFeed;

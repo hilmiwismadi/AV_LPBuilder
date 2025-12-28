@@ -1,0 +1,28 @@
+{
+  "name": "instagram-event-scraper",
+  "version": "1.0.0",
+  "description": "Instagram event scraper for CRM lead generation",
+  "main": "scraper.js",
+  "type": "module",
+  "scripts": {
+    "start": "node scraper.js",
+    "scrape-improved": "node scraper-improved.js",
+    "server": "node server.js",
+    "migrate": "node migrate-phone-numbers.js",
+    "init-db": "node init-db.js",
+    "view": "node view-data.js",
+    "check-date": "node check-date.js",
+    "deep-scroll": "node check-date-improved.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.18.0",
+    "better-sqlite3": "^11.0.0",
+    "puppeteer": "^22.0.0",
+    "xlsx": "^0.18.5",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

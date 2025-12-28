@@ -1,0 +1,69 @@
+Perfect! I've fixed the error and created a credential file system for     
+  you. Here's what changed:
+
+  ✅ Fixed Issues
+
+  1. Fixed the waitForTimeout error - Replaced with proper delay function    
+  2. Created config.json - Now you can store your Instagram credentials      
+  3. Automatic login - No more manual login, it reads from config file       
+  4. Better error handling - Clear messages if something goes wrong
+
+  🚀 Quick Setup (3 Steps)
+
+  Step 1: Edit config.json
+
+  Open the file at: web-scraper/config.json
+
+  Replace with YOUR credentials:
+
+  {
+    "instagram": {
+      "username": "your_actual_instagram_username",
+      "password": "your_actual_instagram_password"
+    },
+    "scraping": {
+      "targetAccounts": ["infolomba.sch"],
+      "startDate": "2024-12-01",
+      "endDate": "2025-05-31",
+      "maxScrolls": 30
+    }
+  }
+
+  Step 2: Run the Scraper
+
+  cd web-scraper
+  npm start
+
+  Step 3: View Results
+
+  npm run view
+
+  🎯 How It Works Now
+
+  1. Browser opens automatically
+  2. Reads your credentials from config.json
+  3. Logs in automatically - no manual input needed!
+  4. Saves session - next time, no login required
+  5. Starts scraping - collects posts, extracts phone numbers, filters       
+  free events
+  6. Saves to database - events.db
+
+  🔒 Security
+
+  - config.json is ignored by git (won't be committed)
+  - Your credentials stay local only
+  - Session saved in instagram-cookies.json (also ignored by git)
+  - One-time login - session persists across runs
+
+  Files Created
+
+  web-scraper/
+  ├── config.json              ← ADD YOUR CREDENTIALS HERE
+  ├── config.example.json      ← Reference template
+  ├── scraper.js               ← Fixed version with auto-login
+  ├── QUICK-START.md           ← Simple 3-step guide
+  ├── README.md                ← Full documentation
+  └── ... other files
+
+  Just edit config.json with your Instagram username and password, then      
+  run npm start!

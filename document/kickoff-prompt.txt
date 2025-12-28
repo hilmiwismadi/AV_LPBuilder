@@ -1,0 +1,38 @@
+Background story: every time i approach potential client after manually scraping their phone number i have to repeatedly chat multiple number with same template (only change certain part to suit the client) and i realize it can be more efficient if i create CRM Dashboard
+
+I want to create simple CRM dashboard with the purpose:
+1. It have a table with necessary column like phone number, client name, client organization, last contact and action button that integrate with webwhatsapp.js
+2. The action button will give a pop up with the interface of the chat history, drop down of template chat and input for custom answer chat. So i dont have to open my Whatsapp to read and send the chat for client
+3. Whatsapp integration only accept the text for the number in whitelist. The whitelist is updated everytime I manually add in CRM table row
+4. Create a pgsql with ORM prisma for DB. and for FE choose vite and for BE is up to claude which one that run quick and efficient
+5. DB save all the client data, chat history and any other stuff that might add in this project
+Tabel Dashboard 
+Kolom necessary untuk otomasi
+event_organizer : Nama EO
+ig_link : Link IG akun
+cp_2nd : CP 2nd Hand
+cp_1st : CP 1st Hand
+img_logo: Image logo 
+Img_poster: Image poster 
+Action buka chat WA kontak
+Kolom tambahan untuk informasi yang relevan
+last_event: nama event terakhir  
+link_demo: demo link yang sudah dipersonalisasi 
+last_system: apakah menggunakan forms/wa/partner lain sebelumnya
+color_palette : warna tema 
+date_estimation : Timeline estimasi ticketing event terdekat dimulai
+igevent_link Link IG post event sebelumnya
+last_contact: Tanggal terakhir di kontak
+Dropdown PIC tim internal
+Dropdown status (To Do, Follow Up, Next Year) (mempengaruhi sistem reminder dengan date_estimation)
+
+
+Here is the template
+First Cold Chatting
+Variant FCC
+[Umum] : “salah satu panitia
+[Sponsor/Partner] “panitia divisi sponsor/partneship”
+Message : “Permisi kak, apakah benar ini kontak [variant_fcc] dari [event_organizer]?”
+
+Collaborate check up
+Message : “Kalau boleh tahu apakah panitia juga membuka peluang sponsorship atau kolaborasi digital, kak?”

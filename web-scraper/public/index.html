@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRM Events - Instagram Leads</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .header h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 16px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .stat-card h3 {
+      color: #667eea;
+      font-size: 36px;
+      margin-bottom: 5px;
+    }
+
+    .stat-card p {
+      color: #666;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .controls {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 250px;
+      padding: 12px 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      overflow-x: auto;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1200px;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    th {
+      padding: 15px 10px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    th:first-child {
+      border-top-left-radius: 10px;
+    }
+
+    th:last-child {
+      border-top-right-radius: 10px;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #e0e0e0;
+      transition: background 0.3s;
+    }
+
+    tbody tr:hover {
+      background: #f5f5f5;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    td {
+      padding: 12px 10px;
+      font-size: 14px;
+      color: #333;
+      vertical-align: middle;
+    }
+
+    .event-name {
+      font-weight: 600;
+      color: #667eea;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .event-name-input {
+      width: 100%;
+      max-width: 300px;
+      padding: 8px 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #667eea;
+      transition: all 0.3s;
+    }
+
+    .event-name-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .ig-link-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .ig-link-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(188, 24, 136, 0.4);
+    }
+
+    .phone-input {
+      width: 100%;
+      max-width: 150px;
+      padding: 8px 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 13px;
+      transition: all 0.3s;
+      font-family: 'Courier New', monospace;
+    }
+
+    .phone-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .phone-input.has-value {
+      background: #e8f5e9;
+      border-color: #4caf50;
+    }
+
+    .phone-input.scraped {
+      background: #fff3e0;
+      border-color: #ff9800;
+    }
+
+    .btn-small {
+      padding: 8px 12px;
+      font-size: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    .btn-ig {
+      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+      color: white;
+    }
+
+    .btn-ig:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(188, 24, 136, 0.4);
+    }
+
+    .btn-wa {
+      background: #25d366;
+      color: white;
+    }
+
+    .btn-wa:hover {
+      background: #128c7e;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+    }
+
+    .btn-wa:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 50px;
+      color: #666;
+      font-size: 18px;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .pagination button {
+      padding: 10px 20px;
+      border: 2px solid #667eea;
+      background: white;
+      color: #667eea;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .pagination button:hover:not(:disabled) {
+      background: #667eea;
+      color: white;
+    }
+
+    .pagination button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .pagination span {
+      padding: 0 15px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .save-indicator {
+      display: inline-block;
+      margin-left: 10px;
+      font-size: 12px;
+      color: #4caf50;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .save-indicator.show {
+      opacity: 1;
+    }
+
+    .date-cell {
+      color: #666;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 30px;
+      color: #999;
+      font-style: italic;
+    }
+
+    .phone-label {
+      font-size: 11px;
+      color: #999;
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .action-cell {
+      white-space: nowrap;
+    }
+
+    @media (max-width: 1400px) {
+      .table-container {
+        overflow-x: scroll;
+      }
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .modal-header h2 {
+      color: #333;
+      font-size: 24px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #999;
+      transition: color 0.3s;
+    }
+
+    .close-btn:hover {
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .readonly {
+      background: #f5f5f5;
+      cursor: not-allowed;
+    }
+
+    .btn-details {
+      background: #26a69a;
+      color: white;
+    }
+
+    .btn-details:hover {
+      background: #00897b;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(38, 166, 154, 0.4);
+    }
+
+    /* Scraping Dashboard */
+    .scraping-dashboard {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      display: none;
+    }
+
+    .scraping-dashboard.active {
+      display: block;
+    }
+
+    .scraping-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .scraping-header h2 {
+      color: #667eea;
+      font-size: 24px;
+      margin: 0;
+    }
+
+    .status-badge {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .status-badge.running {
+      background: #4caf50;
+      color: white;
+      animation: pulse 2s infinite;
+    }
+
+    .status-badge.idle {
+      background: #ccc;
+      color: #666;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .scraping-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .scraping-stat {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px;
+      border-radius: 10px;
+      color: white;
+      text-align: center;
+    }
+
+    .scraping-stat h4 {
+      margin: 0 0 5px 0;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .scraping-stat p {
+      margin: 0;
+      font-size: 12px;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .scraping-logs {
+      background: #1e1e1e;
+      border-radius: 10px;
+      padding: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #00ff00;
+    }
+
+    .scraping-logs .log-line {
+      margin-bottom: 5px;
+      line-height: 1.5;
+    }
+
+    .scraping-logs .log-error {
+      color: #ff5555;
+    }
+
+    .scraping-logs .log-success {
+      color: #50fa7b;
+    }
+
+    .btn-scrape {
+      background: #4caf50;
+      color: white;
+    }
+
+    .btn-scrape:hover {
+      background: #45a049;
+    }
+
+    .btn-scrape:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>CRM Events - Instagram Leads</h1>
+      <p>Manage your Instagram scraped leads with phone numbers and WhatsApp integration</p>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat-card">
+        <h3 id="totalPosts">0</h3>
+        <p>Total Posts</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="withPhone">0</h3>
+        <p>With Phone Numbers</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="todoCount">0</h3>
+        <p>To Do</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input type="text" class="search-input" id="searchInput" placeholder="Search by event name, phone number...">
+      <button class="btn btn-primary" onclick="searchPosts()">Search</button>
+      <button class="btn btn-primary" onclick="loadPosts()">Show All</button>
+      <button class="btn btn-primary btn-scrape" id="startScrapeBtn" onclick="startScraping()">▶️ Start Scrape</button>
+      <button class="btn btn-primary btn-scrape" id="revisitBtn" onclick="startRevisit()" style="background: #2196F3;">🔄 Re-Visit Posts</button>
+      <button class="btn btn-primary" onclick="openSettings()" style="background: #ff9800;">⚙️ Settings</button>
+    </div>
+
+    <!-- Scraping Dashboard -->
+    <div class="scraping-dashboard" id="scrapingDashboard">
+      <div class="scraping-header">
+        <h2>Live Scraping Dashboard</h2>
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <button class="btn btn-primary" id="stopScrapeBtn" onclick="stopScraping()" style="background: #f44336; display: none;">⏹️ Stop</button>
+          <span class="status-badge idle" id="statusBadge">Idle</span>
+        </div>
+      </div>
+
+      <div class="scraping-stats">
+        <div class="scraping-stat">
+          <h4 id="scrapeTotalCollected">0</h4>
+          <p>Posts Collected</p>
+        </div>
+        <div class="scraping-stat">
+          <h4 id="scrapeCurrentProcessing">0</h4>
+          <p>Currently Processing</p>
+        </div>
+        <div class="scraping-stat">
+          <h4 id="scrapeSuccessCount">0</h4>
+          <p>Successfully Saved</p>
+        </div>
+        <div class="scraping-stat">
+          <h4 id="scrapeFailCount">0</h4>
+          <p>Failed</p>
+        </div>
+        <div class="scraping-stat">
+          <h4 id="scrapeTotalToProcess">0</h4>
+          <p>Total To Process</p>
+        </div>
+        <div class="scraping-stat">
+          <h4 id="scrapeAccount">-</h4>
+          <p>Current Account</p>
+        </div>
+      </div>
+
+      <h3 style="color: #333; margin-bottom: 10px; font-size: 16px;">Live Logs</h3>
+      <div class="scraping-logs" id="scrapingLogs">
+        <div class="log-line">Waiting to start...</div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table id="postsTable">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Event Name</th>
+            <th>IG Link</th>
+            <th>Date</th>
+            <th>Phone 1st</th>
+            <th>Phone 2nd</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="postsBody">
+          <tr>
+            <td colspan="7" class="loading">Loading posts...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination" id="pagination" style="display: none;">
+      <button onclick="changePage(-1)">Previous</button>
+      <span id="pageInfo">Page 1 of 1</span>
+      <button onclick="changePage(1)">Next</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Scraper Settings</h2>
+        <button class="close-btn" onclick="closeSettings()">&times;</button>
+      </div>
+      <form id="settingsForm">
+        <h3 style="color: #667eea; margin-bottom: 15px; font-size: 18px;">Instagram Credentials</h3>
+
+        <div class="form-group">
+          <label>Instagram Username</label>
+          <input type="text" id="configUsername" placeholder="your_instagram_username" required>
+        </div>
+
+        <div class="form-group">
+          <label>Instagram Password</label>
+          <input type="password" id="configPassword" placeholder="Leave blank to keep current">
+          <small style="color: #999; font-size: 12px;">Leave blank to keep your current password</small>
+        </div>
+
+        <h3 style="color: #667eea; margin: 25px 0 15px 0; font-size: 18px;">Scraping Configuration</h3>
+
+        <div class="form-group">
+          <label>Target Instagram Accounts (comma-separated)</label>
+          <input type="text" id="configTargetAccounts" placeholder="infolomba.sch, account2" required>
+        </div>
+
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" id="configStartDate" required>
+        </div>
+
+        <div class="form-group">
+          <label>End Date</label>
+          <input type="date" id="configEndDate" required>
+        </div>
+
+        <div class="form-group">
+          <label>Max Scrolls</label>
+          <input type="number" id="configMaxScrolls" min="1" max="100" placeholder="30" required>
+          <small style="color: #999; font-size: 12px;">How many times to scroll down to collect posts</small>
+        </div>
+
+        <div class="form-group">
+          <label>Skip First N Posts</label>
+          <input type="number" id="configSkipFirstN" min="0" placeholder="1000" required>
+          <small style="color: #999; font-size: 12px;">Skip the first N most recent posts</small>
+        </div>
+
+        <div class="form-group">
+          <label>Scrape Count</label>
+          <input type="number" id="configScrapeCount" min="1" placeholder="100" required>
+          <small style="color: #999; font-size: 12px;">Number of posts to scrape after skipping</small>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 25px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Save Settings</button>
+          <button type="button" class="btn" onclick="closeSettings()" style="flex: 1; background: #ccc;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Details Modal -->
+  <div class="modal" id="detailsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Post Details</h2>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <form id="detailsForm">
+        <input type="hidden" id="editPostId">
+
+        <div class="form-group">
+          <label>Post URL</label>
+          <input type="text" id="editPostUrl" class="readonly" readonly>
+        </div>
+
+        <div class="form-group">
+          <label>Post Date</label>
+          <input type="text" id="editPostDate" class="readonly" readonly>
+        </div>
+
+        <div class="form-group">
+          <label>Event Title</label>
+          <input type="text" id="editEventTitle" class="readonly" readonly>
+        </div>
+
+        <div class="form-group">
+          <label>Caption</label>
+          <textarea id="editCaption" class="readonly" readonly rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number 1st (Primary)</label>
+          <input type="text" id="editPhone1" placeholder="628xxx">
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number 2nd (Secondary / Scraped)</label>
+          <input type="text" id="editPhone2" placeholder="628xxx">
+        </div>
+
+        <div class="form-group">
+          <label>Event Organizer</label>
+          <input type="text" id="editEventOrganizer" placeholder="Enter event organizer name">
+        </div>
+
+        <div class="form-group">
+          <label>Contact Person 1</label>
+          <input type="text" id="editContactPerson1" placeholder="Enter first contact person">
+        </div>
+
+        <div class="form-group">
+          <label>Contact Person 2</label>
+          <input type="text" id="editContactPerson2" placeholder="Enter second contact person">
+        </div>
+
+        <div class="form-group">
+          <label>Event Type</label>
+          <input type="text" id="editEventType" placeholder="e.g., Conference, Workshop, Seminar">
+        </div>
+
+        <div class="form-group">
+          <label>Location</label>
+          <input type="text" id="editLocation" placeholder="Enter event location">
+        </div>
+
+        <div class="form-group">
+          <label>Next Event Date</label>
+          <input type="date" id="editNextEventDate">
+        </div>
+
+        <div class="form-group">
+          <label>Price Range</label>
+          <input type="text" id="editPriceRange" placeholder="e.g., $100-$500">
+        </div>
+
+        <div class="form-group">
+          <label>Status</label>
+          <select id="editStatus">
+            <option value="TODO">To Do</option>
+            <option value="CONTACTED">Contacted</option>
+            <option value="FOLLOW_UP">Follow Up</option>
+            <option value="CLOSED">Closed</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Last Contact Date</label>
+          <input type="date" id="editLastContactDate">
+        </div>
+
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="editNotes" placeholder="Add any notes about this lead..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 25px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Save Changes</button>
+          <button type="button" class="btn" onclick="closeModal()" style="flex: 1; background: #ccc;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3002/api';
+    let currentPage = 1;
+    let totalPages = 1;
+    let saveTimers = {};
+
+    // HTML escape function to prevent XSS and quote issues
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Load statistics
+    async function loadStats() {
+      try {
+        const response = await fetch(`${API_URL}/stats`);
+        const data = await response.json();
+
+        document.getElementById('totalPosts').textContent = data.total;
+        document.getElementById('withPhone').textContent = data.withPhone;
+
+        const todoStatus = data.byStatus.find(s => s.status === 'TODO');
+        document.getElementById('todoCount').textContent = todoStatus ? todoStatus.count : data.total;
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    // Load posts
+    async function loadPosts(page = 1) {
+      try {
+        document.getElementById('postsBody').innerHTML = '<tr><td colspan="7" class="loading">Loading posts...</td></tr>';
+
+        const response = await fetch(`${API_URL}/posts?page=${page}&limit=100`);
+        const data = await response.json();
+
+        currentPage = data.pagination.page;
+        totalPages = data.pagination.totalPages;
+
+        displayPosts(data.posts);
+        updatePagination();
+        await loadStats();
+      } catch (error) {
+        console.error('Error loading posts:', error);
+        document.getElementById('postsBody').innerHTML = '<tr><td colspan="7" class="no-data">Error loading posts</td></tr>';
+      }
+    }
+
+    // Display posts in table
+    function displayPosts(posts) {
+      const tbody = document.getElementById('postsBody');
+
+      if (posts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="no-data">No posts found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = posts.map((post, index) => {
+        const rowNum = (currentPage - 1) * 100 + index + 1;
+        const date = post.post_date ? new Date(post.post_date).toLocaleDateString() : 'N/A';
+        const phone1 = post.phone_number_1 || '';
+        const phone2 = post.phone_number_2 || '';
+        const eventTitle = post.event_title || '';
+
+        // Escape HTML to prevent XSS and quote issues
+        const escapedEventTitle = escapeHtml(eventTitle);
+        const escapedPhone1 = escapeHtml(phone1);
+        const escapedPhone2 = escapeHtml(phone2);
+
+        const phone1Class = phone1 ? 'has-value' : '';
+        const phone2Class = phone2 ? 'has-value' : '';
+
+        return `
+          <tr data-id="${post.id}">
+            <td>${rowNum}</td>
+            <td>
+              <input
+                type="text"
+                class="event-name-input"
+                data-field="event_title"
+                data-id="${post.id}"
+                value="${escapedEventTitle}"
+                placeholder="Enter event name"
+                onchange="updateField(${post.id}, 'event_title', this.value)"
+                onkeypress="if(event.key==='Enter'){event.preventDefault(); this.blur(); updateField(${post.id}, 'event_title', this.value, true);}"
+              />
+            </td>
+            <td>
+              <a href="${escapeHtml(post.post_url)}" target="_blank" class="ig-link-btn">View Post</a>
+            </td>
+            <td class="date-cell">${date}</td>
+            <td>
+              <input
+                type="text"
+                class="phone-input ${phone1Class}"
+                data-field="phone_number_1"
+                data-id="${post.id}"
+                value="${escapedPhone1}"
+                placeholder="628xxx"
+                onchange="updatePhone(${post.id}, 'phone_number_1', this.value)"
+              />
+            </td>
+            <td>
+              <input
+                type="text"
+                class="phone-input ${phone2Class}"
+                data-field="phone_number_2"
+                data-id="${post.id}"
+                value="${escapedPhone2}"
+                placeholder="628xxx"
+                onchange="updatePhone(${post.id}, 'phone_number_2', this.value)"
+              />
+            </td>
+            <td class="action-cell">
+              <button
+                class="btn-small btn-wa"
+                onclick="openWhatsApp('${escapedPhone1}')"
+                ${!phone1 ? 'disabled' : ''}
+                title="${phone1 ? 'Chat on WhatsApp' : 'Add phone number first'}"
+              >
+                WA 1st
+              </button>
+              <button
+                class="btn-small btn-wa"
+                onclick="openWhatsApp('${escapedPhone2}')"
+                ${!phone2 ? 'disabled' : ''}
+                title="${phone2 ? 'Chat on WhatsApp' : 'Add phone number first'}"
+              >
+                WA 2nd
+              </button>
+              <button
+                class="btn-small btn-details"
+                onclick="openDetails(${post.id})"
+                title="View and edit full details"
+              >
+                Details
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Update generic field (auto-save on change)
+    async function updateField(postId, field, value, immediate = false) {
+      try {
+        // Clear existing timer for this field
+        const timerKey = `${postId}-${field}`;
+        if (saveTimers[timerKey]) {
+          clearTimeout(saveTimers[timerKey]);
+        }
+
+        const saveFunction = async () => {
+          // Get current post data
+          const postResponse = await fetch(`${API_URL}/posts/${postId}`);
+          const post = await postResponse.json();
+
+          // Update the specific field
+          const updateData = {
+            event_title: field === 'event_title' ? value : (post.event_title || ''),
+            phone_number_1: post.phone_number_1 || '',
+            phone_number_2: post.phone_number_2 || '',
+            event_organizer: post.event_organizer || '',
+            contact_person_1: post.contact_person_1 || '',
+            contact_person_2: post.contact_person_2 || '',
+            event_type: post.event_type || '',
+            location: post.location || '',
+            next_event_date: post.next_event_date || '',
+            price_range: post.price_range || '',
+            status: post.status || 'TODO',
+            notes: post.notes || '',
+            last_contact_date: post.last_contact_date || ''
+          };
+
+          const response = await fetch(`${API_URL}/posts/${postId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updateData)
+          });
+
+          if (response.ok) {
+            console.log(`✓ ${field} saved for post ${postId}`);
+          } else {
+            console.error('Error saving field');
+            alert('Error saving field');
+          }
+        };
+
+        // If immediate (e.g., Enter key pressed), save right away
+        if (immediate) {
+          await saveFunction();
+        } else {
+          // Otherwise debounce (wait 500ms after user stops typing)
+          saveTimers[timerKey] = setTimeout(saveFunction, 500);
+        }
+
+      } catch (error) {
+        console.error('Error updating field:', error);
+        alert('Error updating field');
+      }
+    }
+
+    // Update phone number (auto-save on change)
+    async function updatePhone(postId, field, value) {
+      try {
+        // Clear existing timer for this field
+        const timerKey = `${postId}-${field}`;
+        if (saveTimers[timerKey]) {
+          clearTimeout(saveTimers[timerKey]);
+        }
+
+        // Get the input element
+        const input = document.querySelector(`input[data-id="${postId}"][data-field="${field}"]`);
+
+        // Update class based on value
+        if (value) {
+          input.classList.add('has-value');
+          input.classList.remove('scraped');
+        } else {
+          input.classList.remove('has-value');
+        }
+
+        // Debounce save (wait 500ms after user stops typing)
+        saveTimers[timerKey] = setTimeout(async () => {
+          // Get current post data
+          const postResponse = await fetch(`${API_URL}/posts/${postId}`);
+          const post = await postResponse.json();
+
+          // Update the specific phone field
+          const updateData = {
+            phone_number_1: post.phone_number_1 || '',
+            phone_number_2: post.phone_number_2 || '',
+            event_organizer: post.event_organizer || '',
+            contact_person_1: post.contact_person_1 || '',
+            contact_person_2: post.contact_person_2 || '',
+            event_type: post.event_type || '',
+            location: post.location || '',
+            next_event_date: post.next_event_date || '',
+            price_range: post.price_range || '',
+            status: post.status || 'TODO',
+            notes: post.notes || '',
+            last_contact_date: post.last_contact_date || ''
+          };
+
+          updateData[field] = value;
+
+          const response = await fetch(`${API_URL}/posts/${postId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updateData)
+          });
+
+          if (response.ok) {
+            console.log(`✓ ${field} saved for post ${postId}`);
+
+            // Update WhatsApp buttons
+            const row = input.closest('tr');
+            const phone1 = updateData.phone_number_1;
+            const phone2 = updateData.phone_number_2;
+
+            // Update WA buttons state
+            const waButtons = row.querySelectorAll('.btn-wa');
+            if (field === 'phone_number_1') {
+              waButtons[0].disabled = !phone1;
+              waButtons[0].onclick = phone1 ? () => openWhatsApp(phone1) : null;
+            } else {
+              waButtons[1].disabled = !phone2;
+              waButtons[1].onclick = phone2 ? () => openWhatsApp(phone2) : null;
+            }
+
+            await loadStats();
+          } else {
+            console.error('Error saving phone number');
+            alert('Error saving phone number');
+          }
+        }, 500);
+
+      } catch (error) {
+        console.error('Error updating phone:', error);
+        alert('Error updating phone number');
+      }
+    }
+
+    // Open WhatsApp chat
+    function openWhatsApp(phone) {
+      if (!phone) {
+        alert('Please add a phone number first');
+        return;
+      }
+
+      // Clean phone number (remove spaces, dashes, etc)
+      const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+
+      // Ensure it starts with country code
+      let formattedPhone = cleanPhone;
+      if (formattedPhone.startsWith('0')) {
+        formattedPhone = '62' + formattedPhone.substring(1);
+      } else if (!formattedPhone.startsWith('62') && !formattedPhone.startsWith('+')) {
+        formattedPhone = '62' + formattedPhone;
+      }
+
+      // Remove + if present
+      formattedPhone = formattedPhone.replace('+', '');
+
+      // Open WhatsApp
+      const waUrl = `https://wa.me/${formattedPhone}`;
+      window.open(waUrl, '_blank');
+    }
+
+    // Open details modal
+    async function openDetails(id) {
+      try {
+        const response = await fetch(`${API_URL}/posts/${id}`);
+        const post = await response.json();
+
+        document.getElementById('editPostId').value = post.id;
+        document.getElementById('editPostUrl').value = post.post_url;
+        document.getElementById('editPostDate').value = post.post_date ? new Date(post.post_date).toLocaleDateString() : 'N/A';
+        document.getElementById('editEventTitle').value = post.event_title || '';
+        document.getElementById('editCaption').value = post.caption || '';
+        document.getElementById('editPhone1').value = post.phone_number_1 || '';
+        document.getElementById('editPhone2').value = post.phone_number_2 || '';
+        document.getElementById('editEventOrganizer').value = post.event_organizer || '';
+        document.getElementById('editContactPerson1').value = post.contact_person_1 || '';
+        document.getElementById('editContactPerson2').value = post.contact_person_2 || '';
+        document.getElementById('editEventType').value = post.event_type || '';
+        document.getElementById('editLocation').value = post.location || '';
+        document.getElementById('editNextEventDate').value = post.next_event_date || '';
+        document.getElementById('editPriceRange').value = post.price_range || '';
+        document.getElementById('editStatus').value = post.status || 'TODO';
+        document.getElementById('editLastContactDate').value = post.last_contact_date || '';
+        document.getElementById('editNotes').value = post.notes || '';
+
+        document.getElementById('detailsModal').classList.add('active');
+      } catch (error) {
+        console.error('Error loading post:', error);
+        alert('Error loading post details');
+      }
+    }
+
+    // Close modal
+    function closeModal() {
+      document.getElementById('detailsModal').classList.remove('active');
+    }
+
+    // Handle form submission
+    document.getElementById('detailsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const id = document.getElementById('editPostId').value;
+      const data = {
+        phone_number_1: document.getElementById('editPhone1').value,
+        phone_number_2: document.getElementById('editPhone2').value,
+        event_organizer: document.getElementById('editEventOrganizer').value,
+        contact_person_1: document.getElementById('editContactPerson1').value,
+        contact_person_2: document.getElementById('editContactPerson2').value,
+        event_type: document.getElementById('editEventType').value,
+        location: document.getElementById('editLocation').value,
+        next_event_date: document.getElementById('editNextEventDate').value,
+        price_range: document.getElementById('editPriceRange').value,
+        status: document.getElementById('editStatus').value,
+        last_contact_date: document.getElementById('editLastContactDate').value,
+        notes: document.getElementById('editNotes').value
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/posts/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          alert('Post updated successfully!');
+          closeModal();
+          loadPosts(currentPage);
+        } else {
+          alert('Error updating post');
+        }
+      } catch (error) {
+        console.error('Error updating post:', error);
+        alert('Error updating post');
+      }
+    });
+
+    // Update pagination
+    function updatePagination() {
+      document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+      document.getElementById('pagination').style.display = totalPages > 1 ? 'flex' : 'none';
+
+      const buttons = document.querySelectorAll('.pagination button');
+      buttons[0].disabled = currentPage === 1;
+      buttons[1].disabled = currentPage === totalPages;
+    }
+
+    // Change page
+    function changePage(delta) {
+      const newPage = currentPage + delta;
+      if (newPage >= 1 && newPage <= totalPages) {
+        loadPosts(newPage);
+      }
+    }
+
+    // Search posts
+    async function searchPosts() {
+      const query = document.getElementById('searchInput').value.trim();
+
+      if (!query) {
+        loadPosts();
+        return;
+      }
+
+      try {
+        document.getElementById('postsBody').innerHTML = '<tr><td colspan="7" class="loading">Searching...</td></tr>';
+        const response = await fetch(`${API_URL}/posts/search/${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        currentPage = 1;
+        displayPosts(data.posts);
+        document.getElementById('pagination').style.display = 'none';
+      } catch (error) {
+        console.error('Error searching:', error);
+      }
+    }
+
+    // Search on Enter key
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchPosts();
+      }
+    });
+
+    // Open settings modal
+    async function openSettings() {
+      try {
+        const response = await fetch(`${API_URL}/config`);
+        const config = await response.json();
+
+        document.getElementById('configUsername').value = config.instagram.username || '';
+        document.getElementById('configPassword').value = ''; // Always empty for security
+        document.getElementById('configTargetAccounts').value = config.scraping.targetAccounts.join(', ');
+        document.getElementById('configStartDate').value = config.scraping.startDate || '';
+        document.getElementById('configEndDate').value = config.scraping.endDate || '';
+        document.getElementById('configMaxScrolls').value = config.scraping.maxScrolls || 30;
+        document.getElementById('configSkipFirstN').value = config.scraping.skipFirstN || 0;
+        document.getElementById('configScrapeCount').value = config.scraping.scrapeCount || 100;
+
+        document.getElementById('settingsModal').classList.add('active');
+      } catch (error) {
+        console.error('Error loading settings:', error);
+        alert('Error loading settings');
+      }
+    }
+
+    // Close settings modal
+    function closeSettings() {
+      document.getElementById('settingsModal').classList.remove('active');
+    }
+
+    // Handle settings form submission
+    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById('configUsername').value.trim();
+      const password = document.getElementById('configPassword').value;
+      const targetAccounts = document.getElementById('configTargetAccounts').value
+        .split(',')
+        .map(acc => acc.trim())
+        .filter(acc => acc.length > 0);
+      const startDate = document.getElementById('configStartDate').value;
+      const endDate = document.getElementById('configEndDate').value;
+      const maxScrolls = parseInt(document.getElementById('configMaxScrolls').value);
+      const skipFirstN = parseInt(document.getElementById('configSkipFirstN').value);
+      const scrapeCount = parseInt(document.getElementById('configScrapeCount').value);
+
+      if (!username || targetAccounts.length === 0) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      const data = {
+        instagram: {
+          username: username,
+          password: password || '********' // Keep current if empty
+        },
+        scraping: {
+          targetAccounts: targetAccounts,
+          startDate: startDate,
+          endDate: endDate,
+          maxScrolls: maxScrolls,
+          skipFirstN: skipFirstN,
+          scrapeCount: scrapeCount
+        }
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/config`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          alert('Settings saved successfully! The new configuration will be used for the next scrape.');
+          closeSettings();
+        } else {
+          alert('Error saving settings');
+        }
+      } catch (error) {
+        console.error('Error saving settings:', error);
+        alert('Error saving settings');
+      }
+    });
+
+    // Scraping functions
+    let statusPollingInterval = null;
+
+    async function startScraping() {
+      try {
+        const btn = document.getElementById('startScrapeBtn');
+        btn.disabled = true;
+        btn.textContent = 'Starting...';
+
+        const response = await fetch(`${API_URL}/scrape/start`, {
+          method: 'POST'
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+
+          // Show dashboard
+          document.getElementById('scrapingDashboard').classList.add('active');
+
+          // Start polling for status
+          startStatusPolling();
+
+          alert('Scraping started! Check the live dashboard below.');
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Failed to start scraping');
+          btn.disabled = false;
+          btn.textContent = '▶️ Start Scrape';
+        }
+      } catch (error) {
+        console.error('Error starting scrape:', error);
+        alert('Error starting scraping');
+        document.getElementById('startScrapeBtn').disabled = false;
+        document.getElementById('startScrapeBtn').textContent = '▶️ Start Scrape';
+      }
+    }
+
+    async function startRevisit() {
+      const confirmation = confirm(
+        'This will re-visit ALL existing posts on Instagram and update their captions & phone numbers.\n\n' +
+        'This may take a while (about 2 seconds per post × 124 posts = ~4 minutes).\n\n' +
+        'Continue?'
+      );
+
+      if (!confirmation) return;
+
+      try {
+        const btn = document.getElementById('revisitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Starting...';
+
+        const response = await fetch(`${API_URL}/scrape/revisit`, {
+          method: 'POST'
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+
+          // Show dashboard
+          document.getElementById('scrapingDashboard').classList.add('active');
+
+          // Start polling for status
+          startStatusPolling();
+
+          alert('Re-visit started! Check the live dashboard below.');
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Failed to start re-visit');
+          btn.disabled = false;
+          btn.textContent = '🔄 Re-Visit Posts';
+        }
+      } catch (error) {
+        console.error('Error starting re-visit:', error);
+        alert('Error starting re-visit');
+        document.getElementById('revisitBtn').disabled = false;
+        document.getElementById('revisitBtn').textContent = '🔄 Re-Visit Posts';
+      }
+    }
+
+    async function stopScraping() {
+      const confirmation = confirm('Are you sure you want to stop the scraping process?');
+      if (!confirmation) return;
+
+      try {
+        const response = await fetch(`${API_URL}/scrape/stop`, {
+          method: 'POST'
+        });
+
+        if (response.ok) {
+          alert('Stop signal sent. The scraper will terminate shortly.');
+          // Force update status
+          await updateScrapingStatus();
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Failed to stop scraping');
+        }
+      } catch (error) {
+        console.error('Error stopping scrape:', error);
+        alert('Error stopping scraping');
+      }
+    }
+
+    function startStatusPolling() {
+      // Clear any existing interval
+      if (statusPollingInterval) {
+        clearInterval(statusPollingInterval);
+      }
+
+      // Poll every second
+      statusPollingInterval = setInterval(updateScrapingStatus, 1000);
+
+      // Update immediately
+      updateScrapingStatus();
+    }
+
+    function stopStatusPolling() {
+      if (statusPollingInterval) {
+        clearInterval(statusPollingInterval);
+        statusPollingInterval = null;
+      }
+    }
+
+    async function updateScrapingStatus() {
+      try {
+        const response = await fetch(`${API_URL}/scrape/status`);
+        const status = await response.json();
+
+        // Update status badge
+        const statusBadge = document.getElementById('statusBadge');
+        const startBtn = document.getElementById('startScrapeBtn');
+        const revisitBtn = document.getElementById('revisitBtn');
+        const stopBtn = document.getElementById('stopScrapeBtn');
+
+        if (status.isRunning) {
+          statusBadge.textContent = 'Running';
+          statusBadge.className = 'status-badge running';
+          startBtn.disabled = true;
+          startBtn.textContent = '⏸️ Running...';
+          revisitBtn.disabled = true;
+          revisitBtn.textContent = '⏸️ Running...';
+          stopBtn.style.display = 'inline-block';
+        } else {
+          statusBadge.textContent = 'Idle';
+          statusBadge.className = 'status-badge idle';
+          startBtn.disabled = false;
+          startBtn.textContent = '▶️ Start Scrape';
+          revisitBtn.disabled = false;
+          revisitBtn.textContent = '🔄 Re-Visit Posts';
+          stopBtn.style.display = 'none';
+
+          // Stop polling if not running
+          stopStatusPolling();
+
+          // Reload posts to show new data
+          if (status.successCount > 0) {
+            loadPosts();
+          }
+        }
+
+        // Update stats
+        document.getElementById('scrapeTotalCollected').textContent = status.totalCollected;
+        document.getElementById('scrapeCurrentProcessing').textContent = status.currentProcessing;
+        document.getElementById('scrapeSuccessCount').textContent = status.successCount;
+        document.getElementById('scrapeFailCount').textContent = status.failCount;
+        document.getElementById('scrapeTotalToProcess').textContent = status.totalToProcess;
+        document.getElementById('scrapeAccount').textContent = status.currentAccount || '-';
+
+        // Update logs
+        const logsContainer = document.getElementById('scrapingLogs');
+        if (status.logs && status.logs.length > 0) {
+          logsContainer.innerHTML = status.logs.map(log => {
+            let className = 'log-line';
+            if (log.includes('ERROR') || log.includes('FAILED')) {
+              className += ' log-error';
+            } else if (log.includes('SAVED') || log.includes('completed')) {
+              className += ' log-success';
+            }
+            return `<div class="${className}">${escapeHtml(log)}</div>`;
+          }).join('');
+
+          // Auto-scroll to bottom
+          logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+      } catch (error) {
+        console.error('Error fetching status:', error);
+      }
+    }
+
+    // Check status on page load
+    async function checkInitialScrapingStatus() {
+      try {
+        const response = await fetch(`${API_URL}/scrape/status`);
+        const status = await response.json();
+
+        if (status.isRunning) {
+          document.getElementById('scrapingDashboard').classList.add('active');
+          startStatusPolling();
+        }
+      } catch (error) {
+        console.error('Error checking initial status:', error);
+      }
+    }
+
+    // Initial load
+    loadPosts();
+    checkInitialScrapingStatus();
+  </script>
+</body>
+</html>

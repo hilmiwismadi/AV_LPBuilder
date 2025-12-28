@@ -1,0 +1,386 @@
+================================================================================
+CRM DASHBOARD - ALL COMMANDS REFERENCE
+================================================================================
+
+DATABASE CREDENTIALS (from db.txt)
+----------------------------------
+Host: localhost
+Port: 5432
+Username: postgres
+Password: postgres
+Database name: crm_tools
+
+
+================================================================================
+INITIAL SETUP (Run Once)
+================================================================================
+
+1. CREATE DATABASE
+----------------------------------
+Open PostgreSQL (psql or pgAdmin) and run:
+
+    CREATE DATABASE crm_tools;
+
+
+2. BACKEND SETUP
+----------------------------------
+cd backend
+npm install
+copy .env.example .env
+    (Mac/Linux: cp .env.example .env)
+
+Edit .env file:
+    DATABASE_URL="postgresql://postgres:postgres@localhost:5432/crm_tools?schema=public"
+    PORT=3001
+    UPLOAD_DIR=uploads
+
+Generate Prisma Client:
+    npm run prisma:generate
+
+Create Database Tables:
+    npm run prisma:migrate
+
+Seed Initial Templates:
+    npm run prisma:seed
+
+
+3. FRONTEND SETUP
+----------------------------------
+cd frontend
+npm install
+
+
+================================================================================
+DAILY USAGE - STARTING THE APPLICATION
+================================================================================
+
+TERMINAL 1 - Start Backend Server
+----------------------------------
+cd backend
+npm run dev
+
+Server will run on: http://localhost:3001
+QR Code will appear for WhatsApp authentication (scan with phone)
+Keep this terminal open!
+
+
+TERMINAL 2 - Start Frontend Server
+----------------------------------
+cd frontend
+npm run dev
+
+Frontend will run on: http://localhost:5173
+Open browser to: http://localhost:5173
+
+
+================================================================================
+WHATSAPP SETUP
+================================================================================
+
+First Time Only:
+----------------------------------
+1. Make sure backend is running (npm run dev)
+2. Wait for QR code to appear in terminal
+3. Open WhatsApp on your phone
+4. Go to: Settings → Linked Devices → Link a Device
+5. Scan the QR code from the terminal
+6. Wait for "WhatsApp client is ready!" message
+7. Dashboard will show "WhatsApp: Connected"
+
+If QR Code Doesn't Show:
+----------------------------------
+cd backend
+Delete folders: .wwebjs_auth and .wwebjs_cache
+Restart backend: npm run dev
+Scan QR code again
+
+
+================================================================================
+DATABASE MANAGEMENT
+================================================================================
+
+Open Prisma Studio (Database GUI)
+----------------------------------
+cd backend
+npm run prisma:studio
+
+Opens at: http://localhost:5555
+You can view/edit all data here!
+
+
+View Database in Terminal (psql)
+----------------------------------
+psql -U postgres -d crm_tools
+
+Common commands:
+    \dt                 - List all tables
+    \d clients          - Show clients table structure
+    \d chat_history     - Show chat_history table structure
+    \d chat_templates   - Show chat_templates table structure
+    SELECT * FROM clients;           - View all clients
+    SELECT * FROM chat_history;      - View all messages
+    SELECT * FROM chat_templates;    - View all templates
+    \q                  - Quit psql
+
+
+Run New Migrations (after schema changes)
+----------------------------------
+cd backend
+npm run prisma:migrate
+
+
+Reset Database (WARNING: Deletes all data!)
+----------------------------------
+cd backend
+npx prisma migrate reset
+npm run prisma:seed
+
+
+================================================================================
+API ENDPOINTS (for testing with Postman/cURL)
+================================================================================
+
+Health Check:
+    GET http://localhost:3001/api/health
+
+
+Clients:
+    GET    http://localhost:3001/api/clients          - Get all clients
+    GET    http://localhost:3001/api/clients/:id      - Get one client
+    POST   http://localhost:3001/api/clients          - Create client
+    PUT    http://localhost:3001/api/clients/:id      - Update client
+    DELETE http://localhost:3001/api/clients/:id      - Delete client
+
+
+Chat History:
+    GET    http://localhost:3001/api/chat/:clientId   - Get chat history
+    POST   http://localhost:3001/api/chat             - Add chat message
+
+
+Templates:
+    GET    http://localhost:3001/api/templates        - Get all templates
+    GET    http://localhost:3001/api/templates/:id    - Get one template
+    POST   http://localhost:3001/api/templates        - Create template
+    PUT    http://localhost:3001/api/templates/:id    - Update template
+    DELETE http://localhost:3001/api/templates/:id    - Delete template
+    POST   http://localhost:3001/api/templates/process - Process template
+
+
+WhatsApp:
+    GET    http://localhost:3001/api/whatsapp/status         - Check status
+    POST   http://localhost:3001/api/whatsapp/send           - Send message
+    POST   http://localhost:3001/api/whatsapp/refresh-whitelist - Refresh
+
+
+================================================================================
+USEFUL COMMANDS
+================================================================================
+
+Check if PostgreSQL is Running:
+----------------------------------
+Windows:
+    sc query postgresql-x64-14
+    (Replace 14 with your version)
+
+Mac/Linux:
+    pg_isready
+    brew services list    (if installed via Homebrew)
+
+
+Check if Node.js is Installed:
+----------------------------------
+node --version
+npm --version
+
+
+View Backend Logs:
+----------------------------------
+Backend terminal shows all logs in real-time
+
+
+Build for Production:
+----------------------------------
+Backend:
+    cd backend
+    npm start    (uses node instead of nodemon)
+
+Frontend:
+    cd frontend
+    npm run build    (creates dist/ folder)
+    npm run preview  (preview production build)
+
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Backend won't start:
+----------------------------------
+1. Check PostgreSQL is running
+2. Verify .env DATABASE_URL is correct
+3. Run: cd backend && npm run prisma:generate
+
+
+Frontend can't connect:
+----------------------------------
+1. Make sure backend is running on port 3001
+2. Check frontend/src/config.js has correct URL
+
+
+WhatsApp not connecting:
+----------------------------------
+1. Delete .wwebjs_auth and .wwebjs_cache folders
+2. Restart backend
+3. Scan QR code again
+
+
+Database connection error:
+----------------------------------
+1. Check PostgreSQL is running
+2. Verify credentials in .env match db.txt
+3. Run: psql -U postgres -d crm_tools (to test connection)
+
+
+Messages not sending:
+----------------------------------
+1. Check WhatsApp status shows "Connected" in dashboard
+2. Verify phone number format: 081234567890 (no +, spaces, or dashes)
+3. Client must be added to CRM before sending messages
+
+
+================================================================================
+ADDING CUSTOM TEMPLATES
+================================================================================
+
+Option 1: Via Prisma Studio
+----------------------------------
+cd backend
+npm run prisma:studio
+Go to: http://localhost:5555
+Click "ChatTemplate" → "Add record"
+
+
+Option 2: Via API (Postman/cURL)
+----------------------------------
+POST http://localhost:3001/api/templates
+Content-Type: application/json
+
+{
+  "name": "Template Name",
+  "category": "Category",
+  "message": "Your message with [variables]",
+  "variables": ["variable1", "variable2"]
+}
+
+
+Example Template:
+{
+  "name": "Follow Up - Demo",
+  "category": "Follow Up",
+  "message": "Halo [event_organizer], bagaimana dengan demo yang sudah saya kirimkan?",
+  "variables": ["event_organizer"]
+}
+
+
+================================================================================
+PROJECT STRUCTURE
+================================================================================
+
+CRM_Tools/
+├── backend/
+│   ├── src/
+│   │   ├── controllers/       # API logic
+│   │   ├── routes/            # API routes
+│   │   ├── middleware/        # File upload
+│   │   ├── index.js           # Main server
+│   │   ├── whatsappService.js # WhatsApp integration
+│   │   └── db.js              # Prisma client
+│   ├── prisma/
+│   │   ├── schema.prisma      # Database schema
+│   │   └── seed.js            # Initial data
+│   ├── uploads/               # Image uploads
+│   ├── .env                   # Environment variables
+│   └── package.json
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/        # React components
+│   │   ├── services/          # API client
+│   │   ├── App.jsx            # Main app
+│   │   └── App.css            # Styles
+│   └── package.json
+│
+├── document/
+│   ├── kickoff-prompt.txt     # Original requirements
+│   ├── db.txt                 # Database credentials
+│   └── commands.txt           # This file!
+│
+├── README.md                   # Full documentation
+└── QUICKSTART.md               # Quick setup guide
+
+
+================================================================================
+QUICK REFERENCE - MOST USED COMMANDS
+================================================================================
+
+Start Backend:       cd backend && npm run dev
+Start Frontend:      cd frontend && npm run dev
+View Database:       cd backend && npm run prisma:studio
+Check Health:        Open http://localhost:3001/api/health
+Open Dashboard:      Open http://localhost:5173
+
+
+================================================================================
+
+NEW FEATURES ADDED
+================================================================================
+
+1. AUTOMATIC PHONE NUMBER PARSING
+----------------------------------
+The system now automatically parses phone numbers in any format:
+   +628124523521  →  081234567890
+   08124523521    →  081234567890
+   8124523521     →  081234567890
+   6281234567890  →  081234567890
+
+You can enter phone numbers in any format when adding/editing clients!
+
+
+2. NEW CHAT TEMPLATES
+----------------------------------
+The following templates have been added:
+
+   a) Introduction with Proposal - Default
+      Category: Introduction
+      Variables: none
+      (Includes note about attaching PDF proposal)
+
+   b) Introduction with Proposal - Without Attachment
+      Category: Introduction
+      Variables: none
+      (Introduction without attachment note)
+
+   c) Link Demo
+      Category: Proposal
+      Variables: [event_organizer], [link_demo]
+      (Sends demo link with partnership package offer)
+
+   d) Follow Up - General
+      Category: Follow Up
+      Variables: [event_organizer]
+      (General follow-up message with friendly tone)
+
+
+3. TEMPLATE VARIABLES
+----------------------------------
+Templates can use these variables (auto-filled from client data):
+   [event_organizer]  - Client's organization name
+   [link_demo]        - Personalized demo link
+   [variant_fcc]      - Default: "salah satu panitia"
+
+To add the new templates to your database:
+   cd backend
+   npm run prisma:seed
+
+
+================================================================================
