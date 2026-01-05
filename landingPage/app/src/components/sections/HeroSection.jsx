@@ -59,12 +59,12 @@ const HeroSection = () => {
             </a>
           </div>
           <div className="flex flex-col sm:flex-row justify-center gap-4 px-4 mb-12">
-            <button className="btn-primary bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto">
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="btn-primary bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto text-center">
               {heroText.ctaPrimary}
-            </button>
-            <button className="btn-secondary hover:bg-white hover:text-gray-800 w-full sm:w-auto">
+            </a>
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary hover:bg-white hover:text-gray-800 w-full sm:w-auto text-center">
               {heroText.ctaSecondary}
-            </button>
+            </a>
           </div>
           <button
             onClick={scrollToNextSection}
@@ -107,12 +107,12 @@ const HeroSection = () => {
             </a>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <button className="btn-primary bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto">
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="btn-primary bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto text-center">
               {heroText.ctaPrimary}
-            </button>
-            <button className="btn-secondary hover:bg-white hover:text-gray-800 w-full sm:w-auto">
+            </a>
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary hover:bg-white hover:text-gray-800 w-full sm:w-auto text-center">
               {heroText.ctaSecondary}
-            </button>
+            </a>
           </div>
           <button
             onClick={scrollToNextSection}
@@ -162,12 +162,12 @@ const HeroSection = () => {
           </a>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <button className="btn-primary bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto">
+          <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="btn-primary bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto text-center">
             {heroText.ctaPrimary}
-          </button>
-          <button className="btn-secondary hover:bg-white hover:text-gray-800 w-full sm:w-auto">
+          </a>
+          <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary hover:bg-white hover:text-gray-800 w-full sm:w-auto text-center">
             {heroText.ctaSecondary}
-          </button>
+          </a>
         </div>
         <button
           onClick={scrollToNextSection}

@@ -150,13 +150,15 @@ export const CustomizationProvider = ({ children }) => {
 
   // New state for hero text customization
   const [heroText, setHeroText] = useState({
-    title: 'Innovation Challenge 2024',
-    tagline: 'Empowering Innovation Through Competition',
-    date: '15-20 Januari 2024',
-    instagram: '@eventorganizer',
-    instagramUrl: 'https://instagram.com/eventorganizer',
-    ctaPrimary: 'Daftar Sekarang',
-    ctaSecondary: 'Lihat Detail',
+    title: 'Lorem Ipsum Dolor Amet',
+    tagline: 'Consectetur adipiscing elit sed do eiusmod',
+    date: '12-15 Lorem 2024',
+    instagram: '@loremipsum',
+    instagramUrl: 'https://instagram.com/loremipsum',
+    ctaPrimary: 'Lorem Ipsum',
+    ctaPrimaryUrl: '',
+    ctaSecondary: 'Dolor Sit',
+    ctaSecondaryUrl: '',
   });
 
   // State to track which configuration is being edited
@@ -165,12 +167,12 @@ export const CustomizationProvider = ({ children }) => {
 
   // New state for about text customization
   const [aboutText, setAboutText] = useState({
-    mainTitle: 'Tentang Event',
-    mainDescription: 'Innovation Challenge 2024 adalah kompetisi bergengsi yang menghadirkan platform bagi para inovator muda untuk mengembangkan ide-ide kreatif mereka. Event ini dirancang untuk mendorong semangat kewirausahaan dan inovasi di berbagai bidang.',
-    subTitle1: 'Tema Event',
-    subDescription1: '"Teknologi untuk Masa Depan Berkelanjutan" - Menghadirkan solusi inovatif untuk tantangan global melalui teknologi dan kreativitas.',
-    subTitle2: 'Visi',
-    subDescription2: 'Menjadi wadah terdepan bagi generasi muda Indonesia untuk mengembangkan potensi dan menciptakan dampak positif bagi masyarakat melalui inovasi dan teknologi.',
+    mainTitle: 'Lorem Ipsum',
+    mainDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+    subTitle1: 'Dolor Sit',
+    subDescription1: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat.',
+    subTitle2: 'Consectetur',
+    subDescription2: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium totam rem aperiam eaque ipsa quae ab illo inventore veritatis.',
     subTitle3: '',
     subDescription3: '',
     subTitle4: '',
@@ -179,165 +181,180 @@ export const CustomizationProvider = ({ children }) => {
 
   // State for categories text and cards
   const [categoriesText, setCategoriesText] = useState({
-    sectionTitle: 'Event Categories',
-    sectionSubtitle: 'Pilih kategori lomba yang sesuai dengan keahlian dan minat Anda',
+    sectionTitle: 'Lorem Ipsum',
+    sectionSubtitle: 'Consectetur adipiscing elit sed do eiusmod tempor incididunt',
   });
 
   const [categoriesCards, setCategoriesCards] = useState([
     {
       id: 1,
       icon: 'FaPaintBrush',
-      title: 'UI/UX Design',
-      description: 'Desain interface dan user experience untuk aplikasi atau website',
+      image: null,
+      title: 'Lorem Ipsum',
+      description: 'Dolor sit amet consectetur adipiscing elit sed do',
       requirements: [
-        { title: 'Tim', description: '1-3 orang' },
-        { title: 'Tools', description: 'Bebas' },
-        { title: 'Durasi', description: '3 hari' }
+        { title: 'Lorem', description: 'Ipsum dolor' },
+        { title: 'Amet', description: 'Consectetur' },
+        { title: 'Elit', description: 'Sed do' }
       ],
+      buttonUrl: '',
     },
     {
       id: 2,
       icon: 'FaCode',
-      title: 'Competitive Programming',
-      description: 'Pemecahan masalah algoritmik dan pemrograman kompetitif',
+      image: null,
+      title: 'Dolor Consectetur',
+      description: 'Eiusmod tempor incididunt ut labore et dolore magna',
       requirements: [
-        { title: 'Tim', description: '1-3 orang' },
-        { title: 'Bahasa', description: 'C++, Java, Python' },
-        { title: 'Durasi', description: '5 jam' }
+        { title: 'Quis', description: 'Nostrud ex' },
+        { title: 'Veniam', description: 'Ullamco laboris' },
+        { title: 'Nisi', description: 'Aliquip' }
       ],
+      buttonUrl: '',
     },
     {
       id: 3,
       icon: 'FaBriefcase',
-      title: 'Business Plan',
-      description: 'Rencana bisnis untuk startup atau produk inovatif',
+      image: null,
+      title: 'Adipiscing Elit',
+      description: 'Sed ut perspiciatis unde omnis iste natus error',
       requirements: [
-        { title: 'Tim', description: '3-5 orang' },
-        { title: 'Format', description: 'Presentasi & Dokumen' },
-        { title: 'Durasi', description: '2 minggu' }
+        { title: 'Voluptatem', description: 'Accusantium' },
+        { title: 'Doloremque', description: 'Laudantium totam' },
+        { title: 'Aperiam', description: 'Eaque ipsa' }
       ],
+      buttonUrl: '',
     },
     {
       id: 4,
       icon: 'FaPenFancy',
-      title: 'Essay Competition',
-      description: 'Menulis esai tentang tema inovasi dan teknologi',
+      image: null,
+      title: 'Tempor Incididunt',
+      description: 'Nemo enim ipsam voluptatem quia voluptas sit',
       requirements: [
-        { title: 'Tim', description: 'Individual' },
-        { title: 'Panjang', description: '1500-2000 kata' },
-        { title: 'Bahasa', description: 'Indonesia/Inggris' }
+        { title: 'Neque', description: 'Porro quisquam' },
+        { title: 'Magnam', description: 'Aliquam quaerat' },
+        { title: 'Eius', description: 'Modi tempora' }
       ],
+      buttonUrl: '',
     },
   ]);
 
   // State for timeline text and cards
   const [timelineText, setTimelineText] = useState({
-    sectionTitle: 'Timeline',
-    sectionSubtitle: 'Jadwal lengkap pelaksanaan Innovation Challenge 2024',
+    sectionTitle: 'Tempus Fugit',
+    sectionSubtitle: 'Lorem ipsum dolor sit amet consectetur adipiscing elit',
   });
 
   const [timelineCards, setTimelineCards] = useState([
     {
       id: 1,
       icon: 'FaFlag',
-      title: 'Pendaftaran Dibuka',
-      date: '1 November - 15 Desember 2023',
-      description: 'Peserta dapat mendaftar melalui website resmi dan mengumpulkan berkas pendaftaran.',
+      image: null,
+      title: 'Lorem Initium',
+      date: '1-15 Tempus 2024',
+      description: 'Consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore.',
     },
     {
       id: 2,
       icon: 'FaFileAlt',
-      title: 'Seleksi Administrasi',
-      date: '16 - 22 Desember 2023',
-      description: 'Tim panitia akan melakukan verifikasi berkas dan menyeleksi peserta yang memenuhi syarat.',
+      image: null,
+      title: 'Dolor Selectio',
+      date: '16-22 Tempus 2024',
+      description: 'Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.',
     },
     {
       id: 3,
       icon: 'FaUsers',
-      title: 'Babak Penyisihan',
-      date: '5 - 10 Januari 2024',
-      description: 'Peserta mengikuti babak penyisihan sesuai kategori lomba masing-masing.',
+      image: null,
+      title: 'Ipsum Phase',
+      date: '5-10 Annus 2024',
+      description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse.',
     },
     {
       id: 4,
       icon: 'FaStar',
-      title: 'Semifinal',
-      date: '15 Januari 2024',
-      description: '20 tim terbaik dari setiap kategori akan berkompetisi di babak semifinal.',
+      image: null,
+      title: 'Semi Finalis',
+      date: '15 Annus 2024',
+      description: 'Excepteur sint occaecat cupidatat non proident sunt in culpa qui.',
     },
     {
       id: 5,
       icon: 'FaTrophy',
-      title: 'Grand Final',
-      date: '20 Januari 2024',
-      description: 'Babak final dan pengumuman pemenang dengan hadiah total ratusan juta rupiah.',
+      image: null,
+      title: 'Magnus Finalis',
+      date: '20 Annus 2024',
+      description: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.',
     },
   ]);
 
   // State for prizes text
   const [prizesText, setPrizesText] = useState({
-    sectionTitle: 'Hadiah & Benefit',
-    sectionSubtitle: 'Total hadiah dan benefit yang bisa Anda dapatkan',
-    totalPrize: 'Rp 500.000.000',
-    prizeDescription: 'Tersebar di semua kategori lomba',
+    sectionTitle: 'Praemium Lorem',
+    sectionSubtitle: 'Magna aliqua ut enim ad minim veniam quis',
+    totalPrize: 'L 500.000',
+    prizeDescription: 'Distributed across omnis categories',
   });
 
   // State for jury text
   const [juryText, setJuryText] = useState({
-    sectionTitle: 'Juri & Pembicara',
-    sectionSubtitle: 'Para ahli dan profesional yang akan menilai karya Anda',
+    sectionTitle: 'Iudices Lorem',
+    sectionSubtitle: 'Consectetur adipiscing elit sed do eiusmod tempor',
   });
 
   // State for documentation text
   const [documentationText, setDocumentationText] = useState({
-    sectionTitle: 'Dokumentasi',
-    sectionSubtitle: 'Lihat keseruan event tahun lalu dan para pemenangnya',
+    sectionTitle: 'Documenta',
+    sectionSubtitle: 'Ut enim ad minim veniam quis nostrud exercitation',
   });
 
   // State for instagram text
   const [instagramText, setInstagramText] = useState({
-    sectionTitle: 'Instagram',
+    sectionTitle: 'Social Media',
     sectionSubtitle: '',
-    handle: '@eventorganizer',
-    tagline: 'Want to know more information? Check our Instagram for the latest updates!',
-    instagramUrl: 'https://www.instagram.com/eventorganizer/',
+    handle: '@loremipsum',
+    tagline: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium!',
+    instagramUrl: 'https://www.instagram.com/loremipsum/',
   });
 
   // State for sponsors text
   const [sponsorsText, setSponsorsText] = useState({
-    sectionTitle: 'Sponsor & Partner',
-    sectionSubtitle: 'Terima kasih kepada sponsor dan partner yang mendukung event ini',
+    sectionTitle: 'Patroni Lorem',
+    sectionSubtitle: 'Duis aute irure dolor in reprehenderit in voluptate',
   });
 
   // State for contact text
   const [contactText, setContactText] = useState({
-    sectionTitle: 'Kontak & FAQ',
-    sectionSubtitle: 'Hubungi kami atau lihat pertanyaan yang sering diajukan',
-    whatsapp: '+62 812-3456-7890',
-    email: 'info@innovationchallenge.com',
-    guidebookUrl: '#',
+    sectionTitle: 'Contactus & FAQ',
+    sectionSubtitle: 'Lorem ipsum dolor sit amet consectetur adipiscing',
+    whatsapp: '+00 000-0000-0000',
+    whatsappUrl: '',
+    email: 'lorem@ipsum.dolor',
+    emailUrl: '',
+    guidebookUrl: '',
   });
 
   const [faqCards, setFaqCards] = useState([
     {
       id: 1,
-      question: 'Bagaimana cara mendaftar?',
-      answer: 'Klik tombol "Daftar Sekarang" di atas, isi formulir pendaftaran, dan upload berkas yang diperlukan. Setelah itu, Anda akan menerima email konfirmasi.',
+      question: 'Quomodo lorem ipsum?',
+      answer: 'Consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation.',
     },
     {
       id: 2,
-      question: 'Berapa biaya pendaftaran?',
-      answer: 'Biaya pendaftaran adalah Rp 100.000 per tim untuk semua kategori. Biaya sudah termasuk akses ke workshop dan seminar.',
+      question: 'Quantum pretium dolor sit?',
+      answer: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat.',
     },
     {
       id: 3,
-      question: 'Apakah boleh mendaftar lebih dari satu kategori?',
-      answer: 'Ya, peserta diperbolehkan mendaftar di lebih dari satu kategori dengan mendaftar dan membayar secara terpisah untuk setiap kategori.',
+      question: 'Possumne multiplex categories?',
+      answer: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium totam rem aperiam eaque ipsa.',
     },
     {
       id: 4,
-      question: 'Apakah ada batasan usia peserta?',
-      answer: 'Kompetisi terbuka untuk pelajar SMA/SMK dan mahasiswa S1/D3 yang masih aktif berkuliah pada tahun ajaran 2023/2024.',
+      question: 'Quid aetas limitatio?',
+      answer: 'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit sed quia consequuntur magni dolores.',
     },
   ]);
 

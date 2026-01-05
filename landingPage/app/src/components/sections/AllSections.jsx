@@ -68,10 +68,17 @@ export const CategoriesSection = () => {
         style={customGradientStyle}
       />
       <div className="relative bg-white p-8 rounded-xl shadow-lg">
-        {category.icon && category.icon !== 'None' && (
-          <div style={customGradientStyle} className={`w-20 h-20 rounded-${layout === 'layout-3' ? '2xl' : 'full'} flex items-center justify-center text-white text-3xl mx-auto mb-6`}>
-            {getIcon(category.icon)}
+        {/* Show image if available, otherwise show icon */}
+        {category.image ? (
+          <div className={`w-20 h-20 rounded-${layout === 'layout-3' ? '2xl' : 'full'} mx-auto mb-6 overflow-hidden`}>
+            <img src={category.image} alt={category.title} className="w-full h-full object-cover" />
           </div>
+        ) : (
+          category.icon && category.icon !== 'None' && (
+            <div style={customGradientStyle} className={`w-20 h-20 rounded-${layout === 'layout-3' ? '2xl' : 'full'} flex items-center justify-center text-white text-3xl mx-auto mb-6`}>
+              {getIcon(category.icon)}
+            </div>
+          )
         )}
         <h3 className="text-xl font-bold mb-4 text-center">{category.title}</h3>
         <p className="text-gray-600 mb-6 text-center">{category.description}</p>
@@ -85,9 +92,12 @@ export const CategoriesSection = () => {
             ))}
           </ul>
         )}
-        <button
+        <a
+          href={category.buttonUrl || '#'}
+          target="_blank"
+          rel="noopener noreferrer"
           style={{ borderColor: customColors.color1, color: customColors.color1 }}
-          className="btn-outline w-full transition-colors"
+          className="btn-outline w-full transition-colors block text-center"
           onMouseEnter={(e) => {
             e.currentTarget.style.background = customColors.color1;
             e.currentTarget.style.color = 'white';
@@ -98,30 +108,37 @@ export const CategoriesSection = () => {
           }}
         >
           Lihat Detail
-        </button>
+        </a>
       </div>
     </div>
   );
 
   if (layout === 'layout-2') {
     return (
-      <section id="categories" className="py-20 bg-white">
+      <section id="categories" className="py-20 bg-white overflow-x-hidden">
         <div className="container mx-auto px-4">
           <h2 className="section-title">{categoriesText.sectionTitle}</h2>
           <p className="section-subtitle">Pilih kategori yang sesuai dengan keahlian Anda</p>
-          <div className="max-w-4xl mx-auto space-y-6 max-h-[600px] overflow-y-auto pr-2">
+          <div className="max-w-4xl mx-auto space-y-6 overflow-x-hidden">
             {categories.map((cat) => (
               <div key={cat.id} className="bg-white p-6 rounded-xl shadow-lg flex items-center gap-6 hover:translate-x-3 transition-transform">
-                {cat.icon && cat.icon !== 'None' && (
-                  <div style={customGradientStyle} className="w-24 h-24 rounded-2xl flex items-center justify-center text-white text-3xl flex-shrink-0">
-                    {getIcon(cat.icon)}
+                {/* Show image if available, otherwise show icon */}
+                {cat.image ? (
+                  <div className="w-24 h-24 rounded-2xl flex-shrink-0 overflow-hidden">
+                    <img src={cat.image} alt={cat.title} className="w-full h-full object-cover" />
                   </div>
+                ) : (
+                  cat.icon && cat.icon !== 'None' && (
+                    <div style={customGradientStyle} className="w-24 h-24 rounded-2xl flex items-center justify-center text-white text-3xl flex-shrink-0">
+                      {getIcon(cat.icon)}
+                    </div>
+                  )
                 )}
                 <div className="flex-1">
                   <h3 className="text-xl font-bold mb-2">{cat.title}</h3>
                   <p className="text-gray-600">{cat.description}</p>
                 </div>
-                <button style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline px-6">Detail</button>
+                <a href={cat.buttonUrl || '#'} target="_blank" rel="noopener noreferrer" style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline px-6">Detail</a>
               </div>
             ))}
           </div>
@@ -132,7 +149,7 @@ export const CategoriesSection = () => {
 
   if (layout === 'layout-3') {
     return (
-      <section id="categories" className="py-20 bg-white relative overflow-hidden">
+      <section id="categories" className="py-20 bg-white relative overflow-x-hidden">
         {/* Animated Ornaments */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div
@@ -153,10 +170,10 @@ export const CategoriesSection = () => {
           <h2 className="section-title">{categoriesText.sectionTitle}</h2>
           <p className="section-subtitle">Pilih kategori yang sesuai dengan keahlian Anda</p>
 
-          {/* Desktop - Horizontal scroll */}
-          <div className="hidden md:flex overflow-x-auto gap-6 pb-6 snap-x snap-mandatory scrollbar-hide">
+          {/* Desktop - Grid instead of horizontal scroll */}
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">
             {categories.map((cat) => (
-              <div key={cat.id} className="min-w-[350px] snap-start">
+              <div key={cat.id}>
                 <CategoryCard category={cat} />
               </div>
             ))}
@@ -218,7 +235,7 @@ export const CategoriesSection = () => {
   }
 
   return (
-    <section id="categories" className="py-20 bg-white relative overflow-hidden">
+    <section id="categories" className="py-20 bg-white relative overflow-x-hidden">
       {/* Animated Ornaments */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div
@@ -240,7 +257,7 @@ export const CategoriesSection = () => {
         <p className="section-subtitle">Pilih kategori yang sesuai dengan keahlian Anda</p>
 
         {/* Desktop view - Grid */}
-        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-h-[600px] overflow-y-auto pr-2">
+        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-h-[600px] overflow-y-auto overflow-x-hidden pr-2">
           {categories.map((cat) => (
             <CategoryCard key={cat.id} category={cat} />
           ))}
@@ -327,10 +344,17 @@ export const TimelineSection = () => {
             <div style={customGradientStyle} className="absolute left-10 top-0 bottom-0 w-1"></div>
             {timeline.map((item) => (
               <div key={item.id} className="mb-12 relative">
-                {item.icon && item.icon !== 'None' && (
-                  <div style={customGradientStyle} className="absolute -left-[100px] w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl shadow-lg">
-                    {getIcon(item.icon)}
+                {/* Show image if available, otherwise show icon */}
+                {item.image ? (
+                  <div className="absolute -left-[100px] w-20 h-20 rounded-full overflow-hidden shadow-lg">
+                    <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                   </div>
+                ) : (
+                  item.icon && item.icon !== 'None' && (
+                    <div style={customGradientStyle} className="absolute -left-[100px] w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl shadow-lg">
+                      {getIcon(item.icon)}
+                    </div>
+                  )
                 )}
                 <div className="relative p-1 rounded-xl group overflow-visible">
                   <div
@@ -365,10 +389,17 @@ export const TimelineSection = () => {
                   style={customGradientStyle}
                 />
                 <div className="relative bg-white p-8 rounded-xl shadow-lg">
-                  {item.icon && item.icon !== 'None' && (
-                    <div style={customGradientStyle} className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl mb-6">
-                      {getIcon(item.icon)}
+                  {/* Show image if available, otherwise show icon */}
+                  {item.image ? (
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden mb-6">
+                      <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                     </div>
+                  ) : (
+                    item.icon && item.icon !== 'None' && (
+                      <div style={customGradientStyle} className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl mb-6">
+                        {getIcon(item.icon)}
+                      </div>
+                    )
                   )}
                   <h3 className="text-xl font-bold mb-2">{item.title}</h3>
                   <p style={{ color: customColors.color1 }} className="font-semibold mb-4">{item.date}</p>
@@ -392,10 +423,17 @@ export const TimelineSection = () => {
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-8 max-h-[600px] overflow-y-auto pr-2">
             {timeline.map((item) => (
               <div key={item.id} className="text-center">
-                {item.icon && item.icon !== 'None' && (
-                  <div style={customGradientStyle} className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-6 shadow-lg relative z-10">
-                    {getIcon(item.icon)}
+                {/* Show image if available, otherwise show icon */}
+                {item.image ? (
+                  <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-6 shadow-lg relative z-10">
+                    <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                   </div>
+                ) : (
+                  item.icon && item.icon !== 'None' && (
+                    <div style={customGradientStyle} className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-6 shadow-lg relative z-10">
+                      {getIcon(item.icon)}
+                    </div>
+                  )
                 )}
                 <h3 className="font-bold mb-2">{item.title}</h3>
                 <p style={{ color: customColors.color1 }} className="text-sm font-semibold mb-2">{item.date}</p>
@@ -890,9 +928,9 @@ export const ContactSection = () => {
                 <div>
                   <h3 className="font-bold text-lg mb-1">WhatsApp</h3>
                   <p className="text-gray-600 mb-3">{contactText.whatsapp}</p>
-                  <button style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline text-sm px-4 py-2">
+                  <a href={contactText.whatsappUrl || '#'} target="_blank" rel="noopener noreferrer" style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline text-sm px-4 py-2 inline-block">
                     Chat Sekarang
-                  </button>
+                  </a>
                 </div>
               </div>
               <div className="bg-white p-6 rounded-xl shadow-lg flex items-start gap-4 hover:-translate-y-2 transition-transform border-2 border-gray-100">
@@ -900,9 +938,9 @@ export const ContactSection = () => {
                 <div>
                   <h3 className="font-bold text-lg mb-1">Email</h3>
                   <p className="text-gray-600 mb-3">{contactText.email}</p>
-                  <button style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline text-sm px-4 py-2">
+                  <a href={contactText.emailUrl || '#'} target="_blank" rel="noopener noreferrer" style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline text-sm px-4 py-2 inline-block">
                     Kirim Email
-                  </button>
+                  </a>
                 </div>
               </div>
               <div className="bg-white p-6 rounded-xl shadow-lg flex items-start gap-4 hover:-translate-y-2 transition-transform border-2 border-gray-100">
@@ -910,9 +948,9 @@ export const ContactSection = () => {
                 <div>
                   <h3 className="font-bold text-lg mb-1">Guidebook</h3>
                   <p className="text-gray-600 mb-3">Panduan lengkap kompetisi</p>
-                  <button style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline text-sm px-4 py-2">
+                  <a href={contactText.guidebookUrl || '#'} target="_blank" rel="noopener noreferrer" style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline text-sm px-4 py-2 inline-block">
                     Download PDF
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>
@@ -955,27 +993,27 @@ export const ContactSection = () => {
               <div style={{ color: customColors.color1 }} className="text-5xl mb-4">{getIcon('FaWhatsapp')}</div>
               <h3 className="font-bold text-lg mb-2">WhatsApp</h3>
               <p className="text-gray-600 text-sm mb-4">{contactText.whatsapp}</p>
-              <button style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline text-sm px-4 py-2">
+              <a href={contactText.whatsappUrl || '#'} target="_blank" rel="noopener noreferrer" style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline text-sm px-4 py-2 inline-block">
                 Chat Sekarang
-              </button>
+              </a>
             </div>
 
             <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-lg text-center hover:-translate-y-3 transition-transform">
               <div style={{ color: customColors.color1 }} className="text-5xl mb-4">{getIcon('FaEnvelope')}</div>
               <h3 className="font-bold text-lg mb-2">Email</h3>
               <p className="text-gray-600 text-sm mb-4">{contactText.email}</p>
-              <button style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline text-sm px-4 py-2">
+              <a href={contactText.emailUrl || '#'} target="_blank" rel="noopener noreferrer" style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline text-sm px-4 py-2 inline-block">
                 Kirim Email
-              </button>
+              </a>
             </div>
 
             <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-lg text-center hover:-translate-y-3 transition-transform">
               <div style={{ color: customColors.color1 }} className="text-5xl mb-4">{getIcon('FaBook')}</div>
               <h3 className="font-bold text-lg mb-2">Guidebook</h3>
               <p className="text-gray-600 text-sm mb-4">Panduan lengkap</p>
-              <button style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline text-sm px-4 py-2">
+              <a href={contactText.guidebookUrl || '#'} target="_blank" rel="noopener noreferrer" style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline text-sm px-4 py-2 inline-block">
                 Download PDF
-              </button>
+              </a>
             </div>
           </div>
 
@@ -1020,9 +1058,9 @@ export const ContactSection = () => {
                 <h3 className="font-bold text-lg mb-1">WhatsApp</h3>
                 <p className="text-sm opacity-90">{contactText.whatsapp}</p>
               </div>
-              <button className="bg-white text-gray-800 px-6 py-2 rounded-full font-semibold hover:scale-105 transition-transform">
+              <a href={contactText.whatsappUrl || '#'} target="_blank" rel="noopener noreferrer" className="bg-white text-gray-800 px-6 py-2 rounded-full font-semibold hover:scale-105 transition-transform">
                 Chat
-              </button>
+              </a>
             </div>
 
             <div className="bg-white border-2 border-gray-200 p-6 rounded-xl shadow-lg flex items-center gap-6 hover:border-gray-300 transition-colors">
@@ -1031,9 +1069,9 @@ export const ContactSection = () => {
                 <h3 className="font-bold text-lg mb-1">Email</h3>
                 <p className="text-sm text-gray-600">{contactText.email}</p>
               </div>
-              <button style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline px-6 py-2">
+              <a href={contactText.emailUrl || '#'} target="_blank" rel="noopener noreferrer" style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline px-6 py-2 inline-block">
                 Email
-              </button>
+              </a>
             </div>
 
             <div className="bg-white border-2 border-gray-200 p-6 rounded-xl shadow-lg flex items-center gap-6 hover:border-gray-300 transition-colors">
@@ -1042,9 +1080,9 @@ export const ContactSection = () => {
                 <h3 className="font-bold text-lg mb-1">Guidebook</h3>
                 <p className="text-sm text-gray-600">Panduan lengkap kompetisi</p>
               </div>
-              <button style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline px-6 py-2">
+              <a href={contactText.guidebookUrl || '#'} target="_blank" rel="noopener noreferrer" style={{ borderColor: customColors.color1, color: customColors.color1 }} className="btn-outline px-6 py-2 inline-block">
                 Download
-              </button>
+              </a>
             </div>
           </div>
 

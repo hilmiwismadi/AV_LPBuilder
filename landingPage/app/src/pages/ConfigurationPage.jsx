@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useCustomization, sections, recommendedPalettes } from '../contexts/CustomizationContext';
-import { FaSave, FaPalette, FaImage, FaEye, FaSyncAlt, FaChevronDown, FaChevronUp, FaPlus, FaTrash, FaEdit, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { FaSave, FaPalette, FaImage, FaEye, FaSyncAlt, FaChevronDown, FaChevronUp, FaPlus, FaTrash, FaEdit, FaArrowUp, FaArrowDown, FaFileExport, FaFileImport } from 'react-icons/fa';
+import { getIcon } from '../utils/iconMapper';
 
 const sectionLabels = {
   hero: 'Hero Section',
@@ -84,6 +85,8 @@ const ConfigurationPage = () => {
   const posterInputRef = useRef(null);
   const photoInputRef = useRef(null);
   const iframeRef = useRef(null);
+  const savedScrollPosition = useRef({ x: 0, y: 0 });
+  const importJsonInputRef = useRef(null);
 
   // Pre-fill configuration name when editing
   useEffect(() => {
@@ -92,14 +95,44 @@ const ConfigurationPage = () => {
     }
   }, [editingConfigName]);
 
-  // Refresh preview when configuration changes
+  // Refresh preview when configuration changes - with scroll position preservation
   useEffect(() => {
     const timer = setTimeout(() => {
+      if (iframeRef.current && iframeRef.current.contentWindow) {
+        try {
+          // Save current scroll position
+          const iframeDoc = iframeRef.current.contentWindow.document;
+          savedScrollPosition.current = {
+            x: iframeDoc.documentElement.scrollLeft || iframeDoc.body.scrollLeft,
+            y: iframeDoc.documentElement.scrollTop || iframeDoc.body.scrollTop,
+          };
+        } catch (e) {
+          console.log('Could not access iframe scroll position:', e);
+        }
+      }
+
       setPreviewKey((prev) => prev + 1);
     }, 500); // Debounce for 500ms
 
     return () => clearTimeout(timer);
   }, [customColors, images, layouts, sectionVisibility, heroText, aboutText, categoriesText, categoriesCards, timelineText, timelineCards, prizesText, juryText, documentationText, instagramText, sponsorsText, contactText, faqCards]);
+
+  // Restore scroll position after iframe loads
+  const handleIframeLoad = () => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      setTimeout(() => {
+        try {
+          const iframeDoc = iframeRef.current.contentWindow.document;
+          iframeDoc.documentElement.scrollLeft = savedScrollPosition.current.x;
+          iframeDoc.documentElement.scrollTop = savedScrollPosition.current.y;
+          iframeDoc.body.scrollLeft = savedScrollPosition.current.x;
+          iframeDoc.body.scrollTop = savedScrollPosition.current.y;
+        } catch (e) {
+          console.log('Could not restore iframe scroll position:', e);
+        }
+      }, 100); // Small delay to ensure content is loaded
+    }
+  };
 
   // Manual refresh function
   const refreshPreview = () => {
@@ -224,14 +257,88 @@ const ConfigurationPage = () => {
     'FaSearchPlus', 'FaPlayCircle', 'FaCog'
   ];
 
+  // Event type presets
+  const eventPresets = {
+    competition: {
+      name: 'Competition',
+      description: 'Perfect for contests and challenges',
+      icon: 'FaTrophy',
+      sections: {
+        hero: true,
+        about: true,
+        categories: true,
+        timeline: true,
+        prizes: true,
+        jury: false,
+        documentation: false,
+        instagram: true,
+        sponsors: false,
+        contact: true,
+      }
+    },
+    seminar: {
+      name: 'Seminar',
+      description: 'Ideal for talks and presentations',
+      icon: 'FaUsers',
+      sections: {
+        hero: true,
+        about: true,
+        categories: true,
+        timeline: false,
+        prizes: true,
+        jury: true,
+        documentation: false,
+        instagram: true,
+        sponsors: false,
+        contact: true,
+      }
+    },
+    workshop: {
+      name: 'Workshop',
+      description: 'Great for hands-on training sessions',
+      icon: 'FaCog',
+      sections: {
+        hero: true,
+        about: true,
+        categories: true,
+        timeline: false,
+        prizes: true,
+        jury: true,
+        documentation: false,
+        instagram: true,
+        sponsors: false,
+        contact: true,
+      }
+    }
+  };
+
+  // Apply preset function
+  const applyPreset = (presetKey) => {
+    const preset = eventPresets[presetKey];
+    if (!preset) return;
+
+    // Update section visibility to match preset
+    Object.keys(preset.sections).forEach((section) => {
+      const shouldBeVisible = preset.sections[section];
+      const isCurrentlyVisible = sectionVisibility[section];
+
+      // Only toggle if different from current state
+      if (shouldBeVisible !== isCurrentlyVisible) {
+        toggleSectionVisibility(section);
+      }
+    });
+  };
+
   // Category Card Management Functions
   const handleAddCategoryCard = () => {
     const newCard = {
       id: Date.now(),
       icon: 'None',
+      image: null,
       title: '',
       description: '',
       requirements: [{ title: '', description: '' }],
+      buttonUrl: '',
     };
     setEditingCategoryCard(newCard);
   };
@@ -267,6 +374,7 @@ const ConfigurationPage = () => {
     const newCard = {
       id: Date.now(),
       icon: 'None',
+      image: null,
       title: '',
       date: '',
       description: '',
@@ -406,6 +514,153 @@ const ConfigurationPage = () => {
     }
   };
 
+  // Export configuration as JSON
+  const handleExportJSON = () => {
+    const configData = {
+      name: configName || 'Unnamed Configuration',
+      customColors,
+      images,
+      layouts,
+      sectionVisibility,
+      heroText,
+      aboutText,
+      categoriesText,
+      categoriesCards,
+      timelineText,
+      timelineCards,
+      prizesText,
+      juryText,
+      documentationText,
+      instagramText,
+      sponsorsText,
+      contactText,
+      faqCards,
+      exportedAt: new Date().toISOString(),
+    };
+
+    const jsonString = JSON.stringify(configData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    link.download = `landing-page-config-${timestamp}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    setSaveStatus('Configuration exported successfully!');
+    setTimeout(() => setSaveStatus(''), 3000);
+  };
+
+  // Import configuration from JSON
+  const handleImportJSON = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.json')) {
+      alert('Please select a JSON file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target.result);
+
+        // Update all state with imported data
+        if (importedData.name) setConfigName(importedData.name);
+        if (importedData.customColors) updateCustomColors(importedData.customColors);
+        if (importedData.images) {
+          Object.keys(importedData.images).forEach((key) => {
+            if (importedData.images[key]) {
+              updateImage(key, importedData.images[key]);
+            }
+          });
+        }
+        if (importedData.layouts) {
+          Object.keys(importedData.layouts).forEach((section) => {
+            changeLayout(section, importedData.layouts[section]);
+          });
+        }
+        if (importedData.sectionVisibility) {
+          Object.keys(importedData.sectionVisibility).forEach((section) => {
+            if (sectionVisibility[section] !== importedData.sectionVisibility[section]) {
+              toggleSectionVisibility(section);
+            }
+          });
+        }
+        if (importedData.heroText) {
+          Object.keys(importedData.heroText).forEach((key) => {
+            updateHeroText(key, importedData.heroText[key]);
+          });
+        }
+        if (importedData.aboutText) {
+          Object.keys(importedData.aboutText).forEach((key) => {
+            updateAboutText(key, importedData.aboutText[key]);
+          });
+        }
+        if (importedData.categoriesText) {
+          Object.keys(importedData.categoriesText).forEach((key) => {
+            updateCategoriesText(key, importedData.categoriesText[key]);
+          });
+        }
+        if (importedData.categoriesCards) updateCategoriesCards(importedData.categoriesCards);
+        if (importedData.timelineText) {
+          Object.keys(importedData.timelineText).forEach((key) => {
+            updateTimelineText(key, importedData.timelineText[key]);
+          });
+        }
+        if (importedData.timelineCards) updateTimelineCards(importedData.timelineCards);
+        if (importedData.prizesText) {
+          Object.keys(importedData.prizesText).forEach((key) => {
+            updatePrizesText(key, importedData.prizesText[key]);
+          });
+        }
+        if (importedData.juryText) {
+          Object.keys(importedData.juryText).forEach((key) => {
+            updateJuryText(key, importedData.juryText[key]);
+          });
+        }
+        if (importedData.documentationText) {
+          Object.keys(importedData.documentationText).forEach((key) => {
+            updateDocumentationText(key, importedData.documentationText[key]);
+          });
+        }
+        if (importedData.instagramText) {
+          Object.keys(importedData.instagramText).forEach((key) => {
+            updateInstagramText(key, importedData.instagramText[key]);
+          });
+        }
+        if (importedData.sponsorsText) {
+          Object.keys(importedData.sponsorsText).forEach((key) => {
+            updateSponsorsText(key, importedData.sponsorsText[key]);
+          });
+        }
+        if (importedData.contactText) {
+          Object.keys(importedData.contactText).forEach((key) => {
+            updateContactText(key, importedData.contactText[key]);
+          });
+        }
+        if (importedData.faqCards) updateFaqCards(importedData.faqCards);
+
+        setSaveStatus('Configuration imported successfully!');
+        setTimeout(() => setSaveStatus(''), 3000);
+      } catch (error) {
+        console.error('Error importing JSON:', error);
+        alert('Error importing JSON file. Please make sure the file is valid.');
+      }
+    };
+    reader.onerror = () => {
+      alert('Error reading file');
+    };
+    reader.readAsText(file);
+
+    // Reset file input
+    event.target.value = '';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -432,6 +687,53 @@ const ConfigurationPage = () => {
                 placeholder="Enter configuration name..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+            </div>
+
+            {/* Event Type Presets */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <FaSyncAlt className="text-blue-600" />
+                Event Type Presets
+              </h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Quick start templates for different event types. Applies recommended section visibility settings.
+              </p>
+              <div className="grid grid-cols-1 gap-3">
+                {Object.keys(eventPresets).map((presetKey) => {
+                  const preset = eventPresets[presetKey];
+                  return (
+                    <button
+                      key={presetKey}
+                      onClick={() => applyPreset(presetKey)}
+                      className="p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="text-2xl text-gray-400 group-hover:text-blue-600 transition-colors mt-1">
+                          {getIcon(preset.icon)}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+                            {preset.name}
+                          </h3>
+                          <p className="text-sm text-gray-600 mt-1">{preset.description}</p>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {Object.entries(preset.sections)
+                              .filter(([_, visible]) => visible)
+                              .map(([section]) => (
+                                <span
+                                  key={section}
+                                  className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded"
+                                >
+                                  {section}
+                                </span>
+                              ))}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Color Configuration */}
@@ -533,18 +835,46 @@ const ConfigurationPage = () => {
                 {/* Logo Upload */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Event Logo</label>
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => logoInputRef.current?.click()}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Upload Logo
-                    </button>
-                    {images.logo && (
-                      <div className="w-20 h-20 border-2 border-gray-300 rounded-lg overflow-hidden">
-                        <img src={images.logo} alt="Logo preview" className="w-full h-full object-contain" />
-                      </div>
-                    )}
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+                    }}
+                    onDragLeave={(e) => {
+                      e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                      const file = e.dataTransfer.files[0];
+                      if (file && file.type.startsWith('image/')) {
+                        handleImageUpload('logo', { target: { files: [file] } });
+                      }
+                    }}
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => logoInputRef.current?.click()}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        {images.logo ? 'Change Logo' : 'Upload Logo'}
+                      </button>
+                      {images.logo && (
+                        <>
+                          <div className="w-20 h-20 border-2 border-gray-300 rounded-lg overflow-hidden">
+                            <img src={images.logo} alt="Logo preview" className="w-full h-full object-contain" />
+                          </div>
+                          <button
+                            onClick={() => updateImage('logo', null)}
+                            className="px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">Click to upload or drag and drop</p>
                   </div>
                   <input
                     ref={logoInputRef}
@@ -558,18 +888,46 @@ const ConfigurationPage = () => {
                 {/* Poster Upload */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Event Poster</label>
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => posterInputRef.current?.click()}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Upload Poster
-                    </button>
-                    {images.poster && (
-                      <div className="w-20 h-20 border-2 border-gray-300 rounded-lg overflow-hidden">
-                        <img src={images.poster} alt="Poster preview" className="w-full h-full object-contain" />
-                      </div>
-                    )}
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+                    }}
+                    onDragLeave={(e) => {
+                      e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                      const file = e.dataTransfer.files[0];
+                      if (file && file.type.startsWith('image/')) {
+                        handleImageUpload('poster', { target: { files: [file] } });
+                      }
+                    }}
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => posterInputRef.current?.click()}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        {images.poster ? 'Change Poster' : 'Upload Poster'}
+                      </button>
+                      {images.poster && (
+                        <>
+                          <div className="w-20 h-20 border-2 border-gray-300 rounded-lg overflow-hidden">
+                            <img src={images.poster} alt="Poster preview" className="w-full h-full object-contain" />
+                          </div>
+                          <button
+                            onClick={() => updateImage('poster', null)}
+                            className="px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">Click to upload or drag and drop</p>
                   </div>
                   <input
                     ref={posterInputRef}
@@ -586,18 +944,46 @@ const ConfigurationPage = () => {
                     Event Photo
                     <span className="text-xs text-gray-500 ml-2">(Visible in Hero Variant 3 only)</span>
                   </label>
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => photoInputRef.current?.click()}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Upload Photo
-                    </button>
-                    {images.photo && (
-                      <div className="w-20 h-20 border-2 border-gray-300 rounded-lg overflow-hidden">
-                        <img src={images.photo} alt="Photo preview" className="w-full h-full object-contain" />
-                      </div>
-                    )}
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+                    }}
+                    onDragLeave={(e) => {
+                      e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                      const file = e.dataTransfer.files[0];
+                      if (file && file.type.startsWith('image/')) {
+                        handleImageUpload('photo', { target: { files: [file] } });
+                      }
+                    }}
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => photoInputRef.current?.click()}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        {images.photo ? 'Change Photo' : 'Upload Photo'}
+                      </button>
+                      {images.photo && (
+                        <>
+                          <div className="w-20 h-20 border-2 border-gray-300 rounded-lg overflow-hidden">
+                            <img src={images.photo} alt="Photo preview" className="w-full h-full object-contain" />
+                          </div>
+                          <button
+                            onClick={() => updateImage('photo', null)}
+                            className="px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">Click to upload or drag and drop</p>
                   </div>
                   <input
                     ref={photoInputRef}
@@ -728,12 +1114,34 @@ const ConfigurationPage = () => {
                             </div>
 
                             <div>
+                              <label className="block text-xs text-gray-600 mb-1">Registration Button URL</label>
+                              <input
+                                type="text"
+                                value={heroText.ctaPrimaryUrl}
+                                onChange={(e) => updateHeroText('ctaPrimaryUrl', e.target.value)}
+                                placeholder="https://forms.google.com/..."
+                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+
+                            <div>
                               <label className="block text-xs text-gray-600 mb-1">Guidebook Button</label>
                               <input
                                 type="text"
                                 value={heroText.ctaSecondary}
                                 onChange={(e) => updateHeroText('ctaSecondary', e.target.value)}
                                 placeholder="Lihat Detail"
+                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">Guidebook Button URL</label>
+                              <input
+                                type="text"
+                                value={heroText.ctaSecondaryUrl}
+                                onChange={(e) => updateHeroText('ctaSecondaryUrl', e.target.value)}
+                                placeholder="https://drive.google.com/..."
                                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
@@ -989,16 +1397,89 @@ const ConfigurationPage = () => {
                                     </h4>
 
                                     <div>
-                                      <label className="block text-xs text-gray-600 mb-1">Icon</label>
-                                      <select
-                                        value={editingCategoryCard.icon || 'None'}
-                                        onChange={(e) => setEditingCategoryCard({ ...editingCategoryCard, icon: e.target.value })}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                      <label className="block text-xs text-gray-600 mb-2">Icon or Image</label>
+
+                                      {/* Image upload option */}
+                                      <div
+                                        onDragOver={(e) => {
+                                          e.preventDefault();
+                                          e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+                                        }}
+                                        onDragLeave={(e) => {
+                                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                                        }}
+                                        onDrop={async (e) => {
+                                          e.preventDefault();
+                                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                                          const file = e.dataTransfer.files[0];
+                                          if (file && file.type.startsWith('image/')) {
+                                            try {
+                                              const compressed = await compressImage(file, 'categoryIcon');
+                                              setEditingCategoryCard({ ...editingCategoryCard, image: compressed, icon: 'None' });
+                                            } catch (error) {
+                                              alert('Error processing image');
+                                            }
+                                          }
+                                        }}
+                                        className="mb-3 border-2 border-dashed border-gray-300 rounded-md p-3 transition-colors"
                                       >
-                                        {availableIcons.map(icon => (
-                                          <option key={icon} value={icon}>{icon}</option>
-                                        ))}
-                                      </select>
+                                        <div className="flex items-center gap-3">
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const input = document.createElement('input');
+                                              input.type = 'file';
+                                              input.accept = 'image/*';
+                                              input.onchange = async (e) => {
+                                                const file = e.target.files[0];
+                                                if (file) {
+                                                  try {
+                                                    const compressed = await compressImage(file, 'categoryIcon');
+                                                    setEditingCategoryCard({ ...editingCategoryCard, image: compressed, icon: 'None' });
+                                                  } catch (error) {
+                                                    alert('Error processing image');
+                                                  }
+                                                }
+                                              };
+                                              input.click();
+                                            }}
+                                            className="px-3 py-2 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700"
+                                          >
+                                            {editingCategoryCard.image ? 'Change Image' : 'Upload Image'}
+                                          </button>
+                                          {editingCategoryCard.image && (
+                                            <>
+                                              <div className="w-12 h-12 border-2 border-gray-300 rounded-md overflow-hidden">
+                                                <img src={editingCategoryCard.image} alt="Preview" className="w-full h-full object-cover" />
+                                              </div>
+                                              <button
+                                                type="button"
+                                                onClick={() => setEditingCategoryCard({ ...editingCategoryCard, image: null })}
+                                                className="text-red-600 text-xs hover:underline"
+                                              >
+                                                Remove Image
+                                              </button>
+                                            </>
+                                          )}
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">Click to upload or drag and drop</p>
+                                      </div>
+
+                                      {/* Icon selector (only shown if no image) */}
+                                      {!editingCategoryCard.image && (
+                                        <>
+                                          <label className="block text-xs text-gray-600 mb-1">Or Select Icon</label>
+                                          <select
+                                            value={editingCategoryCard.icon || 'None'}
+                                            onChange={(e) => setEditingCategoryCard({ ...editingCategoryCard, icon: e.target.value })}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                          >
+                                            {availableIcons.map(icon => (
+                                              <option key={icon} value={icon}>{icon}</option>
+                                            ))}
+                                          </select>
+                                        </>
+                                      )}
                                     </div>
 
                                     <div>
@@ -1069,6 +1550,17 @@ const ConfigurationPage = () => {
                                       >
                                         + Add Requirement
                                       </button>
+                                    </div>
+
+                                    <div>
+                                      <label className="block text-xs text-gray-600 mb-1">Button URL</label>
+                                      <input
+                                        type="text"
+                                        value={editingCategoryCard.buttonUrl || ''}
+                                        onChange={(e) => setEditingCategoryCard({ ...editingCategoryCard, buttonUrl: e.target.value })}
+                                        placeholder="https://forms.google.com/..."
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                      />
                                     </div>
 
                                     <div className="flex gap-2 pt-2">
@@ -1209,16 +1701,89 @@ const ConfigurationPage = () => {
                                     </h4>
 
                                     <div>
-                                      <label className="block text-xs text-gray-600 mb-1">Icon</label>
-                                      <select
-                                        value={editingTimelineCard.icon || 'None'}
-                                        onChange={(e) => setEditingTimelineCard({ ...editingTimelineCard, icon: e.target.value })}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                      <label className="block text-xs text-gray-600 mb-2">Icon or Image</label>
+
+                                      {/* Image upload option */}
+                                      <div
+                                        onDragOver={(e) => {
+                                          e.preventDefault();
+                                          e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+                                        }}
+                                        onDragLeave={(e) => {
+                                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                                        }}
+                                        onDrop={async (e) => {
+                                          e.preventDefault();
+                                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                                          const file = e.dataTransfer.files[0];
+                                          if (file && file.type.startsWith('image/')) {
+                                            try {
+                                              const compressed = await compressImage(file, 'timelineIcon');
+                                              setEditingTimelineCard({ ...editingTimelineCard, image: compressed, icon: 'None' });
+                                            } catch (error) {
+                                              alert('Error processing image');
+                                            }
+                                          }
+                                        }}
+                                        className="mb-3 border-2 border-dashed border-gray-300 rounded-md p-3 transition-colors"
                                       >
-                                        {availableIcons.map(icon => (
-                                          <option key={icon} value={icon}>{icon}</option>
-                                        ))}
-                                      </select>
+                                        <div className="flex items-center gap-3">
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const input = document.createElement('input');
+                                              input.type = 'file';
+                                              input.accept = 'image/*';
+                                              input.onchange = async (e) => {
+                                                const file = e.target.files[0];
+                                                if (file) {
+                                                  try {
+                                                    const compressed = await compressImage(file, 'timelineIcon');
+                                                    setEditingTimelineCard({ ...editingTimelineCard, image: compressed, icon: 'None' });
+                                                  } catch (error) {
+                                                    alert('Error processing image');
+                                                  }
+                                                }
+                                              };
+                                              input.click();
+                                            }}
+                                            className="px-3 py-2 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700"
+                                          >
+                                            {editingTimelineCard.image ? 'Change Image' : 'Upload Image'}
+                                          </button>
+                                          {editingTimelineCard.image && (
+                                            <>
+                                              <div className="w-12 h-12 border-2 border-gray-300 rounded-md overflow-hidden">
+                                                <img src={editingTimelineCard.image} alt="Preview" className="w-full h-full object-cover" />
+                                              </div>
+                                              <button
+                                                type="button"
+                                                onClick={() => setEditingTimelineCard({ ...editingTimelineCard, image: null })}
+                                                className="text-red-600 text-xs hover:underline"
+                                              >
+                                                Remove Image
+                                              </button>
+                                            </>
+                                          )}
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">Click to upload or drag and drop</p>
+                                      </div>
+
+                                      {/* Icon selector (only shown if no image) */}
+                                      {!editingTimelineCard.image && (
+                                        <>
+                                          <label className="block text-xs text-gray-600 mb-1">Or Select Icon</label>
+                                          <select
+                                            value={editingTimelineCard.icon || 'None'}
+                                            onChange={(e) => setEditingTimelineCard({ ...editingTimelineCard, icon: e.target.value })}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                          >
+                                            {availableIcons.map(icon => (
+                                              <option key={icon} value={icon}>{icon}</option>
+                                            ))}
+                                          </select>
+                                        </>
+                                      )}
                                     </div>
 
                                     <div>
@@ -1574,6 +2139,17 @@ const ConfigurationPage = () => {
                                   </div>
 
                                   <div>
+                                    <label className="block text-xs text-gray-600 mb-1">WhatsApp URL</label>
+                                    <input
+                                      type="text"
+                                      value={contactText.whatsappUrl}
+                                      onChange={(e) => updateContactText('whatsappUrl', e.target.value)}
+                                      placeholder="https://wa.me/6281234567890"
+                                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
                                     <label className="block text-xs text-gray-600 mb-1">Email</label>
                                     <input
                                       type="text"
@@ -1585,12 +2161,23 @@ const ConfigurationPage = () => {
                                   </div>
 
                                   <div>
+                                    <label className="block text-xs text-gray-600 mb-1">Email URL</label>
+                                    <input
+                                      type="text"
+                                      value={contactText.emailUrl}
+                                      onChange={(e) => updateContactText('emailUrl', e.target.value)}
+                                      placeholder="mailto:info@innovationchallenge.com"
+                                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
                                     <label className="block text-xs text-gray-600 mb-1">Guidebook URL</label>
                                     <input
                                       type="text"
                                       value={contactText.guidebookUrl}
                                       onChange={(e) => updateContactText('guidebookUrl', e.target.value)}
-                                      placeholder="#"
+                                      placeholder="https://drive.google.com/..."
                                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
                                   </div>
@@ -1743,6 +2330,37 @@ const ConfigurationPage = () => {
               )}
             </div>
 
+            {/* Export/Import Buttons */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800">Export / Import</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Export your current configuration as a JSON file or import a previously saved configuration.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleExportJSON}
+                  className="flex-1 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <FaFileExport />
+                  Export JSON
+                </button>
+                <button
+                  onClick={() => importJsonInputRef.current?.click()}
+                  className="flex-1 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <FaFileImport />
+                  Import JSON
+                </button>
+              </div>
+              <input
+                ref={importJsonInputRef}
+                type="file"
+                accept=".json,application/json"
+                onChange={handleImportJSON}
+                className="hidden"
+              />
+            </div>
+
             {saveStatus && (
               <div
                 className={`p-4 rounded-lg text-center ${
@@ -1785,6 +2403,7 @@ const ConfigurationPage = () => {
                     title="Landing Page Preview"
                     className="w-full h-full"
                     style={{ transform: 'scale(0.5)', transformOrigin: 'top left', width: '200%', height: '200%' }}
+                    onLoad={handleIframeLoad}
                   />
                 </div>
               </div>
