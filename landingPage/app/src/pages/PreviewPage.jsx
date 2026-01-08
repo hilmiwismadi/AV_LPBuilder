@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCustomization } from '../contexts/CustomizationContext';
+import api from '../utils/axios';
 import LandingPage from './LandingPage';
 
 const PreviewPage = () => {
@@ -17,45 +18,20 @@ const PreviewPage = () => {
   const fetchAndLoadConfiguration = async () => {
     try {
       setLoading(true);
-      console.log('Fetching configurations from /api/configurations');
 
-      // Fetch all configurations
-      const response = await fetch('/api/configurations');
-      console.log('Response status:', response.status);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch configurations: ${response.status} ${response.statusText}`);
-      }
-
-      const configs = await response.json();
-      console.log('Fetched configs:', configs);
-      console.log('Looking for slug:', eventName);
-
-      if (!Array.isArray(configs)) {
-        throw new Error('Invalid response format from API');
-      }
-
-      // Find the configuration by converting name to slug format
-      const foundConfig = configs.find((c) => {
-        const slug = c.name.toLowerCase().replace(/\s+/g, '-');
-        console.log(`Comparing slug "${slug}" with "${eventName.toLowerCase()}"`);
-        return slug === eventName.toLowerCase();
-      });
+      // Fetch configuration by slug using authenticated API
+      const response = await api.get(`/configurations/by-slug/${eventName}`);
+      const foundConfig = response.data;
 
       if (!foundConfig) {
-        console.error('Configuration not found. Available configs:', configs.map(c => ({
-          name: c.name,
-          slug: c.name.toLowerCase().replace(/\s+/g, '-')
-        })));
-        setError(`Configuration not found. Looking for: ${eventName}`);
+        setError(`Configuration not found: ${eventName}`);
         setLoading(false);
         return;
       }
 
-      console.log('Found config:', foundConfig);
       setConfig(foundConfig);
 
-      // Apply the configuration temporarily
+      // Apply the configuration
       const settings = {
         theme: foundConfig.selectedTheme || 'theme1',
         layouts: foundConfig.layouts,
@@ -64,6 +40,17 @@ const PreviewPage = () => {
         sectionVisibility: foundConfig.sectionVisibility,
         heroText: foundConfig.heroText,
         aboutText: foundConfig.aboutText,
+        categoriesText: foundConfig.categoriesText,
+        categoriesCards: foundConfig.categoriesCards,
+        timelineText: foundConfig.timelineText,
+        timelineCards: foundConfig.timelineCards,
+        prizesText: foundConfig.prizesText,
+        juryText: foundConfig.juryText,
+        documentationText: foundConfig.documentationText,
+        instagramText: foundConfig.instagramText,
+        sponsorsText: foundConfig.sponsorsText,
+        contactText: foundConfig.contactText,
+        faqCards: foundConfig.faqCards
       };
 
       // Create a file-like object for import
@@ -74,7 +61,7 @@ const PreviewPage = () => {
       setLoading(false);
     } catch (err) {
       console.error('Error loading configuration:', err);
-      setError(err.message || 'Failed to load configuration');
+      setError(err.response?.data?.message || err.message || 'Failed to load configuration');
       setLoading(false);
     }
   };
@@ -107,16 +94,26 @@ const PreviewPage = () => {
     );
   }
 
+  const liveUrl = `https://${config.slug}.webbuild.arachnova.id`;
+
   return (
     <div>
       {/* Banner showing this is a preview */}
-      <div className="bg-blue-600 text-white py-2 px-4 text-center text-sm font-medium">
-        Preview Mode: {config?.name}
+      <div className="bg-blue-600 text-white py-2 px-4 text-center text-sm font-medium flex items-center justify-center gap-4">
+        <span>Preview Mode: {config?.name}</span>
         <a
           href="/saved"
-          className="ml-4 underline hover:text-blue-100"
+          className="underline hover:text-blue-100"
         >
-          Back to Saved Configurations
+          Back to Saved
+        </a>
+        <a
+          href={liveUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-blue-50 font-medium"
+        >
+          View Live →
         </a>
       </div>
       <LandingPage />

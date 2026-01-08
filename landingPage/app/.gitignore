@@ -24,3 +24,24 @@ dist-ssr
 *.sw?
 
 /src/generated/prisma
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Database
+*.db
+*.db-journal
+prisma/dev.db*
+
+# Backup files
+*.backup
+*.backup[0-9]
+
+# PM2 ecosystem config with secrets
+ecosystem.config.cjs
+
+# Prisma generated duplicates
+prisma/prisma/
+

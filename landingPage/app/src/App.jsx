@@ -1,11 +1,20 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { CustomizationProvider, useCustomization } from './contexts/CustomizationContext';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { RoleBasedRoute } from './components/auth/RoleBasedRoute';
 import { useEffect } from 'react';
+import { isMainDomain } from './utils/subdomainDetector';
 import Navigation from './components/Navigation';
 import LandingPage from './pages/LandingPage';
 import ConfigurationPage from './pages/ConfigurationPage';
 import SavedPage from './pages/SavedPage';
 import PreviewPage from './pages/PreviewPage';
+import DefaultHomePage from './pages/DefaultHomePage';
+import SubdomainLandingPage from './pages/SubdomainLandingPage';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import ManageClientsPage from './pages/ManageClientsPage';
 
 // Component to apply custom colors to CSS variables
 function ColorVariablesApplier() {
@@ -20,42 +29,113 @@ function ColorVariablesApplier() {
 }
 
 function App() {
-  return (
-    <CustomizationProvider>
-      <Router>
-        <ColorVariablesApplier />
-        <div className="min-h-screen bg-gray-50">
-          <Routes>
-            {/* Landing Page without Navigation */}
-            <Route path="/" element={<LandingPage />} />
+  const isMain = isMainDomain();
 
-            {/* Pages with Navigation */}
-            <Route
-              path="/configuration"
-              element={
-                <>
-                  <Navigation />
-                  <ConfigurationPage />
-                </>
-              }
-            />
-            <Route
-              path="/saved"
-              element={
-                <>
-                  <Navigation />
-                  <SavedPage />
-                </>
-              }
-            />
-            <Route
-              path="/saved/:eventName"
-              element={<PreviewPage />}
-            />
-          </Routes>
-        </div>
-      </Router>
-    </CustomizationProvider>
+  // If this is a subdomain, only show the subdomain landing page (no auth required)
+  if (!isMain) {
+    return (
+      <CustomizationProvider>
+        <ColorVariablesApplier />
+        <SubdomainLandingPage />
+      </CustomizationProvider>
+    );
+  }
+
+  // Main domain routing (webbuild.arachnova.id)
+  return (
+    <AuthProvider>
+      <CustomizationProvider>
+        <Router>
+          <ColorVariablesApplier />
+          <div className="min-h-screen bg-gray-50">
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<DefaultHomePage />} />
+              <Route path="/login" element={<LoginPage />} />
+
+              {/* Protected routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Configuration - Create New */}
+              <Route
+                path="/configuration"
+                element={
+                  <ProtectedRoute>
+                    <Navigation />
+                    <ConfigurationPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Configuration - Edit Existing */}
+              <Route
+                path="/configuration/:eventId"
+                element={
+                  <ProtectedRoute>
+                    <Navigation />
+                    <ConfigurationPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Live Preview for iframe */}
+              <Route
+                path="/preview"
+                element={
+                  <ProtectedRoute>
+                    <LandingPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/saved"
+                element={
+                  <ProtectedRoute>
+                    <Navigation />
+                    <SavedPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/saved/:eventName"
+                element={
+                  <ProtectedRoute>
+                    <PreviewPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Superadmin only routes */}
+              <Route
+                path="/manage-clients"
+                element={
+                  <ProtectedRoute>
+                    <RoleBasedRoute allowedRoles={['SUPERADMIN']}>
+                      <ManageClientsPage />
+                    </RoleBasedRoute>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Legacy routes */}
+              <Route path="/builder" element={<Navigate to="/configuration" replace />} />
+
+              {/* Catch all - redirect to home */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+        </Router>
+      </CustomizationProvider>
+    </AuthProvider>
   );
 }
 

@@ -576,6 +576,232 @@ export const CustomizationProvider = ({ children }) => {
     setEditingConfigName('');
   };
 
+  // Reset all configuration data to defaults
+  const resetToDefaults = () => {
+    // Reset theme and layouts
+    setSelectedTheme('theme1');
+    setLayouts(defaultLayouts);
+
+    // Reset colors
+    setCustomColors({
+      color1: '#667eea',
+      color2: '#764ba2',
+    });
+
+    // Reset images
+    setImages({
+      logo: null,
+      poster: null,
+      photo: null,
+    });
+
+    // Reset section visibility
+    setSectionVisibility(defaultSectionVisibility);
+
+    // Reset hero text
+    setHeroText({
+      title: 'Lorem Ipsum Dolor Amet',
+      tagline: 'Consectetur adipiscing elit sed do eiusmod',
+      date: '12-15 Lorem 2024',
+      instagram: '@loremipsum',
+      instagramUrl: 'https://instagram.com/loremipsum',
+      ctaPrimary: 'Lorem Ipsum',
+      ctaPrimaryUrl: '',
+      ctaSecondary: 'Dolor Sit',
+      ctaSecondaryUrl: '',
+    });
+
+    // Reset about text
+    setAboutText({
+      mainTitle: 'Lorem Ipsum',
+      mainDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+      subTitle1: 'Dolor Sit',
+      subDescription1: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat.',
+      subTitle2: 'Consectetur',
+      subDescription2: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium totam rem aperiam eaque ipsa quae ab illo inventore veritatis.',
+      subTitle3: '',
+      subDescription3: '',
+      subTitle4: '',
+      subDescription4: '',
+    });
+
+    // Reset categories
+    setCategoriesText({
+      sectionTitle: 'Lorem Ipsum',
+      sectionSubtitle: 'Consectetur adipiscing elit sed do eiusmod tempor incididunt',
+    });
+
+    setCategoriesCards([
+      {
+        id: 1,
+        icon: 'FaPaintBrush',
+        image: null,
+        title: 'Lorem Ipsum',
+        description: 'Dolor sit amet consectetur adipiscing elit sed do',
+        requirements: [
+          { title: 'Lorem', description: 'Ipsum dolor' },
+          { title: 'Amet', description: 'Consectetur' },
+          { title: 'Elit', description: 'Sed do' }
+        ],
+        buttonUrl: '',
+      },
+      {
+        id: 2,
+        icon: 'FaCode',
+        image: null,
+        title: 'Dolor Consectetur',
+        description: 'Eiusmod tempor incididunt ut labore et dolore magna',
+        requirements: [
+          { title: 'Quis', description: 'Nostrud ex' },
+          { title: 'Veniam', description: 'Ullamco laboris' },
+          { title: 'Nisi', description: 'Aliquip' }
+        ],
+        buttonUrl: '',
+      },
+      {
+        id: 3,
+        icon: 'FaBriefcase',
+        image: null,
+        title: 'Adipiscing Elit',
+        description: 'Sed ut perspiciatis unde omnis iste natus error',
+        requirements: [
+          { title: 'Voluptatem', description: 'Accusantium' },
+          { title: 'Doloremque', description: 'Laudantium totam' },
+          { title: 'Aperiam', description: 'Eaque ipsa' }
+        ],
+        buttonUrl: '',
+      },
+      {
+        id: 4,
+        icon: 'FaPenFancy',
+        image: null,
+        title: 'Tempor Incididunt',
+        description: 'Nemo enim ipsam voluptatem quia voluptas sit',
+        requirements: [
+          { title: 'Neque', description: 'Porro quisquam' },
+          { title: 'Magnam', description: 'Aliquam quaerat' },
+          { title: 'Eius', description: 'Modi tempora' }
+        ],
+        buttonUrl: '',
+      },
+    ]);
+
+    // Reset timeline
+    setTimelineText({
+      sectionTitle: 'Tempus Fugit',
+      sectionSubtitle: 'Lorem ipsum dolor sit amet consectetur adipiscing elit',
+    });
+
+    setTimelineCards([
+      {
+        id: 1,
+        icon: 'FaFlag',
+        image: null,
+        title: 'Lorem Initium',
+        date: '1-15 Tempus 2024',
+        description: 'Consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore.',
+      },
+      {
+        id: 2,
+        icon: 'FaFileAlt',
+        image: null,
+        title: 'Dolor Selectio',
+        date: '16-22 Tempus 2024',
+        description: 'Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.',
+      },
+      {
+        id: 3,
+        icon: 'FaUsers',
+        image: null,
+        title: 'Ipsum Phase',
+        date: '5-10 Annus 2024',
+        description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse.',
+      },
+      {
+        id: 4,
+        icon: 'FaStar',
+        image: null,
+        title: 'Semi Finalis',
+        date: '15 Annus 2024',
+        description: 'Excepteur sint occaecat cupidatat non proident sunt in culpa qui.',
+      },
+      {
+        id: 5,
+        icon: 'FaTrophy',
+        image: null,
+        title: 'Magnus Finalis',
+        date: '20 Annus 2024',
+        description: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.',
+      },
+    ]);
+
+    // Reset other sections
+    setPrizesText({
+      sectionTitle: 'Praemium Lorem',
+      sectionSubtitle: 'Magna aliqua ut enim ad minim veniam quis',
+      totalPrize: 'L 500.000',
+      prizeDescription: 'Distributed across omnis categories',
+    });
+
+    setJuryText({
+      sectionTitle: 'Iudices Lorem',
+      sectionSubtitle: 'Consectetur adipiscing elit sed do eiusmod tempor',
+    });
+
+    setDocumentationText({
+      sectionTitle: 'Documenta',
+      sectionSubtitle: 'Ut enim ad minim veniam quis nostrud exercitation',
+    });
+
+    setInstagramText({
+      sectionTitle: 'Social Media',
+      sectionSubtitle: '',
+      handle: '@loremipsum',
+      tagline: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium!',
+      instagramUrl: 'https://www.instagram.com/loremipsum/',
+    });
+
+    setSponsorsText({
+      sectionTitle: 'Patroni Lorem',
+      sectionSubtitle: 'Duis aute irure dolor in reprehenderit in voluptate',
+    });
+
+    setContactText({
+      sectionTitle: 'Contactus & FAQ',
+      sectionSubtitle: 'Lorem ipsum dolor sit amet consectetur adipiscing',
+      whatsapp: '+00 000-0000-0000',
+      whatsappUrl: '',
+      email: 'lorem@ipsum.dolor',
+      emailUrl: '',
+      guidebookUrl: '',
+    });
+
+    setFaqCards([
+      {
+        id: 1,
+        question: 'Quomodo lorem ipsum?',
+        answer: 'Consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation.',
+      },
+      {
+        id: 2,
+        question: 'Quantum pretium dolor sit?',
+        answer: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat.',
+      },
+      {
+        id: 3,
+        question: 'Possumne multiplex categories?',
+        answer: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium totam rem aperiam eaque ipsa.',
+      },
+      {
+        id: 4,
+        question: 'Quid aetas limitatio?',
+        answer: 'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit sed quia consequuntur magni dolores.',
+      },
+    ]);
+
+    console.log('All configuration data reset to defaults');
+  };
+
   // Update about text
   const updateAboutText = (field, value) => {
     setAboutText((prev) => {
@@ -1063,9 +1289,26 @@ export const CustomizationProvider = ({ children }) => {
     updateTimelineText,
     timelineCards,
     updateTimelineCards,
+    setCustomColors,
+    setImages,
+    setLayouts,
+    setSectionVisibility,
     prizesText,
     updatePrizesText,
     juryText,
+    setHeroText,
+    setAboutText,
+    setCategoriesText,
+    setCategoriesCards,
+    setTimelineText,
+    setTimelineCards,
+    setPrizesText,
+    setJuryText,
+    setDocumentationText,
+    setInstagramText,
+    setSponsorsText,
+    setContactText,
+    setFaqCards,
     updateJuryText,
     documentationText,
     updateDocumentationText,
@@ -1082,6 +1325,7 @@ export const CustomizationProvider = ({ children }) => {
     editingConfigName,
     setEditingConfig,
     clearEditingConfig,
+    resetToDefaults,
   };
 
   return (

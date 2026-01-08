@@ -1,159 +1,105 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { PrismaClient } from '@prisma/client';
+import authRoutes from './routes/auth.routes.js';
+import userRoutes from './routes/user.routes.js';
+import configRoutes from './routes/config.routes.js';
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = 3001;
 
+// CORS Configuration - Allow main domain and all subdomains
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, Postman, curl)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    // List of allowed origins
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'https://localhost:5173',
+      'http://webbuild.arachnova.id',
+      'https://webbuild.arachnova.id',
+    ];
+
+    // Check if origin is in the allowed list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // Check if origin matches wildcard subdomain pattern: *.webbuild.arachnova.id
+    const subdomainPattern = /^https?:\/\/[\w-]+\.webbuild\.arachnova\.id$/;
+    if (subdomainPattern.test(origin)) {
+      return callback(null, true);
+    }
+
+    // Origin not allowed
+    console.log('CORS blocked origin:', origin);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true // Allow cookies
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' })); // Increased limit for image data
+app.use(cookieParser()); // Parse cookies for JWT tokens
 
-// GET all configurations
-app.get('/api/configurations', async (req, res) => {
-  try {
-    const configurations = await prisma.configuration.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+// Mount routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/configurations', configRoutes);
 
-    // Parse JSON strings back to objects
-    const parsedConfigurations = configurations.map((config) => ({
-      ...config,
-      customColors: JSON.parse(config.customColors),
-      images: config.images ? JSON.parse(config.images) : null,
-      layouts: JSON.parse(config.layouts),
-      sectionVisibility: JSON.parse(config.sectionVisibility),
-    }));
-
-    res.json(parsedConfigurations);
-  } catch (error) {
-    console.error('Error fetching configurations:', error);
-    res.status(500).json({ error: 'Failed to fetch configurations' });
-  }
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    database: 'PostgreSQL',
+    subdomain: '*.webbuild.arachnova.id'
+  });
 });
 
-// GET single configuration by ID
-app.get('/api/configurations/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const configuration = await prisma.configuration.findUnique({
-      where: { id },
-    });
-
-    if (!configuration) {
-      return res.status(404).json({ error: 'Configuration not found' });
-    }
-
-    // Parse JSON strings back to objects
-    const parsedConfiguration = {
-      ...configuration,
-      customColors: JSON.parse(configuration.customColors),
-      images: configuration.images ? JSON.parse(configuration.images) : null,
-      layouts: JSON.parse(configuration.layouts),
-      sectionVisibility: JSON.parse(configuration.sectionVisibility),
-    };
-
-    res.json(parsedConfiguration);
-  } catch (error) {
-    console.error('Error fetching configuration:', error);
-    res.status(500).json({ error: 'Failed to fetch configuration' });
-  }
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).json({
+    error: 'Internal server error',
+    message: process.env.NODE_ENV === 'production' ? 'An error occurred' : err.message
+  });
 });
 
-// POST create new configuration
-app.post('/api/configurations', async (req, res) => {
-  try {
-    const { name, customColors, images, layouts, sectionVisibility } = req.body;
-
-    if (!name || !customColors || !layouts || !sectionVisibility) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-
-    const configuration = await prisma.configuration.create({
-      data: {
-        name,
-        customColors: JSON.stringify(customColors),
-        images: images ? JSON.stringify(images) : null,
-        layouts: JSON.stringify(layouts),
-        sectionVisibility: JSON.stringify(sectionVisibility),
-      },
-    });
-
-    // Parse JSON strings back to objects for response
-    const parsedConfiguration = {
-      ...configuration,
-      customColors: JSON.parse(configuration.customColors),
-      images: configuration.images ? JSON.parse(configuration.images) : null,
-      layouts: JSON.parse(configuration.layouts),
-      sectionVisibility: JSON.parse(configuration.sectionVisibility),
-    };
-
-    res.status(201).json(parsedConfiguration);
-  } catch (error) {
-    console.error('Error creating configuration:', error);
-    res.status(500).json({ error: 'Failed to create configuration' });
-  }
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not found',
+    message: `Cannot ${req.method} ${req.path}`
+  });
 });
 
-// PUT update configuration
-app.put('/api/configurations/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, customColors, images, layouts, sectionVisibility } = req.body;
-
-    const configuration = await prisma.configuration.update({
-      where: { id },
-      data: {
-        name,
-        customColors: JSON.stringify(customColors),
-        images: images ? JSON.stringify(images) : null,
-        layouts: JSON.stringify(layouts),
-        sectionVisibility: JSON.stringify(sectionVisibility),
-      },
-    });
-
-    // Parse JSON strings back to objects for response
-    const parsedConfiguration = {
-      ...configuration,
-      customColors: JSON.parse(configuration.customColors),
-      images: configuration.images ? JSON.parse(configuration.images) : null,
-      layouts: JSON.parse(configuration.layouts),
-      sectionVisibility: JSON.parse(configuration.sectionVisibility),
-    };
-
-    res.json(parsedConfiguration);
-  } catch (error) {
-    console.error('Error updating configuration:', error);
-    res.status(500).json({ error: 'Failed to update configuration' });
-  }
-});
-
-// DELETE configuration
-app.delete('/api/configurations/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    await prisma.configuration.delete({
-      where: { id },
-    });
-
-    res.json({ message: 'Configuration deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting configuration:', error);
-    res.status(500).json({ error: 'Failed to delete configuration' });
-  }
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`API server running on http://localhost:${PORT}`);
+// Start server - bind to 0.0.0.0 for external IP access
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`API server running on http://0.0.0.0:${PORT}`);
+  console.log(`Access via IP: http://103.175.218.159:${PORT}`);
+  console.log(`Database: PostgreSQL (lpbuilder_db)`);
+  console.log(`Subdomain routing enabled: *.webbuild.arachnova.id`);
+  console.log(`Authentication: JWT with httpOnly cookies`);
+  console.log(`CORS: Allowing main domain + wildcard subdomains`);
 });
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
+  console.log('Shutting down gracefully...');
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('Shutting down gracefully...');
   await prisma.$disconnect();
   process.exit(0);
 });

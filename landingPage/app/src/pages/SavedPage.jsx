@@ -1,26 +1,32 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaTrash, FaEye, FaDownload, FaEdit } from 'react-icons/fa';
+import { FaTrash, FaEye, FaDownload, FaEdit, FaUserCog } from 'react-icons/fa';
 import { useCustomization } from '../contexts/CustomizationContext';
+import { useAuth } from '../hooks/useAuth';
+import api from '../utils/axios';
 
 const SavedPage = () => {
   const [savedConfigs, setSavedConfigs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [selectedConfig, setSelectedConfig] = useState(null);
+  const [eventOrganizers, setEventOrganizers] = useState([]);
+  const [selectedOwnerId, setSelectedOwnerId] = useState('');
   const navigate = useNavigate();
-  const { importSettings, setEditingConfig } = useCustomization();
+  const { setEditingConfig } = useCustomization();
+  const { isSuperadmin } = useAuth();
 
-  // Fetch saved configurations
   useEffect(() => {
     fetchConfigurations();
-  }, []);
+    if (isSuperadmin) {
+      fetchEventOrganizers();
+    }
+  }, [isSuperadmin]);
 
   const fetchConfigurations = async () => {
     try {
-      const response = await fetch('/api/configurations');
-      if (response.ok) {
-        const data = await response.json();
-        setSavedConfigs(data);
-      }
+      const response = await api.get('/configurations');
+      setSavedConfigs(response.data);
     } catch (error) {
       console.error('Error fetching configurations:', error);
     } finally {
@@ -28,60 +34,35 @@ const SavedPage = () => {
     }
   };
 
-  // Delete configuration
+  const fetchEventOrganizers = async () => {
+    try {
+      const response = await api.get('/users');
+      setEventOrganizers(response.data.users || []);
+    } catch (error) {
+      console.error('Error fetching event organizers:', error);
+    }
+  };
+
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this configuration?')) {
       return;
     }
 
     try {
-      const response = await fetch(`/api/configurations/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setSavedConfigs(savedConfigs.filter((config) => config.id !== id));
-      } else {
-        alert('Failed to delete configuration');
-      }
+      await api.delete(`/configurations/${id}`);
+      setSavedConfigs(savedConfigs.filter((config) => config.id !== id));
     } catch (error) {
       console.error('Error deleting configuration:', error);
       alert('Error deleting configuration');
     }
   };
 
-  // Load configuration for editing
-  const handleLoad = async (config) => {
-    try {
-      // Create a settings object from the config
-      const settings = {
-        theme: config.selectedTheme || 'theme1',
-        layouts: config.layouts,
-        customColors: config.customColors,
-        images: config.images,
-        sectionVisibility: config.sectionVisibility,
-        heroText: config.heroText,
-        aboutText: config.aboutText,
-      };
-
-      // Create a file-like object for import
-      const blob = new Blob([JSON.stringify(settings)], { type: 'application/json' });
-      const file = new File([blob], 'config.json', { type: 'application/json' });
-
-      await importSettings(file);
-
-      // Set the editing config ID and name
-      setEditingConfig(config.id, config.name);
-
-      // Navigate to configuration page for editing
-      navigate('/configuration');
-    } catch (error) {
-      console.error('Error loading configuration:', error);
-      alert('Error loading configuration');
-    }
+  const handleEdit = (config) => {
+    // Set editing state and navigate to edit route
+    setEditingConfig(config.id, config.name);
+    navigate(`/configuration/${config.slug}`);
   };
 
-  // Download configuration as JSON
   const handleDownload = (config) => {
     const settings = {
       theme: config.selectedTheme || 'theme1',
@@ -105,15 +86,47 @@ const SavedPage = () => {
     URL.revokeObjectURL(url);
   };
 
-  // Helper function to convert config name to URL slug
-  const createSlug = (name) => {
-    return name.toLowerCase().replace(/\s+/g, '-');
+  const handlePreview = (config) => {
+    window.open(`/saved/${config.slug}`, '_blank');
   };
 
-  // Show preview - open in new tab
-  const handlePreview = (config) => {
-    const slug = createSlug(config.name);
-    window.open(`/saved/${slug}`, '_blank');
+  const handleOwnerClick = (ownerId) => {
+    if (isSuperadmin && ownerId) {
+      navigate('/manage-clients', { state: { highlightUserId: ownerId } });
+    }
+  };
+
+  const openAssignModal = (config) => {
+    setSelectedConfig(config);
+    setSelectedOwnerId(config.owner?.id || '');
+    setAssignModalOpen(true);
+  };
+
+  const closeAssignModal = () => {
+    setAssignModalOpen(false);
+    setSelectedConfig(null);
+    setSelectedOwnerId('');
+  };
+
+  const handleAssignOwner = async () => {
+    if (!selectedOwnerId) {
+      alert('Please select an event organizer');
+      return;
+    }
+
+    try {
+      await api.put(`/configurations/${selectedConfig.id}`, {
+        ownerId: selectedOwnerId
+      });
+
+      // Refresh configurations
+      await fetchConfigurations();
+      closeAssignModal();
+      alert('Owner assigned successfully!');
+    } catch (error) {
+      console.error('Error assigning owner:', error);
+      alert(error.response?.data?.error || 'Failed to assign owner');
+    }
   };
 
   return (
@@ -141,21 +154,15 @@ const SavedPage = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Colors
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Sections
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Created
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Slug</th>
+                    {isSuperadmin && (
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Owner (EO)</th>
+                    )}
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Colors</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sections</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -164,6 +171,27 @@ const SavedPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{config.name}</div>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500 font-mono">{config.slug}</div>
+                      </td>
+                      {isSuperadmin && (
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {config.owner ? (
+                            <div>
+                              <div
+                                className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer"
+                                onClick={() => handleOwnerClick(config.owner.id)}
+                                title="Click to manage this user"
+                              >
+                                {config.owner.name}
+                              </div>
+                              <div className="text-xs text-gray-500">{config.owner.email}</div>
+                            </div>
+                          ) : (
+                            <div className="text-sm text-gray-400 italic">Unassigned</div>
+                          )}
+                        </td>
+                      )}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <div
@@ -205,12 +233,21 @@ const SavedPage = () => {
                             <FaEye />
                           </button>
                           <button
-                            onClick={() => handleLoad(config)}
+                            onClick={() => handleEdit(config)}
                             className="text-green-600 hover:text-green-900 p-2 rounded hover:bg-green-50"
-                            title="Load"
+                            title="Edit"
                           >
                             <FaEdit />
                           </button>
+                          {isSuperadmin && (
+                            <button
+                              onClick={() => openAssignModal(config)}
+                              className="text-purple-600 hover:text-purple-900 p-2 rounded hover:bg-purple-50"
+                              title="Assign Owner"
+                            >
+                              <FaUserCog />
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDownload(config)}
                             className="text-indigo-600 hover:text-indigo-900 p-2 rounded hover:bg-indigo-50"
@@ -235,6 +272,51 @@ const SavedPage = () => {
           </div>
         )}
       </div>
+
+      {/* Assign Owner Modal */}
+      {assignModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Assign Event Organizer</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Configuration: <span className="font-medium">{selectedConfig?.name}</span>
+            </p>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Event Organizer
+              </label>
+              <select
+                value={selectedOwnerId}
+                onChange={(e) => setSelectedOwnerId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">-- Select Owner --</option>
+                {eventOrganizers.map((eo) => (
+                  <option key={eo.id} value={eo.id}>
+                    {eo.name} ({eo.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={closeAssignModal}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAssignOwner}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Assign Owner
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

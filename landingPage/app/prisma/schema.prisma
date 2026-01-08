@@ -1,22 +1,78 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+// Prisma schema for PostgreSQL
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPERADMIN
+  EVENT_ORGANIZER
+  VISITOR
+}
+
+model User {
+  id            String          @id @default(uuid())
+  email         String          @unique
+  password      String          // bcrypt hashed password
+  name          String
+  role          UserRole        @default(EVENT_ORGANIZER)
+  createdById   String?         // Superadmin who created this user
+  createdBy     User?           @relation("UserCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdUsers  User[]          @relation("UserCreatedBy")
+  configurations Configuration[]
+  refreshTokens RefreshToken[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([email])
+  @@index([role])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
 }
 
 model Configuration {
   id                String   @id @default(uuid())
   name              String
-  customColors      String   // JSON string
-  images            String?  // JSON string
-  layouts           String   // JSON string
-  sectionVisibility String   // JSON string
+  slug              String   @unique  // URL-friendly identifier for subdomains
+  customColors      Json     // JSON type (not String) for better performance
+  images            Json?    // Store image paths as JSON, not base64
+  layouts           Json     // JSON type  
+  sectionVisibility Json     // JSON type
+  heroText          Json?    // Additional content fields
+  aboutText         Json?
+  categoriesText    Json?
+  categoriesCards   Json?
+  timelineText      Json?
+  timelineCards     Json?
+  prizesText        Json?
+  juryText          Json?
+  documentationText Json?
+  instagramText     Json?
+  sponsorsText      Json?
+  contactText       Json?
+  faqCards          Json?
+  ownerId           String?  // User who owns this configuration
+  owner             User?    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([name])
+  @@index([slug])  // Index for fast subdomain lookup
+  @@index([ownerId])
 }

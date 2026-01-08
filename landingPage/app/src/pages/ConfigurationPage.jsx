@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import api from '../utils/axios';
 import { useCustomization, sections, recommendedPalettes } from '../contexts/CustomizationContext';
 import { FaSave, FaPalette, FaImage, FaEye, FaSyncAlt, FaChevronDown, FaChevronUp, FaPlus, FaTrash, FaEdit, FaArrowUp, FaArrowDown, FaFileExport, FaFileImport } from 'react-icons/fa';
 import { getIcon } from '../utils/iconMapper';
@@ -55,9 +57,14 @@ const ConfigurationPage = () => {
     editingConfigId,
     editingConfigName,
     clearEditingConfig,
+    resetToDefaults,
+    setEditingConfig,
   } = useCustomization();
 
   const [selectedPalette, setSelectedPalette] = useState(null);
+  const navigate = useNavigate();
+  const { eventId } = useParams();
+  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
   const [useCustomPalette, setUseCustomPalette] = useState(false);
   const [configName, setConfigName] = useState('');
   const [saveStatus, setSaveStatus] = useState('');
@@ -88,7 +95,144 @@ const ConfigurationPage = () => {
   const savedScrollPosition = useRef({ x: 0, y: 0 });
   const importJsonInputRef = useRef(null);
 
-  // Pre-fill configuration name when editing
+  // Load configuration when eventId is present in URL
+  useEffect(() => {
+    const loadConfiguration = async () => {
+      // If no eventId, clear editing state (create new mode)
+      if (!eventId) {
+        clearEditingConfig();
+        resetToDefaults();
+        setConfigName('');
+        return;
+      }
+
+      // If eventId exists, load the configuration
+      setIsLoadingConfig(true);
+      try {
+        const response = await api.get(`/configurations/by-slug/${eventId}`);
+        const config = response.data;
+
+        // Set editing state
+        setEditingConfig(config.id, config.name);
+        setConfigName(config.name);
+
+        // Load all configuration data
+        if (config.customColors) {
+          updateCustomColors(config.customColors);
+        }
+
+        if (config.images) {
+          Object.keys(config.images).forEach((key) => {
+            if (config.images[key]) {
+              updateImage(key, config.images[key]);
+            }
+          });
+        }
+
+        if (config.layouts) {
+          Object.keys(config.layouts).forEach((section) => {
+            changeLayout(section, config.layouts[section]);
+          });
+        }
+
+        if (config.sectionVisibility) {
+          // We need to reconstruct visibility by toggling
+          Object.keys(config.sectionVisibility).forEach((section) => {
+            const shouldBeVisible = config.sectionVisibility[section];
+            const isCurrentlyVisible = sectionVisibility[section];
+            if (shouldBeVisible !== isCurrentlyVisible) {
+              toggleSectionVisibility(section);
+            }
+          });
+        }
+
+        if (config.heroText) {
+          Object.keys(config.heroText).forEach((key) => {
+            updateHeroText(key, config.heroText[key]);
+          });
+        }
+
+        if (config.aboutText) {
+          Object.keys(config.aboutText).forEach((key) => {
+            updateAboutText(key, config.aboutText[key]);
+          });
+        }
+
+        if (config.categoriesText) {
+          Object.keys(config.categoriesText).forEach((key) => {
+            updateCategoriesText(key, config.categoriesText[key]);
+          });
+        }
+
+        if (config.categoriesCards) {
+          updateCategoriesCards(config.categoriesCards);
+        }
+
+        if (config.timelineText) {
+          Object.keys(config.timelineText).forEach((key) => {
+            updateTimelineText(key, config.timelineText[key]);
+          });
+        }
+
+        if (config.timelineCards) {
+          updateTimelineCards(config.timelineCards);
+        }
+
+        if (config.prizesText) {
+          Object.keys(config.prizesText).forEach((key) => {
+            updatePrizesText(key, config.prizesText[key]);
+          });
+        }
+
+        if (config.juryText) {
+          Object.keys(config.juryText).forEach((key) => {
+            updateJuryText(key, config.juryText[key]);
+          });
+        }
+
+        if (config.documentationText) {
+          Object.keys(config.documentationText).forEach((key) => {
+            updateDocumentationText(key, config.documentationText[key]);
+          });
+        }
+
+        if (config.instagramText) {
+          Object.keys(config.instagramText).forEach((key) => {
+            updateInstagramText(key, config.instagramText[key]);
+          });
+        }
+
+        if (config.sponsorsText) {
+          Object.keys(config.sponsorsText).forEach((key) => {
+            updateSponsorsText(key, config.sponsorsText[key]);
+          });
+        }
+
+        if (config.contactText) {
+          Object.keys(config.contactText).forEach((key) => {
+            updateContactText(key, config.contactText[key]);
+          });
+        }
+
+        if (config.faqCards) {
+          updateFaqCards(config.faqCards);
+        }
+
+        setSaveStatus('Configuration loaded successfully!');
+        setTimeout(() => setSaveStatus(''), 2000);
+      } catch (error) {
+        console.error('Error loading configuration:', error);
+        setSaveStatus('Error loading configuration');
+        setTimeout(() => setSaveStatus(''), 3000);
+      } finally {
+        setIsLoadingConfig(false);
+      }
+    };
+
+    loadConfiguration();
+  }, [eventId]);
+
+    // Pre-fill configuration name when editing
   useEffect(() => {
     if (editingConfigName) {
       setConfigName(editingConfigName);
@@ -113,6 +257,18 @@ const ConfigurationPage = () => {
 
       setPreviewKey((prev) => prev + 1);
     }, 500); // Debounce for 500ms
+
+    // Show loading indicator while fetching configuration
+  if (isLoadingConfig) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading configuration...</p>
+        </div>
+      </div>
+    );
+  }
 
     return () => clearTimeout(timer);
   }, [customColors, images, layouts, sectionVisibility, heroText, aboutText, categoriesText, categoriesCards, timelineText, timelineCards, prizesText, juryText, documentationText, instagramText, sponsorsText, contactText, faqCards]);
@@ -245,6 +401,7 @@ const ConfigurationPage = () => {
   // Cancel editing
   const handleCancelEdit = () => {
     clearEditingConfig();
+        resetToDefaults();
     setConfigName('');
     setSaveStatus('');
   };
@@ -485,6 +642,7 @@ const ConfigurationPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(configData),
       });
 
@@ -492,29 +650,39 @@ const ConfigurationPage = () => {
         const savedConfig = await response.json();
         setSaveStatus(isEditing ? 'Configuration updated successfully!' : 'Configuration saved successfully!');
 
+        // FIX 3: Don't clear editing config after save to prevent duplicates
+        // Instead, set the editing config to the saved one
         if (!isEditing) {
-          setConfigName('');
+          // For new configs, update to editing mode with the new ID
+          setEditingConfig(savedConfig.id, savedConfig.name);
+        } else {
+          // For updates, keep the same editing state but update the name if changed
+          setEditingConfig(editingConfigId, savedConfig.name);
         }
 
-        // Clear editing state
-        clearEditingConfig();
+        // FIX 2: Navigate to preview page after 1.5 seconds
+        setTimeout(() => {
+          setSaveStatus('');
+          navigate(`/saved/${savedConfig.slug}`);
+        }, 1500);
 
-        setTimeout(() => setSaveStatus(''), 3000);
         console.log('Saved configuration:', savedConfig);
       } else {
         const errorData = await response.text();
         console.error('Server error:', errorData);
         setSaveStatus(`Failed to save: ${response.status} ${response.statusText}`);
+
+        // FIX 2: Show error for longer (5 seconds) and don't navigate
         setTimeout(() => setSaveStatus(''), 5000);
       }
     } catch (error) {
       console.error('Error saving configuration:', error);
       setSaveStatus(`Error: ${error.message}. Make sure the API server is running on port 3001.`);
+
+      // FIX 2: Show error for longer (5 seconds) and don't navigate
       setTimeout(() => setSaveStatus(''), 5000);
     }
   };
-
-  // Export configuration as JSON
   const handleExportJSON = () => {
     const configData = {
       name: configName || 'Unnamed Configuration',
@@ -2377,7 +2545,7 @@ const ConfigurationPage = () => {
           </div>
 
           {/* Right Side - Preview */}
-          <div className="sticky top-8 h-fit">
+          <div className="sticky top-8 max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -2394,12 +2562,12 @@ const ConfigurationPage = () => {
               </div>
 
               {/* 16:9 Preview Container */}
-              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <div className="relative w-full" style={{ paddingBottom: '40%' }}>
                 <div className="absolute inset-0 border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-100">
                   <iframe
                     ref={iframeRef}
                     key={previewKey}
-                    src="/"
+                    src="/preview"
                     title="Landing Page Preview"
                     className="w-full h-full"
                     style={{ transform: 'scale(0.5)', transformOrigin: 'top left', width: '200%', height: '200%' }}
@@ -2411,6 +2579,7 @@ const ConfigurationPage = () => {
               <p className="text-sm text-gray-600 mt-4 text-center">
                 Preview auto-refreshes when you make changes (500ms delay)
               </p>
+{/* Mobile Preview */}              <div className="bg-white rounded-lg shadow-md p-4 mt-4">                <div className="flex items-center justify-between mb-4">                  <h2 className="text-xl font-semibold flex items-center gap-2">                    <FaEye className="text-blue-600" />                    Mobile Preview                  </h2>                </div>                {/* Mobile Phone Frame */}                <div className="flex justify-center">                  <div className="relative bg-gray-900 rounded-[2.5rem] p-3 shadow-2xl" style={{ width: '280px' }}>                    {/* Phone Notch */}                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-5 bg-gray-900 rounded-b-3xl z-10"></div>                                        {/* Screen Container */}                    <div className="bg-white rounded-[2rem] overflow-hidden" style={{ height: '450px' }}>                      <iframe                        key={previewKey}                        src="/preview"                        title="Mobile Landing Page Preview"                        className="w-full h-full"                        style={{ border: 'none' }}                      />                    </div>                  </div>                </div>                <p className="text-sm text-gray-600 mt-4 text-center">                  Mobile size (280x450px)                </p>              </div>
             </div>
           </div>
         </div>
