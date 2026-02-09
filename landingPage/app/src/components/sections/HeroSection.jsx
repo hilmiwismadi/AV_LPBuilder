@@ -66,13 +66,7 @@ const HeroSection = () => {
               {heroText.ctaSecondary}
             </a>
           </div>
-          <button
-            onClick={scrollToNextSection}
-            className="animate-bounce hover:scale-110 transition-transform cursor-pointer bg-transparent border-none"
-            aria-label="Scroll to next section"
-          >
-            {getIcon('FaChevronDown', 'text-3xl text-white opacity-80 hover:opacity-100')}
-          </button>
+          
         </div>
         <div className="absolute inset-0 opacity-10 hidden sm:block">
           <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full blur-3xl"></div>
@@ -114,13 +108,7 @@ const HeroSection = () => {
               {heroText.ctaSecondary}
             </a>
           </div>
-          <button
-            onClick={scrollToNextSection}
-            className="animate-bounce hover:scale-110 transition-transform cursor-pointer bg-transparent border-none self-start"
-            aria-label="Scroll to next section"
-          >
-            {getIcon('FaChevronDown', 'text-3xl text-white opacity-80 hover:opacity-100')}
-          </button>
+          
         </div>
         <div className="flex items-center justify-center p-6 sm:p-8 order-2 min-h-[300px] md:min-h-0">
           {images.poster ? (
@@ -140,58 +128,107 @@ const HeroSection = () => {
   }
 
   // Layout 3: Asymmetric
+  // Layout 3: Asymmetric
   const photoSrc = images.photo;
 
   return (
-    <section id="hero" style={customGradientStyle} className="min-h-screen flex items-center text-white relative overflow-hidden p-6 sm:p-8 md:p-12 lg:p-16">
-      <div className="max-w-2xl z-10">
-        <img src={logoSrc} alt="Event Logo" className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 rounded-2xl mb-6 shadow-xl object-cover" />
-        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">{heroText.title}</h1>
-        <p className="text-base sm:text-lg md:text-xl mb-6">{heroText.tagline}</p>
-        <div className="flex flex-col gap-3 mb-8 text-sm sm:text-base">
-          <p className="flex items-center gap-2">
-            {getIcon('FaCalendar')} <span>{heroText.date}</span>
-          </p>
-          <a
-            href={heroText.instagramUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 hover:underline cursor-pointer"
-          >
-            {getIcon('FaInstagram')} <span>{heroText.instagram}</span>
-          </a>
+    <section id="hero" style={customGradientStyle} className="min-h-screen flex items-center text-white relative overflow-hidden">
+      {/* Mobile: Stacked layout with photo in middle */}
+      <div className="flex flex-col md:hidden w-full p-6">
+        {/* Top div: Logo, Title, Tagline */}
+        <div className="flex flex-col items-center text-center z-10 mb-4">
+          <img src={logoSrc} alt="Event Logo" className="w-20 h-20 rounded-2xl mb-4 shadow-xl object-cover" />
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2 leading-tight">{heroText.title}</h1>
+          <p className="text-base sm:text-lg">{heroText.tagline}</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="btn-primary bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto text-center">
-            {heroText.ctaPrimary}
-          </a>
-          <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary hover:bg-white hover:text-gray-800 w-full sm:w-auto text-center">
-            {heroText.ctaSecondary}
-          </a>
-        </div>
-        <button
-          onClick={scrollToNextSection}
-          className="animate-bounce hover:scale-110 transition-transform cursor-pointer bg-transparent border-none"
-          aria-label="Scroll to next section"
-        >
-          {getIcon('FaChevronDown', 'text-3xl text-white opacity-80 hover:opacity-100')}
-        </button>
-      </div>
-      {photoSrc ? (
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px] hidden md:block">
-          <img
-            src={photoSrc}
-            alt="Event Photo"
-            className="w-full h-full rounded-3xl shadow-2xl object-cover"
-          />
-        </div>
-      ) : (
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px] hidden md:flex items-center justify-center">
-          <div className="w-full h-full bg-white/10 rounded-3xl shadow-2xl border-2 border-white/30 border-dashed flex items-center justify-center">
-            <p className="text-white/60 text-center px-4 text-lg">Photo Placeholder</p>
+        
+        {/* Middle: Event Photo */}
+        {photoSrc ? (
+          <div className="flex justify-center items-center my-4 z-10">
+            <img
+              src={photoSrc}
+              alt="Event Photo"
+              className="w-48 h-48 sm:w-64 sm:h-64 rounded-2xl shadow-2xl object-cover"
+            />
+          </div>
+        ) : (
+          <div className="flex justify-center items-center my-4 z-10">
+            <div className="w-48 h-48 sm:w-64 sm:h-64 bg-white/10 rounded-2xl shadow-2xl border-2 border-white/30 border-dashed flex items-center justify-center">
+              <p className="text-white/60 text-center px-4 text-sm">Photo Placeholder</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Bottom div: Date, Instagram, CTA */}
+        <div className="flex flex-col items-center text-center z-10">
+          <div className="flex flex-col gap-2 mb-6 text-sm sm:text-base">
+            <p className="flex items-center gap-2">
+              {getIcon('FaCalendar')} <span>{heroText.date}</span>
+            </p>
+            <a
+              href={heroText.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:underline cursor-pointer"
+            >
+              {getIcon('FaInstagram')} <span>{heroText.instagram}</span>
+            </a>
+          </div>
+          <div className="flex flex-col gap-3 w-full max-w-xs">
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="btn-primary bg-white text-gray-800 hover:bg-gray-100 text-center py-2 px-4 rounded-lg">
+              {heroText.ctaPrimary}
+            </a>
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary hover:bg-white hover:text-gray-800 text-center py-2 px-4 rounded-lg border border-white/30">
+              {heroText.ctaSecondary}
+            </a>
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Desktop: Original asymmetric layout */}
+      <div className="hidden md:flex items-center relative overflow-hidden p-8 md:p-12 lg:p-16 w-full">
+        <div className="max-w-2xl z-10">
+          <img src={logoSrc} alt="Event Logo" className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 rounded-2xl mb-6 shadow-xl object-cover" />
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">{heroText.title}</h1>
+          <p className="text-base sm:text-lg md:text-xl mb-6">{heroText.tagline}</p>
+          <div className="flex flex-col gap-3 mb-8 text-sm sm:text-base">
+            <p className="flex items-center gap-2">
+              {getIcon('FaCalendar')} <span>{heroText.date}</span>
+            </p>
+            <a
+              href={heroText.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:underline cursor-pointer"
+            >
+              {getIcon('FaInstagram')} <span>{heroText.instagram}</span>
+            </a>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="btn-primary bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto text-center">
+              {heroText.ctaPrimary}
+            </a>
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary hover:bg-white hover:text-gray-800 w-full sm:w-auto text-center">
+              {heroText.ctaSecondary}
+            </a>
+          </div>
+        </div>
+        {photoSrc ? (
+          <div className="absolute right-8 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px]">
+            <img
+              src={photoSrc}
+              alt="Event Photo"
+              className="w-full h-full rounded-3xl shadow-2xl object-cover"
+            />
+          </div>
+        ) : (
+          <div className="absolute right-8 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px] flex items-center justify-center">
+            <div className="w-full h-full bg-white/10 rounded-3xl shadow-2xl border-2 border-white/30 border-dashed flex items-center justify-center">
+              <p className="text-white/60 text-center px-4 text-lg">Photo Placeholder</p>
+            </div>
+          </div>
+        )}
+      </div>
     </section>
   );
 };

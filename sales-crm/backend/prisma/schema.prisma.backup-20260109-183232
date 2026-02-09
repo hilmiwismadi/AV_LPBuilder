@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      AdminRole @default(ADMIN)
+  createdAt DateTime @default(now())
+}
+
+enum AdminRole {
+  SUPERADMIN
+  ADMIN
+  CS
+}
+
+model Client {
+  id                String         @id @default(uuid())
+  phoneNumber       String
+  eventOrganizer    String
+  igLink            String?
+  cp1st             String?
+  cp2nd             String?
+  imgLogo           String?
+  imgPoster         String?
+  lastEvent         String?
+  linkDemo          String?
+  lastSystem        String?
+  colorPalette      String?
+  dateEstimation    DateTime?
+  igeventLink       String?
+  lastContact       DateTime?
+  pic               String?
+  status            ClientStatus   @default(TODO)
+  startup           StartupType    @default(NOVAGATE)
+  eventType         String?
+  location          String?
+  nextEventDate     DateTime?
+  priceRange        String?
+  doneContact       Boolean        @default(false)
+  notes             String?
+  statistically     String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  chatHistory       ChatHistory[]
+
+  @@unique([phoneNumber, startup])
+  @@map("clients")
+}
+
+model ChatHistory {
+  id         String   @id @default(uuid())
+  phoneHash  String   @default("")
+  client     Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  clientId   String?  @default("")
+  message    String
+  isOutgoing Boolean
+  timestamp  DateTime @default(now())
+
+  @@map("chat_history")
+  @@index([phoneHash])
+  @@index([clientId])
+}
+
+model ChatTemplate {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  category    String
+  message     String
+  variables   String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("chat_templates")
+}
+
+enum ClientStatus {
+  TODO
+  FOLLOW_UP
+  NEXT_YEAR
+  GHOSTED_FOLLOW_UP
+}
+
+enum StartupType {
+  NOVAGATE
+  NOVATIX
+}

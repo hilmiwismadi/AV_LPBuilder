@@ -668,12 +668,31 @@ const ConfigurationPage = () => {
 
         console.log('Saved configuration:', savedConfig);
       } else {
-        const errorData = await response.text();
-        console.error('Server error:', errorData);
-        setSaveStatus(`Failed to save: ${response.status} ${response.statusText}`);
+        // Parse error response
+        let errorMessage = `Failed to save: ${response.status} ${response.statusText}`;
 
-        // FIX 2: Show error for longer (5 seconds) and don't navigate
-        setTimeout(() => setSaveStatus(''), 5000);
+        try {
+          const errorData = await response.json();
+
+          // Handle duplicate name error (409 Conflict)
+          if (response.status === 409) {
+            errorMessage = errorData.message || 'Event name already exists. Please choose a different name.';
+            alert(`❌ ${errorMessage}
+
+Please change the event name and try again.`);
+          } else {
+            errorMessage = errorData.message || errorData.error || errorMessage;
+          }
+        } catch (e) {
+          // If JSON parsing fails, use the status text
+          console.error('Error parsing error response:', e);
+        }
+
+        console.error('Server error:', errorMessage);
+        setSaveStatus(errorMessage);
+
+        // Show error for longer (8 seconds)
+        setTimeout(() => setSaveStatus(''), 8000);
       }
     } catch (error) {
       console.error('Error saving configuration:', error);

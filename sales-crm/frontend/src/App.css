@@ -1,0 +1,21 @@
+.app {
+  min-height: 100vh;
+  background: var(--color-dark-bg);
+}
+
+.main-content {
+  margin-left: 260px;
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+}
+
+/* When sidebar is collapsed */
+.sidebar.collapsed + .main-content {
+  margin-left: 70px;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+}

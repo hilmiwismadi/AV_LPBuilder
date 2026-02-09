@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      AdminRole @default(ADMIN)
+  createdAt DateTime @default(now())
+}
+
+enum AdminRole {
+  SUPERADMIN
+  ADMIN
+  CS
+}
+
+model Client {
+  id                String         @id @default(uuid())
+  phoneNumber       String
+  eventOrganizer    String
+  igLink            String?
+  cp1st             String?
+  cp2nd             String?
+  imgLogo           String?
+  imgPoster         String?
+  lastEvent         String?
+  linkDemo          String?
+  lastSystem        String?
+  colorPalette      String?
+  dateEstimation    DateTime?
+  igeventLink       String?
+  lastContact       DateTime?
+  pic               String?
+  assignedBy        String?        @default("")
+  assignedAt        DateTime?
+  status            ClientStatus   @default(TODO)
+  startup           StartupType    @default(NOVAGATE)
+  eventType         String?
+  location          String?
+  nextEventDate     DateTime?
+  priceRange        String?
+  doneContact       Boolean        @default(false)
+  notes             String?
+  statistically     String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  chatHistory       ChatHistory[]
+
+  @@unique([phoneNumber, startup])
+  @@map("clients")
+}
+
+model ChatHistory {
+  id         String   @id @default(uuid())
+  phoneHash  String   @default("")
+  client     Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  clientId   String?  @default("")
+  message    String
+  isOutgoing Boolean
+  timestamp  DateTime @default(now())
+
+  @@map("chat_history")
+  @@index([phoneHash])
+  @@index([clientId])
+}
+
+model ChatTemplate {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  category    String
+  message     String
+  variables   String[]
+  description String?
+  enabled     Boolean  @default(true)
+  usageCount  Int      @default(0)
+  tags        String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+
+  @@map("chat_templates")
+  @@index([category])
+  @@index([enabled])
+}
+
+model TemplateUsage {
+  id           String   @id @default(uuid())
+  templateId   String
+  clientId     String?
+  sentBy       String?
+  responseRate Float?
+  respondedAt  DateTime?
+  createdAt    DateTime @default(now())
+
+  @@map("template_usage")
+  @@index([templateId])
+}
+
+enum ClientStatus {
+  TODO
+  FOLLOW_UP
+  NEXT_YEAR
+  GHOSTED_FOLLOW_UP
+}
+
+enum StartupType {
+  NOVAGATE
+  NOVATIX
+}
+
+// ==================== SCRAPER MODELS ====================
+
+model ScrapingSession {
+  id                String         @id @default(uuid())
+  slug              String         @unique
+  profileUrl        String
+  username          String
+  startPostIndex    Int
+  endPostIndex      Int
+  status            SessionStatus  @default(PENDING)
+  useAuth           Boolean        @default(false)
+  instagramUsername String?        @db.Text
+  instagramPassword String?        @db.Text
+  totalPosts        Int            @default(0)
+  successfulPosts   Int            @default(0)
+  postsWithPhone    Int            @default(0)
+  errorMessage      String?        @db.Text
+  startedAt         DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  scrapedPosts      ScrapedPost[]
+
+  @@map("scraping_sessions")
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ScrapedPost {
+  id                String          @id @default(uuid())
+  sessionId         String
+  session           ScrapingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  postIndex         Int
+  postUrl           String
+  postDate          DateTime?
+  eventTitle        String?
+  eventOrganizer    String?
+  phoneNumber1      String?
+  phoneNumber2      String?
+  location          String?
+  nextEventDate     DateTime?
+  imageUrl          String?         @db.Text
+  caption           String?         @db.Text
+  rawSource         String?         @db.Text
+  createdAt         DateTime        @default(now())
+
+  @@unique([sessionId, postIndex])
+  @@map("scraped_posts")
+  @@index([sessionId])
+  @@index([postUrl])
+}
+
+enum SessionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}

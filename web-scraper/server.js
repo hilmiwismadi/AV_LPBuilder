@@ -26,7 +26,7 @@ let scrapingStatus = {
 let currentScraperProcess = null;
 
 const app = express();
-const PORT = 3002;
+const PORT = 3003;
 
 // Middleware
 app.use(cors());

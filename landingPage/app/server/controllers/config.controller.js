@@ -3,34 +3,25 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // Helper function to generate unique slug with random suffix
-async function generateUniqueSlug(name) {
-  const baseSlug = name
+// Generate clean slug from event name (no random suffix)
+function generateSlug(name) {
+  const slug = name
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '')  // Remove all spaces to create compact slug
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-
-  // Generate random 4-digit suffix (0000-9999)
-  const randomSuffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  let slug = `${baseSlug}${randomSuffix}`;
-
-  // Check if slug already exists, if so, try again (very rare)
-  let attempts = 0;
-  while (await prisma.configuration.findUnique({ where: { slug } })) {
-    attempts++;
-    if (attempts > 10) {
-      // Fallback to timestamp if we can't find unique random suffix after 10 attempts
-      const timestamp = Date.now().toString().slice(-6);
-      slug = `${baseSlug}${timestamp}`;
-      break;
-    }
-    const newRandomSuffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-    slug = `${baseSlug}${newRandomSuffix}`;
-  }
+    .replace(/[^\w\s-]/g, '')      // Remove special characters
+    .replace(/\s+/g, '-')          // Convert spaces to hyphens
+    .replace(/-+/g, '-')           // Replace multiple hyphens with single
+    .replace(/^-|-$/g, '');        // Remove leading/trailing hyphens
 
   return slug;
+}
+
+// Check if slug already exists
+async function checkSlugExists(slug) {
+  const existing = await prisma.configuration.findUnique({
+    where: { slug }
+  });
+  return !!existing;
 }
 
 // GET all configurations (filtered by ownership for Event Organizers)
@@ -188,8 +179,17 @@ export async function createConfiguration(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Auto-generate unique slug from name
-    const slug = await generateUniqueSlug(name);
+    // Generate clean slug from name
+    const slug = generateSlug(name);
+
+    // Check if slug already exists
+    if (await checkSlugExists(slug)) {
+      return res.status(409).json({
+        error: 'Event name already exists',
+        message: `An event with the name "${name}" already exists. Please choose a different name.`,
+        slug: slug
+      });
+    }
 
     const configuration = await prisma.configuration.create({
       data: {

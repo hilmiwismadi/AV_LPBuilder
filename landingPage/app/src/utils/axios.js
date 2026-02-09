@@ -30,6 +30,12 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Don't redirect for public endpoints that can fail with 401
+    const publicEndpoints = ['/auth/verify', '/auth/login'];
+    const isPublicEndpoint = publicEndpoints.some(endpoint => 
+      originalRequest.url?.startsWith(endpoint)
+    );
+
     // Don't retry if this is already a refresh request
     if (originalRequest.url === '/auth/refresh') {
       isRefreshing = false;
@@ -50,6 +56,11 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       // If already on login page, don't try to refresh
       if (window.location.pathname === '/login') {
+        return Promise.reject(error);
+      }
+
+      // Don't redirect or refresh for public endpoints
+      if (isPublicEndpoint) {
         return Promise.reject(error);
       }
 

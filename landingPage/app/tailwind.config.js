@@ -7,6 +7,26 @@ export default {
   theme: {
     extend: {
       colors: {
+        // ArachnoVa Default Theme - White & Cyan/Teal
+        'arachnova-primary': '#06B6D4',
+        'arachnova-secondary': '#22D3EE',
+        'arachnova-accent': '#0891B2',
+        'arachnova-dark': '#0A0E1A',
+        'arachnova-text': '#64748B',
+        // Override default primary color
+        primary: {
+          DEFAULT: '#06B6D4',
+          50: '#ecfeff',
+          100: '#cffafe',
+          200: '#a5f3fc',
+          300: '#67e8f9',
+          400: '#22d3ee',
+          500: '#06b6d4',
+          600: '#0891b2',
+          700: '#0e7490',
+          800: '#155e75',
+          900: '#164e63',
+        },
         // Theme 1 - Purple Gradient
         'theme1-primary': '#667eea',
         'theme1-secondary': '#764ba2',
@@ -27,6 +47,7 @@ export default {
         'theme6-secondary': '#330867',
       },
       backgroundImage: {
+        'gradient-arachnova': 'linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)',
         'gradient-theme1': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         'gradient-theme2': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
         'gradient-theme3': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',

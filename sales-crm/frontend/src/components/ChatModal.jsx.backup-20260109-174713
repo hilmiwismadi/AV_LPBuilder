@@ -1,0 +1,237 @@
+import React, { useState, useEffect, useRef } from "react";
+import { whatsappAPI, chatAPI } from "../services/api";
+import "./ChatModal.css";
+
+const ChatModal = ({ client, onClose }) => {
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sendingWhatsApp, setSendingWhatsApp] = useState(false);
+  const [whatsappStatus, setWhatsappStatus] = useState("unknown");
+  const [error, setError] = useState(null);
+  const messagesEndRef = useRef(null);
+  const refreshIntervalRef = useRef(null);
+
+  useEffect(() => {
+    fetchChatHistory();
+    checkWhatsAppStatus();
+    
+    // Set up auto-refresh for new messages
+    refreshIntervalRef.current = setInterval(() => {
+      fetchChatHistory(true); // true = silent refresh (no loading state)
+      checkWhatsAppStatus();
+    }, 3000);
+    
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    };
+  }, [client]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const checkWhatsAppStatus = async () => {
+    try {
+      const response = await whatsappAPI.getStatus();
+      setWhatsappStatus(response.data.status);
+      
+      // Check for new incoming messages from status endpoint
+      if (response.data.incomingMessages && response.data.incomingMessages.length > 0) {
+        console.log("New incoming messages:", response.data.incomingMessages);
+        // Refresh chat history when there are new messages
+        fetchChatHistory(true);
+      }
+    } catch (err) {
+      console.error("Error checking WhatsApp status:", err);
+    }
+  };
+
+  const fetchChatHistory = async (silent = false) => {
+    if (!silent) setLoading(true);
+    try {
+      const response = await chatAPI.getHistory(client.id);
+      const newMessages = response.data.messages || [];
+      
+      // Only update if messages changed (to avoid flicker)
+      if (JSON.stringify(newMessages) !== JSON.stringify(messages)) {
+        setMessages(newMessages);
+      }
+    } catch (error) {
+      console.error("Failed to fetch chat history:", error);
+      if (!silent) setError("Failed to load chat history");
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  };
+
+  const handleSend = async (sendViaWhatsApp = false) => {
+    if (!newMessage.trim()) return;
+
+    setLoading(true);
+    setSendingWhatsApp(sendViaWhatsApp);
+    setError(null);
+
+    try {
+      const tempMessage = {
+        id: "temp-" + Date.now(),
+        text: newMessage,
+        sender: "user",
+        timestamp: new Date(),
+        isOutgoing: true
+      };
+      
+      setMessages((prev) => [...prev, tempMessage]);
+      const messageToSend = newMessage;
+      setNewMessage("");
+
+      const response = await chatAPI.sendMessage(client.id, messageToSend, true, sendViaWhatsApp);
+      
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === tempMessage.id
+            ? {
+                ...msg,
+                id: response.data.id,
+                timestamp: new Date(response.data.timestamp)
+              }
+            : msg
+        )
+      );
+      
+      // Refresh chat history after a short delay to get the saved message
+      setTimeout(() => fetchChatHistory(true), 500);
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      
+      setMessages((prev) => prev.filter((msg) => !msg.id.startsWith("temp-")));
+      setNewMessage(newMessage);
+      
+      if (err.response?.status === 503) {
+        setError("WhatsApp not ready. Please connect WhatsApp first.");
+      } else {
+        setError("Failed to send message. Please try again.");
+      }
+      
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setLoading(false);
+      setSendingWhatsApp(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend(true);
+    }
+  };
+
+  const isWhatsAppReady = whatsappStatus === "ready";
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="chat-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="chat-modal-header">
+          <div className="chat-header-info">
+            <h3>Chat with {client.eventOrganizer}</h3>
+            <span className="phone-number">{client.phoneNumber}</span>
+            <span className={`whatsapp-status ${isWhatsAppReady ? "ready" : "not-ready"}`}>
+              {isWhatsAppReady ? "🟢 WhatsApp Connected" : "🔴 WhatsApp Not Connected"}
+            </span>
+          </div>
+          <button onClick={onClose} className="close-btn" aria-label="Close modal">
+            ×
+          </button>
+        </div>
+
+        {error && (
+          <div className="chat-error">
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="error-dismiss">×</button>
+          </div>
+        )}
+
+        <div className="chat-messages">
+          {messages.length === 0 ? (
+            <div className="no-messages">
+              <p>No messages yet</p>
+              <p className="hint">Start the conversation by sending a message below</p>
+            </div>
+          ) : (
+            messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`message ${msg.sender === "user" ? "user-message" : "client-message"}`}
+              >
+                <div className="message-bubble">{msg.text}</div>
+                <div className="message-time">
+                  {new Date(msg.timestamp).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  })}
+                </div>
+              </div>
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div className="chat-input-area">
+          <textarea
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Type your message... (Press Enter to send via WhatsApp)"
+            rows="3"
+            className="message-input"
+            disabled={loading}
+          />
+
+          <div className="chat-actions">
+            <button
+              onClick={() => handleSend(false)}
+              disabled={loading || !newMessage.trim()}
+              className="save-only-btn"
+              title="Save to chat history only"
+            >
+              {loading && sendingWhatsApp ? "Saving..." : "Save Only"}
+            </button>
+
+            <button
+              onClick={() => handleSend(true)}
+              disabled={loading || !newMessage.trim() || !isWhatsAppReady}
+              className="send-whatsapp-btn"
+              title="Send via WhatsApp"
+            >
+              {loading && sendingWhatsApp ? (
+                "Sending..."
+              ) : (
+                <>
+                  <span className="whatsapp-icon">📱</span>
+                  Send via WhatsApp
+                </>
+              )}
+            </button>
+          </div>
+
+          {!isWhatsAppReady && (
+            <div className="whatsapp-warning">
+              ⚠️ WhatsApp is not connected. Messages will be saved to chat history only.
+              <br />
+              Connect WhatsApp to send messages directly to clients.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ChatModal;
