@@ -143,6 +143,7 @@ export const CustomizationProvider = ({ children }) => {
     logo: null,
     poster: null,
     photo: null,
+    heroBackground: null,
   });
 
   // New state for section visibility
@@ -398,12 +399,14 @@ export const CustomizationProvider = ({ children }) => {
     // Load images
     const savedLogo = localStorage.getItem('logoImage');
     const savedPoster = localStorage.getItem('posterImage');
+    const savedHeroBackground = localStorage.getItem('heroBackgroundImage');
     const savedPhoto = localStorage.getItem('photoImage');
-    if (savedLogo || savedPoster || savedPhoto) {
+    if (savedLogo || savedPoster || savedPhoto || savedHeroBackground) {
       setImages({
         logo: savedLogo,
         poster: savedPoster,
         photo: savedPhoto,
+        heroBackground: savedHeroBackground,
       });
     }
 
@@ -593,6 +596,7 @@ export const CustomizationProvider = ({ children }) => {
       logo: null,
       poster: null,
       photo: null,
+      heroBackground: null,
     });
 
     // Reset section visibility
@@ -917,7 +921,7 @@ export const CustomizationProvider = ({ children }) => {
       contact: 'layout-1',
     });
     setCustomColors({ color1: '#667eea', color2: '#764ba2' });
-    setImages({ logo: null, poster: null, photo: null });
+    setImages({ logo: null, poster: null, photo: null, heroBackground: null });
     setSectionVisibility({
       hero: true,
       about: true,
@@ -1158,6 +1162,7 @@ export const CustomizationProvider = ({ children }) => {
               logo: settings.images.logo || null,
               poster: settings.images.poster || null,
               photo: settings.images.photo || null,
+              heroBackground: settings.images.heroBackground || null,
             });
 
             // Try to save to localStorage (may fail if quota exceeded)
@@ -1185,6 +1190,15 @@ export const CustomizationProvider = ({ children }) => {
               } catch (e) {
                 if (e.name === 'QuotaExceededError') {
                   console.warn('localStorage quota exceeded for photo. Image stored in memory only.');
+                }
+              }
+            }
+            if (settings.images.heroBackground) {
+              try {
+                localStorage.setItem('heroBackgroundImage', settings.images.heroBackground);
+              } catch (e) {
+                if (e.name === 'QuotaExceededError') {
+                  console.warn('localStorage quota exceeded for heroBackground. Image stored in memory only.');
                 }
               }
             }

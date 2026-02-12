@@ -91,6 +91,7 @@ const ConfigurationPage = () => {
   const logoInputRef = useRef(null);
   const posterInputRef = useRef(null);
   const photoInputRef = useRef(null);
+  const heroBackgroundInputRef = useRef(null);
   const iframeRef = useRef(null);
   const savedScrollPosition = useRef({ x: 0, y: 0 });
   const importJsonInputRef = useRef(null);
@@ -1015,7 +1016,7 @@ Please change the event name and try again.`);
                 Images
               </h2>
               <p className="text-xs text-gray-500 mb-4">
-                Images will be automatically compressed. Logo: max 800px, Poster/Photo: max 1600px. Target size: ~500KB each.
+                Images will be automatically compressed. Logo: max 800px, Poster/Photo/Hero Background: max 1600px. Target size: ~500KB each.
               </p>
 
               <div className="space-y-4">
@@ -1182,6 +1183,62 @@ Please change the event name and try again.`);
                 </div>
               </div>
             </div>
+
+                {/* Hero Background Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hero Background Image
+                    <span className="text-xs text-gray-500 ml-2">(Optional - replaces gradient background)</span>
+                  </label>
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+                    }}
+                    onDragLeave={(e) => {
+                      e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                      const file = e.dataTransfer.files[0];
+                      if (file && file.type.startsWith('image/')) {
+                        handleImageUpload('heroBackground', { target: { files: [file] } });
+                      }
+                    }}
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => heroBackgroundInputRef.current?.click()}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        {images.heroBackground ? 'Change Background' : 'Upload Background'}
+                      </button>
+                      {images.heroBackground && (
+                        <>
+                          <div className="w-20 h-20 border-2 border-gray-300 rounded-lg overflow-hidden">
+                            <img src={images.heroBackground} alt="Hero Background preview" className="w-full h-full object-cover" />
+                          </div>
+                          <button
+                            onClick={() => updateImage('heroBackground', null)}
+                            className="px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">Click to upload or drag and drop. Recommended: wide landscape image (1600px+)</p>
+                  </div>
+                  <input
+                    ref={heroBackgroundInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload('heroBackground', e)}
+                    className="hidden"
+                  />
+                </div>
 
             {/* Section Configuration */}
             <div className="bg-white rounded-lg shadow-md p-6">

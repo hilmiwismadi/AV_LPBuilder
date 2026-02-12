@@ -23,10 +23,19 @@ const HeroSection = () => {
     }
   };
 
-  // Create custom gradient style from custom colors
-  const customGradientStyle = {
-    background: `linear-gradient(135deg, ${customColors.color1} 0%, ${customColors.color2} 100%)`,
-  };
+  // Create custom gradient style from custom colors or hero background
+  const heroBackgroundSrc = images.heroBackground;
+
+  const customGradientStyle = heroBackgroundSrc
+    ? {
+        backgroundImage: `url(${heroBackgroundSrc})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }
+    : {
+        background: `linear-gradient(135deg, ${customColors.color1} 0%, ${customColors.color2} 100%)`,
+      };
 
   // Use uploaded logo if available, otherwise use default
   const logoSrc = images.logo || hero.logo;
@@ -35,6 +44,9 @@ const HeroSection = () => {
   if (layout === 'layout-1') {
     return (
       <section id="hero" style={customGradientStyle} className="min-h-screen flex items-center justify-center text-white relative overflow-hidden px-4">
+        {heroBackgroundSrc && (
+          <div className="absolute inset-0 bg-black/50"></div>
+        )}
         <div className="container mx-auto text-center z-10 py-20">
           <div className="mb-6">
             <img
@@ -83,6 +95,9 @@ const HeroSection = () => {
 
     return (
       <section id="hero" style={customGradientStyle} className="min-h-screen grid md:grid-cols-2 text-white relative">
+        {heroBackgroundSrc && (
+          <div className="absolute inset-0 bg-black/50"></div>
+        )}
         <div className="flex flex-col justify-center p-6 sm:p-8 md:p-12 lg:p-16 order-1">
           <img src={logoSrc} alt="Event Logo" className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-xl mb-6 shadow-xl object-cover" />
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">{heroText.title}</h1>
@@ -133,6 +148,9 @@ const HeroSection = () => {
 
   return (
     <section id="hero" style={customGradientStyle} className="min-h-screen flex items-center text-white relative overflow-hidden">
+      {heroBackgroundSrc && (
+        <div className="absolute inset-0 bg-black/50"></div>
+      )}
       {/* Mobile: Stacked layout with photo in middle */}
       <div className="flex flex-col md:hidden w-full p-6">
         {/* Top div: Logo, Title, Tagline */}
