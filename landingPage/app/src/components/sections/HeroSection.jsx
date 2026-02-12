@@ -44,7 +44,7 @@ const HeroSection = () => {
   if (layout === 'layout-1') {
     return (
       <section id="hero" style={customGradientStyle} className="min-h-screen flex items-center justify-center text-white relative overflow-hidden px-4">
-        <div className="container mx-auto text-center z-10 py-20">
+        <div className="container mx-auto text-center z-10 py-20" data-aos="fade-zoom-in" data-aos-duration="1000">
           <div className="mb-6">
             <img
               src={logoSrc}
@@ -92,7 +92,7 @@ const HeroSection = () => {
 
     return (
       <section id="hero" style={customGradientStyle} className="min-h-screen grid md:grid-cols-2 text-white relative">
-        <div className="flex flex-col justify-center p-6 sm:p-8 md:p-12 lg:p-16 order-1">
+        <div className="flex flex-col justify-center p-6 sm:p-8 md:p-12 lg:p-16 order-1" data-aos="fade-right" data-aos-duration="1000">
           <img src={logoSrc} alt="Event Logo" className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-xl mb-6 shadow-xl object-cover" />
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">{heroText.title}</h1>
           <p className="text-base sm:text-lg md:text-xl mb-6 opacity-90">{heroText.tagline}</p>
@@ -119,7 +119,7 @@ const HeroSection = () => {
           </div>
           
         </div>
-        <div className="flex items-center justify-center p-6 sm:p-8 order-2 min-h-[300px] md:min-h-0">
+        <div className="flex items-center justify-center p-6 sm:p-8 order-2 min-h-[300px] md:min-h-0" data-aos="fade-left" data-aos-duration="1000">
           {images.poster ? (
             <img
               src={posterSrc}
@@ -145,15 +145,15 @@ const HeroSection = () => {
       {/* Mobile: Stacked layout with photo in middle */}
       <div className="flex flex-col md:hidden w-full p-6">
         {/* Top div: Logo, Title, Tagline */}
-        <div className="flex flex-col items-center text-center z-10 mb-4">
+        <div className="flex flex-col items-center text-center z-10 mb-4" data-aos="fade-up" data-aos-duration="800">
           <img src={logoSrc} alt="Event Logo" className="w-20 h-20 rounded-2xl mb-4 shadow-xl object-cover" />
           <h1 className="text-2xl sm:text-3xl font-bold mb-2 leading-tight">{heroText.title}</h1>
           <p className="text-base sm:text-lg">{heroText.tagline}</p>
         </div>
-        
+
         {/* Middle: Event Photo */}
         {photoSrc ? (
-          <div className="flex justify-center items-center my-4 z-10">
+          <div className="flex justify-center items-center my-4 z-10" data-aos="zoom-in" data-aos-duration="1000" data-aos-delay="200">
             <img
               src={photoSrc}
               alt="Event Photo"
@@ -196,7 +196,7 @@ const HeroSection = () => {
 
       {/* Desktop: Original asymmetric layout */}
       <div className="hidden md:flex items-center relative overflow-hidden p-8 md:p-12 lg:p-16 w-full">
-        <div className="max-w-2xl z-10">
+        <div className="max-w-2xl z-10" data-aos="fade-right" data-aos-duration="1000">
           <img src={logoSrc} alt="Event Logo" className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 rounded-2xl mb-6 shadow-xl object-cover" />
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">{heroText.title}</h1>
           <p className="text-base sm:text-lg md:text-xl mb-6">{heroText.tagline}</p>
@@ -223,7 +223,7 @@ const HeroSection = () => {
           </div>
         </div>
         {photoSrc ? (
-          <div className="absolute right-16 md:right-20 lg:right-24 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px]">
+          <div className="absolute right-16 md:right-20 lg:right-24 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px]" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
             <img
               src={photoSrc}
               alt="Event Photo"
@@ -231,7 +231,7 @@ const HeroSection = () => {
             />
           </div>
         ) : (
-          <div className="absolute right-16 md:right-20 lg:right-24 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px] flex items-center justify-center">
+          <div className="absolute right-16 md:right-20 lg:right-24 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px] flex items-center justify-center" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
             <div className="w-full h-full bg-white/10 rounded-[3rem] shadow-2xl border-2 border-white/30 border-dashed flex items-center justify-center">
               <p className="text-white/60 text-center px-4 text-lg">Photo Placeholder</p>
             </div>

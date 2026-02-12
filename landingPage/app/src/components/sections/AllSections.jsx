@@ -116,7 +116,7 @@ export const CategoriesSection = () => {
   if (layout === 'layout-2') {
     return (
       <section id="categories" className="py-20 bg-white overflow-x-hidden">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4" data-aos="fade-up">
           <h2 className="section-title">{categoriesText.sectionTitle}</h2>
           <p className="section-subtitle">Pilih kategori yang sesuai dengan keahlian Anda</p>
           <div className="max-w-4xl mx-auto space-y-6 overflow-x-hidden">
@@ -360,7 +360,7 @@ export const TimelineSection = () => {
     };
 
     return (
-      <section id="timeline" className="py-20 bg-gray-50">
+      <section id="timeline" className="py-20 bg-gray-50" data-aos="fade-up">
         <div className="container mx-auto px-4">
           <h2 className="section-title">{timelineText.sectionTitle}</h2>
           <p className="section-subtitle">Jadwal lengkap pelaksanaan kompetisi</p>
@@ -527,7 +527,7 @@ export const TimelineSection = () => {
   }
   if (layout === 'layout-3') {
     return (
-      <section id="timeline" className="py-20 bg-gray-50">
+      <section id="timeline" className="py-20 bg-gray-50" data-aos="fade-up">
         <div className="container mx-auto px-4">
           <h2 className="section-title">{timelineText.sectionTitle}</h2>
           <p className="section-subtitle">Jadwal lengkap pelaksanaan kompetisi</p>
@@ -564,7 +564,7 @@ export const TimelineSection = () => {
   }
 
   return (
-    <section id="timeline" className="py-20 bg-gray-50">
+    <section id="timeline" className="py-20 bg-gray-50" data-aos="fade-up">
       <div className="container mx-auto px-4">
         <h2 className="section-title">Timeline Event</h2>
         <p className="section-subtitle">Jadwal lengkap pelaksanaan kompetisi</p>
@@ -616,7 +616,7 @@ export const PrizesSection = () => {
   // Layout 1: Centered Cards (Original)
   if (layout === 'layout-1') {
     return (
-      <section id="prizes" className="py-20 bg-white">
+      <section id="prizes" className="py-20 bg-white" data-aos="zoom-in">
         <div className="container mx-auto px-4">
           <h2 className="section-title">{prizesText.sectionTitle}</h2>
           <p className="section-subtitle">Raih kesempatan memenangkan hadiah dan benefit menarik</p>
@@ -643,7 +643,7 @@ export const PrizesSection = () => {
   // Layout 2: Split Layout with Sidebar
   if (layout === 'layout-2') {
     return (
-      <section id="prizes" className="py-20 bg-white">
+      <section id="prizes" className="py-20 bg-white" data-aos="zoom-in">
         <div className="container mx-auto px-4">
           <h2 className="section-title">{prizesText.sectionTitle}</h2>
           <p className="section-subtitle">Raih kesempatan memenangkan hadiah dan benefit menarik</p>
@@ -678,7 +678,7 @@ export const PrizesSection = () => {
 
   // Layout 3: Compact Icon Grid
   return (
-    <section id="prizes" className="py-20 bg-white">
+    <section id="prizes" className="py-20 bg-white" data-aos="zoom-in">
       <div className="container mx-auto px-4">
         <h2 className="section-title">Hadiah & Benefit</h2>
         <p className="section-subtitle">Raih kesempatan memenangkan hadiah dan benefit menarik</p>
@@ -731,7 +731,7 @@ export const JurySection = () => {
   // Layout 1: Grid with Photos on Top
   if (layout === 'layout-1') {
     return (
-      <section id="jury" className="py-20 bg-gray-50">
+      <section id="jury" className="py-20 bg-gray-50" data-aos="fade-up">
         <div className="container mx-auto px-4">
           <h2 className="section-title">{juryText.sectionTitle}</h2>
           <p className="section-subtitle">Bertemu dengan para ahli dan profesional terkemuka</p>
@@ -764,7 +764,7 @@ export const JurySection = () => {
   // Layout 2: Horizontal Cards (Side by Side)
   if (layout === 'layout-2') {
     return (
-      <section id="jury" className="py-20 bg-gray-50">
+      <section id="jury" className="py-20 bg-gray-50" data-aos="fade-up">
         <div className="container mx-auto px-4">
           <h2 className="section-title">{juryText.sectionTitle}</h2>
           <p className="section-subtitle">Bertemu dengan para ahli dan profesional terkemuka</p>
@@ -794,7 +794,7 @@ export const JurySection = () => {
 
   // Layout 3: Staggered with Circular Photos
   return (
-    <section id="jury" className="py-20 bg-gray-50">
+    <section id="jury" className="py-20 bg-gray-50" data-aos="fade-up">
       <div className="container mx-auto px-4">
         <h2 className="section-title">Juri & Pembicara</h2>
         <p className="section-subtitle">Bertemu dengan para ahli dan profesional terkemuka</p>
@@ -860,7 +860,7 @@ export const InstagramSection = () => {
         <div style={{ background: `linear-gradient(135deg, ${customColors.color1}80 0%, ${customColors.color2}80 100%)` }} className="absolute top-32 -left-28 w-96 h-96 rounded-full blur-3xl opacity-30"></div>
         <div style={{ background: `linear-gradient(135deg, ${customColors.color2}80 0%, ${customColors.color1}80 100%)` }} className="absolute bottom-32 -right-36 w-[500px] h-[500px] rounded-full blur-3xl opacity-30"></div>
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4 relative z-10" data-aos="fade-up">
           <div className="max-w-6xl mx-auto">
             {/* Title and Tagline */}
             <div className="text-center mb-12">
@@ -1077,7 +1077,7 @@ export const ContactSection = () => {
   if (layout === 'layout-1') {
     return (
       <section id="contact" className="py-20 bg-white">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4" data-aos="fade-up">
           <h2 className="section-title">{contactText.sectionTitle}</h2>
           <p className="section-subtitle">Hubungi kami untuk informasi lebih lanjut</p>
           <div className="grid lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
@@ -1142,7 +1142,7 @@ export const ContactSection = () => {
   if (layout === 'layout-2') {
     return (
       <section id="contact" className="py-20 bg-white">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4" data-aos="fade-up">
           <h2 className="section-title">{contactText.sectionTitle}</h2>
           <p className="section-subtitle">Hubungi kami untuk informasi lebih lanjut</p>
 

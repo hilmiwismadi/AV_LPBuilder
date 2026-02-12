@@ -15,6 +15,8 @@ import SubdomainLandingPage from './pages/SubdomainLandingPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ManageClientsPage from './pages/ManageClientsPage';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 // Component to apply custom colors to CSS variables
 function ColorVariablesApplier() {
@@ -30,6 +32,17 @@ function ColorVariablesApplier() {
 
 function App() {
   const isMain = isMainDomain();
+
+  // Initialize AOS
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      once: false,
+      mirror: true,
+      offset: 100,
+      easing: 'ease-in-out'
+    });
+  }, []);
 
   // If this is a subdomain, only show the subdomain landing page (no auth required)
   if (!isMain) {
