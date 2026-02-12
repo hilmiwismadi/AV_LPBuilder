@@ -92,6 +92,12 @@ const ConfigurationPage = () => {
   const posterInputRef = useRef(null);
   const photoInputRef = useRef(null);
   const heroBackgroundInputRef = useRef(null);
+  const instagram1InputRef = useRef(null);
+  const instagram2InputRef = useRef(null);
+  const instagram3InputRef = useRef(null);
+  const instagram4InputRef = useRef(null);
+  const instagram5InputRef = useRef(null);
+  const instagram6InputRef = useRef(null);
   const iframeRef = useRef(null);
   const savedScrollPosition = useRef({ x: 0, y: 0 });
   const importJsonInputRef = useRef(null);
@@ -1288,6 +1294,326 @@ Please change the event name and try again.`);
                     onChange={(e) => handleImageUpload('heroBackground', e)}
                     className="hidden"
                   />
+                </div>
+
+                {/* Instagram Section Images */}
+                <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Instagram Section Images</h3>
+                  <p className="text-sm text-gray-600 mb-4">Upload 6 images to display in the Instagram section</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Instagram Image 1 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Instagram Image 1</label>
+                      <div
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+                        }}
+                        onDragLeave={(e) => {
+                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                          const file = e.dataTransfer.files[0];
+                          if (file && file.type.startsWith('image/')) {
+                            handleImageUpload('instagram1', { target: { files: [file] } });
+                          }
+                        }}
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-3 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => instagram1InputRef.current?.click()}
+                            className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            {images.instagram1 ? 'Change' : 'Upload'}
+                          </button>
+                          {images.instagram1 && (
+                            <>
+                              <div className="w-16 h-16 border-2 border-gray-300 rounded-lg overflow-hidden">
+                                <img src={images.instagram1} alt="Instagram 1" className="w-full h-full object-cover" />
+                              </div>
+                              <button
+                                onClick={() => updateImage('instagram1', null)}
+                                className="px-2 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition-colors"
+                              >
+                                Remove
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <input
+                        ref={instagram1InputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload('instagram1', e)}
+                        className="hidden"
+                      />
+                    </div>
+
+                    {/* Instagram Image 2 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Instagram Image 2</label>
+                      <div
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+                        }}
+                        onDragLeave={(e) => {
+                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                          const file = e.dataTransfer.files[0];
+                          if (file && file.type.startsWith('image/')) {
+                            handleImageUpload('instagram2', { target: { files: [file] } });
+                          }
+                        }}
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-3 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => instagram2InputRef.current?.click()}
+                            className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            {images.instagram2 ? 'Change' : 'Upload'}
+                          </button>
+                          {images.instagram2 && (
+                            <>
+                              <div className="w-16 h-16 border-2 border-gray-300 rounded-lg overflow-hidden">
+                                <img src={images.instagram2} alt="Instagram 2" className="w-full h-full object-cover" />
+                              </div>
+                              <button
+                                onClick={() => updateImage('instagram2', null)}
+                                className="px-2 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition-colors"
+                              >
+                                Remove
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <input
+                        ref={instagram2InputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload('instagram2', e)}
+                        className="hidden"
+                      />
+                    </div>
+
+                    {/* Instagram Image 3 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Instagram Image 3</label>
+                      <div
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+                        }}
+                        onDragLeave={(e) => {
+                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                          const file = e.dataTransfer.files[0];
+                          if (file && file.type.startsWith('image/')) {
+                            handleImageUpload('instagram3', { target: { files: [file] } });
+                          }
+                        }}
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-3 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => instagram3InputRef.current?.click()}
+                            className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            {images.instagram3 ? 'Change' : 'Upload'}
+                          </button>
+                          {images.instagram3 && (
+                            <>
+                              <div className="w-16 h-16 border-2 border-gray-300 rounded-lg overflow-hidden">
+                                <img src={images.instagram3} alt="Instagram 3" className="w-full h-full object-cover" />
+                              </div>
+                              <button
+                                onClick={() => updateImage('instagram3', null)}
+                                className="px-2 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition-colors"
+                              >
+                                Remove
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <input
+                        ref={instagram3InputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload('instagram3', e)}
+                        className="hidden"
+                      />
+                    </div>
+
+                    {/* Instagram Image 4 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Instagram Image 4</label>
+                      <div
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+                        }}
+                        onDragLeave={(e) => {
+                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                          const file = e.dataTransfer.files[0];
+                          if (file && file.type.startsWith('image/')) {
+                            handleImageUpload('instagram4', { target: { files: [file] } });
+                          }
+                        }}
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-3 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => instagram4InputRef.current?.click()}
+                            className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            {images.instagram4 ? 'Change' : 'Upload'}
+                          </button>
+                          {images.instagram4 && (
+                            <>
+                              <div className="w-16 h-16 border-2 border-gray-300 rounded-lg overflow-hidden">
+                                <img src={images.instagram4} alt="Instagram 4" className="w-full h-full object-cover" />
+                              </div>
+                              <button
+                                onClick={() => updateImage('instagram4', null)}
+                                className="px-2 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition-colors"
+                              >
+                                Remove
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <input
+                        ref={instagram4InputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload('instagram4', e)}
+                        className="hidden"
+                      />
+                    </div>
+
+                    {/* Instagram Image 5 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Instagram Image 5</label>
+                      <div
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+                        }}
+                        onDragLeave={(e) => {
+                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                          const file = e.dataTransfer.files[0];
+                          if (file && file.type.startsWith('image/')) {
+                            handleImageUpload('instagram5', { target: { files: [file] } });
+                          }
+                        }}
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-3 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => instagram5InputRef.current?.click()}
+                            className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            {images.instagram5 ? 'Change' : 'Upload'}
+                          </button>
+                          {images.instagram5 && (
+                            <>
+                              <div className="w-16 h-16 border-2 border-gray-300 rounded-lg overflow-hidden">
+                                <img src={images.instagram5} alt="Instagram 5" className="w-full h-full object-cover" />
+                              </div>
+                              <button
+                                onClick={() => updateImage('instagram5', null)}
+                                className="px-2 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition-colors"
+                              >
+                                Remove
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <input
+                        ref={instagram5InputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload('instagram5', e)}
+                        className="hidden"
+                      />
+                    </div>
+
+                    {/* Instagram Image 6 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Instagram Image 6</label>
+                      <div
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+                        }}
+                        onDragLeave={(e) => {
+                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+                          const file = e.dataTransfer.files[0];
+                          if (file && file.type.startsWith('image/')) {
+                            handleImageUpload('instagram6', { target: { files: [file] } });
+                          }
+                        }}
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-3 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => instagram6InputRef.current?.click()}
+                            className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            {images.instagram6 ? 'Change' : 'Upload'}
+                          </button>
+                          {images.instagram6 && (
+                            <>
+                              <div className="w-16 h-16 border-2 border-gray-300 rounded-lg overflow-hidden">
+                                <img src={images.instagram6} alt="Instagram 6" className="w-full h-full object-cover" />
+                              </div>
+                              <button
+                                onClick={() => updateImage('instagram6', null)}
+                                className="px-2 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition-colors"
+                              >
+                                Remove
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <input
+                        ref={instagram6InputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload('instagram6', e)}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
                 </div>
 
             {/* Section Configuration */}

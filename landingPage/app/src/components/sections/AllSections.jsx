@@ -831,9 +831,18 @@ export const InstagramSection = () => {
     return null;
   }
 
-  // Use uploaded poster or default, and duplicate it 6 times
+  // Use uploaded poster or default as fallback
   const posterSrc = images.poster || about.poster;
-  const instagramPosts = Array(6).fill(posterSrc);
+
+  // Use individual Instagram images or fallback to poster
+  const instagramPosts = [
+    images.instagram1 || posterSrc,
+    images.instagram2 || posterSrc,
+    images.instagram3 || posterSrc,
+    images.instagram4 || posterSrc,
+    images.instagram5 || posterSrc,
+    images.instagram6 || posterSrc,
+  ];
 
   // Use Instagram URL from Instagram Text
   const instagramUrl = instagramText.instagramUrl || instagram.url;

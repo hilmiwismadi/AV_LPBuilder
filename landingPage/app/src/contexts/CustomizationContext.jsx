@@ -145,6 +145,12 @@ export const CustomizationProvider = ({ children }) => {
     poster: null,
     photo: null,
     heroBackground: null,
+    instagram1: null,
+    instagram2: null,
+    instagram3: null,
+    instagram4: null,
+    instagram5: null,
+    instagram6: null,
   });
 
   // New state for section visibility
@@ -402,12 +408,24 @@ export const CustomizationProvider = ({ children }) => {
     const savedPoster = localStorage.getItem('posterImage');
     const savedHeroBackground = localStorage.getItem('heroBackgroundImage');
     const savedPhoto = localStorage.getItem('photoImage');
-    if (savedLogo || savedPoster || savedPhoto || savedHeroBackground) {
+    const savedInstagram1 = localStorage.getItem('instagram1Image');
+    const savedInstagram2 = localStorage.getItem('instagram2Image');
+    const savedInstagram3 = localStorage.getItem('instagram3Image');
+    const savedInstagram4 = localStorage.getItem('instagram4Image');
+    const savedInstagram5 = localStorage.getItem('instagram5Image');
+    const savedInstagram6 = localStorage.getItem('instagram6Image');
+    if (savedLogo || savedPoster || savedPhoto || savedHeroBackground || savedInstagram1 || savedInstagram2 || savedInstagram3 || savedInstagram4 || savedInstagram5 || savedInstagram6) {
       setImages({
         logo: savedLogo,
         poster: savedPoster,
         photo: savedPhoto,
         heroBackground: savedHeroBackground,
+        instagram1: savedInstagram1,
+        instagram2: savedInstagram2,
+        instagram3: savedInstagram3,
+        instagram4: savedInstagram4,
+        instagram5: savedInstagram5,
+        instagram6: savedInstagram6,
       });
     }
 
@@ -598,6 +616,12 @@ export const CustomizationProvider = ({ children }) => {
       poster: null,
       photo: null,
       heroBackground: null,
+      instagram1: null,
+      instagram2: null,
+      instagram3: null,
+      instagram4: null,
+      instagram5: null,
+      instagram6: null,
     });
 
     // Reset section visibility
@@ -922,7 +946,7 @@ export const CustomizationProvider = ({ children }) => {
       contact: 'layout-1',
     });
     setCustomColors({ color1: '#667eea', color2: '#764ba2' });
-    setImages({ logo: null, poster: null, photo: null, heroBackground: null });
+    setImages({ logo: null, poster: null, photo: null, heroBackground: null, instagram1: null, instagram2: null, instagram3: null, instagram4: null, instagram5: null, instagram6: null });
     setSectionVisibility({
       hero: true,
       about: true,
