@@ -194,13 +194,16 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Desktop: Original asymmetric layout */}
-      <div className="hidden md:flex items-center w-full p-8 md:p-12 lg:p-16">
-        <div className="max-w-2xl z-10" data-aos="fade-up" data-aos-duration="1000">
-          <img src={logoSrc} alt="Event Logo" className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 rounded-2xl mb-6 shadow-xl object-cover" />
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">{heroText.title}</h1>
-          <p className="text-base sm:text-lg md:text-xl mb-6">{heroText.tagline}</p>
-          <div className="flex flex-col gap-3 mb-8 text-sm sm:text-base">
+      {/* Desktop: Simple flex layout - Left text, Right photo */}
+      <div className="hidden md:flex items-center justify-between gap-8 w-full max-w-7xl mx-auto px-8 lg:px-16">
+
+        {/* Left side: Text content */}
+        <div className="flex-1 max-w-xl" data-aos="fade-up" data-aos-duration="1000">
+          <img src={logoSrc} alt="Event Logo" className="w-24 h-24 md:w-32 md:h-32 rounded-2xl mb-6 shadow-xl object-cover" />
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">{heroText.title}</h1>
+          <p className="text-lg md:text-xl mb-6">{heroText.tagline}</p>
+
+          <div className="flex flex-col gap-3 mb-8 text-base">
             <p className="flex items-center gap-2">
               {getIcon('FaCalendar')} <span>{heroText.date}</span>
             </p>
@@ -213,33 +216,43 @@ const HeroSection = () => {
               {getIcon('FaInstagram')} <span>{heroText.instagram}</span>
             </a>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="btn-primary bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto text-center">
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <a
+              href={heroText.ctaPrimaryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary bg-white text-gray-800 hover:bg-gray-100 text-center px-6 py-3 rounded-lg"
+            >
               {heroText.ctaPrimary}
             </a>
-            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary hover:bg-white hover:text-gray-800 w-full sm:w-auto text-center">
+            <a
+              href={heroText.ctaSecondaryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary hover:bg-white hover:text-gray-800 text-center px-6 py-3 rounded-lg border border-white/30"
+            >
               {heroText.ctaSecondary}
             </a>
           </div>
         </div>
-      </div>
 
-      {/* Photo positioned relative to section, not the padded container */}
-      {photoSrc ? (
-        <div className="hidden md:block absolute right-16 md:right-20 lg:right-24 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px] max-w-[600px]" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
-          <img
-            src={photoSrc}
-            alt="Event Photo"
-            className="w-full h-full rounded-[3rem] shadow-2xl object-cover"
-          />
+        {/* Right side: Event Photo */}
+        <div className="flex-shrink-0 w-[400px] h-[400px] lg:w-[500px] lg:h-[500px]" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+          {photoSrc ? (
+            <img
+              src={photoSrc}
+              alt="Event Photo"
+              className="w-full h-full rounded-[3rem] shadow-2xl object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-white/10 rounded-[3rem] shadow-2xl border-2 border-white/30 border-dashed flex items-center justify-center">
+              <p className="text-white/60 text-center px-4 text-lg">Photo Placeholder</p>
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="hidden md:flex absolute right-16 md:right-20 lg:right-24 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px] max-w-[600px] items-center justify-center" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
-          <div className="w-full h-full bg-white/10 rounded-[3rem] shadow-2xl border-2 border-white/30 border-dashed flex items-center justify-center">
-            <p className="text-white/60 text-center px-4 text-lg">Photo Placeholder</p>
-          </div>
-        </div>
-      )}
+
+      </div>
     </section>
   );
 };
