@@ -335,15 +335,42 @@ export const TimelineSection = () => {
   };
 
   if (layout === 'layout-2') {
+    const [activeDot, setActiveDot] = React.useState(0);
+    const scrollContainerRef = React.useRef(null);
+
+    const handleScroll = () => {
+      if (scrollContainerRef.current) {
+        const container = scrollContainerRef.current;
+        const scrollLeft = container.scrollLeft;
+        const cardWidth = container.offsetWidth * 0.85 + 16;
+        const newIndex = Math.round(scrollLeft / cardWidth);
+        setActiveDot(newIndex);
+      }
+    };
+
+    const scrollToCard = (index) => {
+      if (scrollContainerRef.current) {
+        const container = scrollContainerRef.current;
+        const cardWidth = container.offsetWidth * 0.85 + 16;
+        container.scrollTo({
+          left: cardWidth * index,
+          behavior: 'smooth'
+        });
+      }
+    };
+
     return (
       <section id="timeline" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="section-title">{timelineText.sectionTitle}</h2>
           <p className="section-subtitle">Jadwal lengkap pelaksanaan kompetisi</p>
           
-          {/* Mobile: Horizontal Scrollable Carousel */}
           <div className="md:hidden">
-            <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide px-4 -mx-4">
+            <div 
+              ref={scrollContainerRef}
+              onScroll={handleScroll}
+              className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide px-4 -mx-4"
+            >
               {timeline.map((item, index) => (
                 <div 
                   key={item.id}
@@ -359,7 +386,6 @@ export const TimelineSection = () => {
                       style={customGradientStyle}
                     />
                     <div className="relative bg-white p-6 rounded-xl shadow-lg">
-                      {/* Icon/Image at top */}
                       <div className="flex items-center gap-4 mb-4">
                         {item.image ? (
                           <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg border-2 border-white flex-shrink-0">
@@ -386,17 +412,24 @@ export const TimelineSection = () => {
                 </div>
               ))}
             </div>
-            {/* Scroll indicator dots */}
             <div className="flex justify-center gap-2 mt-4">
               {timeline.map((_, index) => (
-                <div key={index} className="w-2 h-2 rounded-full bg-gray-300"></div>
+                <button
+                  key={index}
+                  onClick={() => scrollToCard(index)}
+                  className="transition-all duration-300 rounded-full"
+                  style={{
+                    width: activeDot === index ? '24px' : '8px',
+                    height: '8px',
+                    backgroundColor: activeDot === index ? customColors.color1 : '#d1d5db',
+                  }}
+                  aria-label={`Go to timeline item ${index + 1}`}
+                />
               ))}
             </div>
           </div>
 
-          {/* Desktop: Vertical Timeline with Parallax */}
           <div className="hidden md:block max-w-3xl mx-auto relative pl-24 py-8">
-            {/* Extended vertical line */}
             <div 
               style={{
                 ...customGradientStyle,
@@ -419,7 +452,6 @@ export const TimelineSection = () => {
                   animation: `fadeInUp 0.6s ease-out ${index * 0.15}s forwards`
                 }}
               >
-                {/* Icon/Image with parallax effect */}
                 <div 
                   className="timeline-icon"
                   style={{
@@ -446,7 +478,6 @@ export const TimelineSection = () => {
                   )}
                 </div>
 
-                {/* Card with hover and parallax effects */}
                 <div className="relative p-1 rounded-xl group overflow-visible">
                   <div
                     className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300"
@@ -463,7 +494,6 @@ export const TimelineSection = () => {
           </div>
         </div>
         
-        {/* CSS Animations */}
         <style jsx>{`
           @keyframes fadeInUp {
             to {
@@ -495,7 +525,6 @@ export const TimelineSection = () => {
       </section>
     );
   }
-
   if (layout === 'layout-3') {
     return (
       <section id="timeline" className="py-20 bg-gray-50">
