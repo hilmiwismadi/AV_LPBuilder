@@ -17,6 +17,8 @@ import DashboardPage from './pages/DashboardPage';
 import ManageClientsPage from './pages/ManageClientsPage';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Component to apply custom colors to CSS variables
 function ColorVariablesApplier() {
@@ -70,6 +72,7 @@ function App() {
     return (
       <CustomizationProvider>
         <ColorVariablesApplier />
+        <ToastContainer />
         <SubdomainLandingPage />
       </CustomizationProvider>
     );
@@ -81,6 +84,7 @@ function App() {
       <CustomizationProvider>
         <Router>
           <ColorVariablesApplier />
+          <ToastContainer />
           <div className="min-h-screen bg-gray-50">
             <Routes>
               {/* Public routes */}

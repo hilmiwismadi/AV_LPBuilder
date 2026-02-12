@@ -110,7 +110,7 @@ const AboutSection = () => {
         <section id="about" className="py-12 sm:py-16 lg:py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-[300px_1fr] lg:grid-cols-[400px_1fr] gap-8 md:gap-12 lg:gap-16 items-start">
-              <div className="mx-auto md:mx-0 max-w-sm md:max-w-none relative p-1 rounded-2xl group cursor-pointer overflow-visible" onClick={() => setIsModalOpen(true)}>
+              <div className="mx-auto md:mx-0 max-w-sm md:max-w-none relative p-1 rounded-2xl group cursor-pointer overflow-visible" onClick={() => setIsModalOpen(true)} data-aos="fade-up" data-aos-duration="800">
                 <div
                   className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
                   style={gradientBorderStyle}
@@ -121,7 +121,7 @@ const AboutSection = () => {
                   className="relative w-full rounded-2xl shadow-xl"
                 />
               </div>
-            <div>
+            <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
               <h2 className="section-title md:text-left">{aboutText.mainTitle}</h2>
               <div className="mb-6 md:mb-8">
                 <p className="text-gray-700 leading-relaxed text-sm sm:text-base">{aboutText.mainDescription}</p>
@@ -147,11 +147,11 @@ const AboutSection = () => {
         <PosterModal />
         <section id="about" className="py-12 sm:py-16 lg:py-20 bg-gray-50">
           <div className="container mx-auto px-4">
-            <h2 className="section-title">{aboutText.mainTitle}</h2>
+            <h2 className="section-title" data-aos="fade-up">{aboutText.mainTitle}</h2>
 
             <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-start">
               {/* Poster on Left - Sticky */}
-              <div className="mx-auto md:mx-0 flex-shrink-0 w-full max-w-xs sm:max-w-sm md:max-w-none md:w-80 lg:w-96 md:sticky md:top-24 md:h-fit relative p-1 rounded-2xl group cursor-pointer overflow-visible" onClick={() => setIsModalOpen(true)}>
+              <div className="mx-auto md:mx-0 flex-shrink-0 w-full max-w-xs sm:max-w-sm md:max-w-none md:w-80 lg:w-96 md:sticky md:top-24 md:h-fit relative p-1 rounded-2xl group cursor-pointer overflow-visible" onClick={() => setIsModalOpen(true)} data-aos="fade-right" data-aos-duration="800">
                 <div
                   className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
                   style={gradientBorderStyle}
@@ -166,7 +166,7 @@ const AboutSection = () => {
             {/* Boxes on Right */}
             <div className={`flex-1 grid gap-4 sm:gap-6 grid-cols-1 ${subSections.length === 1 ? 'content-center' : ''}`}>
               {/* Main Description Box */}
-              <div className="relative p-1 rounded-xl group">
+              <div className="relative p-1 rounded-xl group" data-aos="fade-left" data-aos-duration="800">
                 <div
                   className="absolute inset-0 rounded-xl opacity-75 group-hover:opacity-100 transition-opacity"
                   style={gradientBorderStyle}
@@ -178,7 +178,7 @@ const AboutSection = () => {
 
               {/* Sub-section Boxes */}
               {subSections.map((sub, index) => (
-                <div key={index} className="relative p-1 rounded-xl group">
+                <div key={index} className="relative p-1 rounded-xl group" data-aos="fade-left" data-aos-duration="800" data-aos-delay={100 * (index + 1)}>
                   <div
                     className="absolute inset-0 rounded-xl opacity-75 group-hover:opacity-100 transition-opacity"
                     style={gradientBorderStyle}
@@ -203,11 +203,11 @@ const AboutSection = () => {
       <PosterModal />
       <section id="about" className="py-12 sm:py-16 lg:py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h2 className="section-title">{aboutText.mainTitle}</h2>
+          <h2 className="section-title" data-aos="fade-up">{aboutText.mainTitle}</h2>
 
           <div className="flex flex-col md:flex-row md:items-start gap-8 md:gap-[5%]">
             {/* Poster - 30% of screen width - Sticky */}
-            <div className="mx-auto md:mx-0 flex-shrink-0 w-full max-w-xs sm:max-w-sm md:w-[30%] md:sticky md:top-24 md:h-fit relative p-1 rounded-2xl group cursor-pointer overflow-visible" onClick={() => setIsModalOpen(true)}>
+            <div className="mx-auto md:mx-0 flex-shrink-0 w-full max-w-xs sm:max-w-sm md:w-[30%] md:sticky md:top-24 md:h-fit relative p-1 rounded-2xl group cursor-pointer overflow-visible" onClick={() => setIsModalOpen(true)} data-aos="fade-right" data-aos-duration="800">
               <div
                 className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
                 style={gradientBorderStyle}
@@ -220,7 +220,7 @@ const AboutSection = () => {
             </div>
 
           {/* Content Box - 65% of screen width */}
-          <div className="bg-white p-6 sm:p-8 lg:p-12 rounded-2xl shadow-xl md:w-[65%]">
+          <div className="bg-white p-6 sm:p-8 lg:p-12 rounded-2xl shadow-xl md:w-[65%]" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">
             <div className={`${subSections.length > 0 ? 'mb-5 sm:mb-6' : ''}`}>
               <p className="text-gray-700 leading-relaxed text-sm sm:text-base mb-4 sm:mb-6">{aboutText.mainDescription}</p>
             </div>

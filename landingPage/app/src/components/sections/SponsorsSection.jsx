@@ -21,12 +21,12 @@ const SponsorsSection = () => {
     return (
       <section id="sponsors" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h2 className="section-title">Sponsor & Media Partner</h2>
-          <p className="section-subtitle">Didukung oleh perusahaan dan media terkemuka</p>
+          <h2 className="section-title" data-aos="fade-up">Sponsor & Media Partner</h2>
+          <p className="section-subtitle" data-aos="fade-up" data-aos-delay="100">Didukung oleh perusahaan dan media terkemuka</p>
 
           <div className="space-y-12">
             {/* Platinum Sponsors */}
-            <div className="text-center">
+            <div className="text-center" data-aos="fade-up" data-aos-delay="200">
               <h3 style={customGradientStyle} className="inline-block text-white px-10 py-3 rounded-full font-bold text-lg mb-10">
                 Platinum Sponsor
               </h3>
@@ -43,7 +43,7 @@ const SponsorsSection = () => {
             </div>
 
             {/* Gold Sponsors */}
-            <div className="text-center">
+            <div className="text-center" data-aos="fade-up" data-aos-delay="300">
               <h3 style={customGradientStyle} className="inline-block text-white px-10 py-3 rounded-full font-bold text-lg mb-10">
                 Gold Sponsor
               </h3>
@@ -86,8 +86,8 @@ const SponsorsSection = () => {
     return (
       <section id="sponsors" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h2 className="section-title">Sponsor & Media Partner</h2>
-          <p className="section-subtitle">Didukung oleh perusahaan dan media terkemuka</p>
+          <h2 className="section-title" data-aos="fade-up">Sponsor & Media Partner</h2>
+          <p className="section-subtitle" data-aos="fade-up" data-aos-delay="100">Didukung oleh perusahaan dan media terkemuka</p>
 
           <div className="space-y-16">
             {/* Platinum Sponsors - Large Cards */}

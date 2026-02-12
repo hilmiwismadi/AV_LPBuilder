@@ -22,16 +22,18 @@ const DocumentationSection = () => {
     return (
       <section id="documentation" className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="section-title">Dokumentasi Tahun Lalu</h2>
-          <p className="section-subtitle">Momen-momen berharga dari event sebelumnya</p>
+          <h2 className="section-title" data-aos="fade-up">Dokumentasi Tahun Lalu</h2>
+          <p className="section-subtitle" data-aos="fade-up" data-aos-delay="100">Momen-momen berharga dari event sebelumnya</p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
-            {documentation.gallery.map((item) => (
+            {documentation.gallery.map((item, index) => (
               <div
                 key={item.id}
                 className={`relative overflow-hidden rounded-xl cursor-pointer group ${
                   item.large ? 'md:col-span-2 md:row-span-2' : ''
                 }`}
+                data-aos="zoom-in"
+                data-aos-delay={index * 100}
               >
                 <img
                   src={item.image}
@@ -77,8 +79,8 @@ const DocumentationSection = () => {
     return (
       <section id="documentation" className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="section-title">Dokumentasi Tahun Lalu</h2>
-          <p className="section-subtitle">Momen-momen berharga dari event sebelumnya</p>
+          <h2 className="section-title" data-aos="fade-up">Dokumentasi Tahun Lalu</h2>
+          <p className="section-subtitle" data-aos="fade-up" data-aos-delay="100">Momen-momen berharga dari event sebelumnya</p>
 
           {/* Masonry Gallery */}
           <div className="columns-1 md:columns-2 lg:columns-3 gap-4 mb-16">
