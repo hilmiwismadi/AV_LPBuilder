@@ -335,8 +335,8 @@ export const TimelineSection = () => {
   };
 
   if (layout === 'layout-2') {
-    const [activeDot, setActiveDot] = React.useState(0);
-    const scrollContainerRef = React.useRef(null);
+    const [activeDot, setActiveDot] = useState(0);
+    const scrollContainerRef = useRef(null);
 
     const handleScroll = () => {
       if (scrollContainerRef.current) {
