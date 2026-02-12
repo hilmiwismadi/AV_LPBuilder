@@ -12,6 +12,21 @@ const HeroSection = () => {
     return null;
   }
 
+  // Button gradient styles
+  const primaryButtonStyle = {
+    background: `linear-gradient(135deg, ${customColors.color1} 0%, ${customColors.color2} 100%)`,
+    borderRadius: '0.5rem'
+  };
+
+  const secondaryButtonStyle = {
+    background: 'transparent',
+    border: '2px solid transparent',
+    backgroundImage: `linear-gradient(white, white), linear-gradient(135deg, ${customColors.color1} 0%, ${customColors.color2} 100%)`,
+    backgroundOrigin: 'border-box',
+    backgroundClip: 'padding-box, border-box',
+    borderRadius: '0.5rem'
+  };
+
   // Scroll to next section
   const scrollToNextSection = () => {
     const heroSection = document.querySelector('#hero');
@@ -68,10 +83,10 @@ const HeroSection = () => {
             </a>
           </div>
           <div className="flex flex-col sm:flex-row justify-center gap-4 px-4 mb-12">
-            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto text-center px-6 py-3 font-semibold transition-colors" style={{ borderRadius: '0.5rem' }}>
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:opacity-90 w-full sm:w-auto text-center px-6 py-3 font-semibold transition-opacity shadow-lg" style={primaryButtonStyle}>
               {heroText.ctaPrimary}
             </a>
-            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="bg-transparent hover:bg-white text-white hover:text-gray-800 w-full sm:w-auto text-center px-6 py-3 font-semibold border-2 border-white transition-colors" style={{ borderRadius: '0.5rem' }}>
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:bg-white/10 w-full sm:w-auto text-center px-6 py-3 font-semibold transition-all border-2 border-white" style={{ borderRadius: '0.5rem' }}>
               {heroText.ctaSecondary}
             </a>
           </div>
@@ -110,10 +125,10 @@ const HeroSection = () => {
             </a>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto text-center px-6 py-3 font-semibold transition-colors" style={{ borderRadius: '0.5rem' }}>
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:opacity-90 w-full sm:w-auto text-center px-6 py-3 font-semibold transition-opacity shadow-lg" style={primaryButtonStyle}>
               {heroText.ctaPrimary}
             </a>
-            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="bg-transparent hover:bg-white text-white hover:text-gray-800 w-full sm:w-auto text-center px-6 py-3 font-semibold border-2 border-white transition-colors" style={{ borderRadius: '0.5rem' }}>
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:bg-white/10 w-full sm:w-auto text-center px-6 py-3 font-semibold transition-all border-2 border-white" style={{ borderRadius: '0.5rem' }}>
               {heroText.ctaSecondary}
             </a>
           </div>
@@ -184,10 +199,10 @@ const HeroSection = () => {
             </a>
           </div>
           <div className="flex flex-col gap-3 w-full max-w-xs">
-            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="bg-white text-gray-800 hover:bg-gray-100 text-center py-2 px-4 font-semibold transition-colors" style={{ borderRadius: '0.5rem' }}>
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:opacity-90 text-center py-2 px-4 font-semibold transition-opacity shadow-lg" style={primaryButtonStyle}>
               {heroText.ctaPrimary}
             </a>
-            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="bg-transparent hover:bg-white text-white hover:text-gray-800 text-center py-2 px-4 font-semibold border-2 border-white transition-colors" style={{ borderRadius: '0.5rem' }}>
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:bg-white/10 text-center py-2 px-4 font-semibold transition-all border-2 border-white" style={{ borderRadius: '0.5rem' }}>
               {heroText.ctaSecondary}
             </a>
           </div>
