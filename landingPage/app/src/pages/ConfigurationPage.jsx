@@ -316,16 +316,16 @@ const ConfigurationPage = () => {
             const targetAspect = targetWidth / targetHeight;
             const imgAspect = width / height;
 
-            // Scale to cover the target dimensions
+            // Scale to fit within the target dimensions (contain, not cover)
             let scaledWidth, scaledHeight;
             if (imgAspect > targetAspect) {
-              // Image is wider - scale to height
-              scaledHeight = targetHeight;
-              scaledWidth = width * (targetHeight / height);
-            } else {
-              // Image is taller - scale to width
+              // Image is wider - scale to width
               scaledWidth = targetWidth;
               scaledHeight = height * (targetWidth / width);
+            } else {
+              // Image is taller - scale to height
+              scaledHeight = targetHeight;
+              scaledWidth = width * (targetHeight / height);
             }
 
             // Set canvas to target dimensions
@@ -333,6 +333,10 @@ const ConfigurationPage = () => {
             canvas.height = targetHeight;
 
             const ctx = canvas.getContext('2d');
+
+            // Fill with black background (for letterboxing/pillarboxing)
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, targetWidth, targetHeight);
 
             // Center the scaled image on the canvas
             const offsetX = (targetWidth - scaledWidth) / 2;
@@ -379,8 +383,6 @@ const ConfigurationPage = () => {
         img.onerror = reject;
         img.src = e.target.result;
       };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
     });
   };
   // Handle image upload
@@ -1261,7 +1263,7 @@ Please change the event name and try again.`);
                         </>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">Click to upload or drag and drop. Images will be automatically resized to 1920x1080</p>
+                    <p className="text-xs text-gray-500 mt-2">Click to upload or drag and drop. Entire image will be fitted to 1920x1080 (no cropping)</p>
                   </div>
                   <input
                     ref={heroBackgroundInputRef}
