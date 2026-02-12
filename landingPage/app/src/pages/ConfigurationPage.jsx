@@ -311,6 +311,7 @@ const ConfigurationPage = () => {
 
           // Handle hero background with specific dimensions (1920x1080)
           if (type === 'heroBackground') {
+            console.log(`[DEBUG] Processing heroBackground: ${width}x${height} -> 1920x1080`);
             const targetWidth = 1920;
             const targetHeight = 1080;
             const targetAspect = targetWidth / targetHeight;
@@ -387,29 +388,39 @@ const ConfigurationPage = () => {
   };
   // Handle image upload
   const handleImageUpload = async (type, event) => {
+    console.log(`[DEBUG] handleImageUpload called for type: ${type}`, event);
     const file = event.target.files[0];
     if (file) {
+      console.log(`[DEBUG] File selected:`, { name: file.name, size: file.size, type: file.type });
       try {
+        console.log(`[DEBUG] Starting compression for ${type}...`);
         // Show loading status
         setSaveStatus('Compressing image...');
 
         const compressedImage = await compressImage(file, type);
+        console.log(`[DEBUG] Compression complete for ${type}, dataURL length: ${compressedImage.length} chars`);
+
+        console.log(`[DEBUG] Calling updateImage for ${type}...`);
         updateImage(type, compressedImage);
+        console.log(`[DEBUG] updateImage completed for ${type}`);
 
         // Verify it was saved to localStorage
         const saved = localStorage.getItem(`${type}Image`);
         if (saved) {
+          console.log(`[DEBUG] Image saved to localStorage successfully`);
           setSaveStatus(`${type.charAt(0).toUpperCase() + type.slice(1)} uploaded successfully!`);
           setTimeout(() => setSaveStatus(''), 2000);
         } else {
-          console.warn(`${type} not in localStorage, but still in memory`);
+          console.warn(`[DEBUG] ${type} not in localStorage, but still in memory`);
           setSaveStatus('');
         }
       } catch (error) {
-        console.error('Error processing image:', error);
+        console.error('[DEBUG] Error processing image:', error);
         alert('Error processing image. Please try a smaller file.');
         setSaveStatus('');
       }
+    } else {
+      console.warn(`[DEBUG] No file selected for ${type}`);
     }
   };
 
