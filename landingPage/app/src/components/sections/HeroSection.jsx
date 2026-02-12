@@ -85,10 +85,34 @@ const HeroSection = () => {
             </a>
           </div>
           <div className="flex flex-col sm:flex-row justify-center gap-4 px-4 mb-12">
-            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:brightness-110 hover:scale-105 hover:shadow-2xl w-full sm:w-auto text-center px-6 py-3 font-semibold shadow-lg" style={primaryButtonStyle}>
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="text-white w-full sm:w-auto text-center px-6 py-3 font-semibold shadow-lg transition-all duration-300 transform"
+              style={primaryButtonStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.filter = 'brightness(1.1)';
+                e.currentTarget.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.filter = 'brightness(1)';
+                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+              }}>
               {heroText.ctaPrimary}
             </a>
-            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="hover:brightness-90 hover:scale-105 hover:shadow-lg w-full sm:w-auto text-center px-6 py-3 font-semibold" style={secondaryButtonStyle}>
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto text-center px-6 py-3 font-semibold transition-all duration-300 transform"
+              style={secondaryButtonStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = `linear-gradient(135deg, ${customColors.color1} 0%, ${customColors.color2} 100%)`;
+                e.currentTarget.style.color = 'white';
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.borderColor = 'transparent';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'white';
+                e.currentTarget.style.color = customColors.color1;
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.borderColor = customColors.color1;
+              }}>
               {heroText.ctaSecondary}
             </a>
           </div>
@@ -127,10 +151,34 @@ const HeroSection = () => {
             </a>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:brightness-110 hover:scale-105 hover:shadow-2xl w-full sm:w-auto text-center px-6 py-3 font-semibold shadow-lg" style={primaryButtonStyle}>
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="text-white w-full sm:w-auto text-center px-6 py-3 font-semibold shadow-lg transition-all duration-300 transform"
+              style={primaryButtonStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.filter = 'brightness(1.1)';
+                e.currentTarget.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.filter = 'brightness(1)';
+                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+              }}>
               {heroText.ctaPrimary}
             </a>
-            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="hover:brightness-90 hover:scale-105 hover:shadow-lg w-full sm:w-auto text-center px-6 py-3 font-semibold" style={secondaryButtonStyle}>
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto text-center px-6 py-3 font-semibold transition-all duration-300 transform"
+              style={secondaryButtonStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = `linear-gradient(135deg, ${customColors.color1} 0%, ${customColors.color2} 100%)`;
+                e.currentTarget.style.color = 'white';
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.borderColor = 'transparent';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'white';
+                e.currentTarget.style.color = customColors.color1;
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.borderColor = customColors.color1;
+              }}>
               {heroText.ctaSecondary}
             </a>
           </div>
@@ -201,10 +249,34 @@ const HeroSection = () => {
             </a>
           </div>
           <div className="flex flex-col gap-3 w-full max-w-xs">
-            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:brightness-110 hover:scale-105 hover:shadow-2xl text-center py-2 px-4 font-semibold shadow-lg" style={primaryButtonStyle}>
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="text-white text-center py-2 px-4 font-semibold shadow-lg transition-all duration-300 transform"
+            style={primaryButtonStyle}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.filter = 'brightness(1.1)';
+              e.currentTarget.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.filter = 'brightness(1)';
+              e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+            }}>
               {heroText.ctaPrimary}
             </a>
-            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="hover:brightness-90 hover:scale-105 hover:shadow-lg text-center py-2 px-4 font-semibold" style={secondaryButtonStyle}>
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="text-center py-2 px-4 font-semibold transition-all duration-300 transform"
+            style={secondaryButtonStyle}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = `linear-gradient(135deg, ${customColors.color1} 0%, ${customColors.color2} 100%)`;
+              e.currentTarget.style.color = 'white';
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.borderColor = 'transparent';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'white';
+              e.currentTarget.style.color = customColors.color1;
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.borderColor = customColors.color1;
+            }}>
               {heroText.ctaSecondary}
             </a>
           </div>
