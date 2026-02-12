@@ -165,6 +165,26 @@ const SubdomainLandingPage = () => {
     return () => document.removeEventListener('click', handleAnchorClick);
   }, []);
 
+  // Update favicon dynamically based on event logo
+  useEffect(() => {
+    if (configData?.images?.logo) {
+      // Get or create favicon link element
+      let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = configData.images.logo;
+      
+      // Remove existing favicon if any
+      const existingFavicon = document.querySelector("link[rel*='icon']");
+      if (existingFavicon) {
+        document.head.removeChild(existingFavicon);
+      }
+      
+      // Add the new favicon
+      document.head.appendChild(link);
+    }
+  }, [configData]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
