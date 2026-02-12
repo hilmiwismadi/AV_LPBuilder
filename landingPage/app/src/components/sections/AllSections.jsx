@@ -335,34 +335,71 @@ export const TimelineSection = () => {
   };
 
   if (layout === 'layout-2') {
+  if (layout === 'layout-2') {
     return (
       <section id="timeline" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="section-title">{timelineText.sectionTitle}</h2>
           <p className="section-subtitle">Jadwal lengkap pelaksanaan kompetisi</p>
-          <div className="max-w-3xl mx-auto relative pl-24 max-h-[600px] overflow-y-auto pr-2">
-            <div style={customGradientStyle} className="absolute left-10 top-0 bottom-0 w-1"></div>
-            {timeline.map((item) => (
-              <div key={item.id} className="mb-12 relative">
-                {/* Show image if available, otherwise show icon */}
-                {item.image ? (
-                  <div className="absolute -left-[100px] w-20 h-20 rounded-full overflow-hidden shadow-lg">
-                    <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                  </div>
-                ) : (
-                  item.icon && item.icon !== 'None' && (
-                    <div style={customGradientStyle} className="absolute -left-[100px] w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl shadow-lg">
-                      {getIcon(item.icon)}
+          <div className="max-w-3xl mx-auto relative pl-24 py-8">
+            {/* Extended vertical line that spans all timeline items */}
+            <div 
+              style={{
+                ...customGradientStyle,
+                position: 'absolute',
+                left: '2.5rem',
+                top: '0',
+                width: '4px',
+                height: '100%',
+                zIndex: 0
+              }}
+            ></div>
+            
+            {timeline.map((item, index) => (
+              <div 
+                key={item.id} 
+                className="mb-16 relative timeline-item"
+                style={{
+                  opacity: 0,
+                  transform: 'translateY(50px)',
+                  animation: `fadeInUp 0.6s ease-out ${index * 0.15}s forwards`
+                }}
+              >
+                {/* Icon/Image with parallax effect */}
+                <div 
+                  className="timeline-icon"
+                  style={{
+                    position: 'absolute',
+                    left: '-100px',
+                    width: '80px',
+                    height: '80px',
+                    zIndex: 10
+                  }}
+                >
+                  {item.image ? (
+                    <div className="w-full h-full rounded-full overflow-hidden shadow-xl border-4 border-white">
+                      <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                     </div>
-                  )
-                )}
+                  ) : (
+                    item.icon && item.icon !== 'None' && (
+                      <div 
+                        style={customGradientStyle} 
+                        className="w-full h-full rounded-full flex items-center justify-center text-white text-2xl shadow-xl border-4 border-white"
+                      >
+                        {getIcon(item.icon)}
+                      </div>
+                    )
+                  )}
+                </div>
+
+                {/* Card with hover and parallax effects */}
                 <div className="relative p-1 rounded-xl group overflow-visible">
                   <div
-                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300"
                     style={customGradientStyle}
                   />
-                  <div className="relative bg-white p-6 rounded-xl shadow-lg">
-                    <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                  <div className="relative bg-white p-6 rounded-xl shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:-translate-y-1">
+                    <h3 className="text-xl font-bold mb-2 group-hover:scale-105 transition-transform">{item.title}</h3>
                     <p style={{ color: customColors.color1 }} className="font-semibold mb-3">{item.date}</p>
                     <p className="text-gray-600">{item.description}</p>
                   </div>
@@ -371,8 +408,24 @@ export const TimelineSection = () => {
             ))}
           </div>
         </div>
+        
+        {/* CSS Animation for parallax fade-in effect */}
+        <style jsx>{`
+          @keyframes fadeInUp {
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          
+          .timeline-item:hover .timeline-icon {
+            transform: scale(1.1) rotate(5deg);
+            transition: transform 0.3s ease;
+          }
+        `}</style>
       </section>
     );
+  }
   }
 
   if (layout === 'layout-3') {
