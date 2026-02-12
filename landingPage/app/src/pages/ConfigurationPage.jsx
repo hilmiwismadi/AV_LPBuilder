@@ -309,25 +309,58 @@ const ConfigurationPage = () => {
           let width = img.width;
           let height = img.height;
 
-          // Determine max dimension based on image type
-          const maxDimension = type === 'logo' ? 800 : 1600;
+          // Handle hero background with specific dimensions (1920x1080)
+          if (type === 'heroBackground') {
+            const targetWidth = 1920;
+            const targetHeight = 1080;
+            const targetAspect = targetWidth / targetHeight;
+            const imgAspect = width / height;
 
-          // Scale down if needed
-          if (width > maxDimension || height > maxDimension) {
-            if (width > height) {
-              height = (height / width) * maxDimension;
-              width = maxDimension;
+            // Scale to cover the target dimensions
+            let scaledWidth, scaledHeight;
+            if (imgAspect > targetAspect) {
+              // Image is wider - scale to height
+              scaledHeight = targetHeight;
+              scaledWidth = width * (targetHeight / height);
             } else {
-              width = (width / height) * maxDimension;
-              height = maxDimension;
+              // Image is taller - scale to width
+              scaledWidth = targetWidth;
+              scaledHeight = height * (targetWidth / width);
             }
+
+            // Set canvas to target dimensions
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+
+            const ctx = canvas.getContext('2d');
+
+            // Center the scaled image on the canvas
+            const offsetX = (targetWidth - scaledWidth) / 2;
+            const offsetY = (targetHeight - scaledHeight) / 2;
+
+            ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+          } else {
+            // Original logic for other image types
+            // Determine max dimension based on image type
+            const maxDimension = type === 'logo' ? 800 : 1600;
+
+            // Scale down if needed
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = (height / width) * maxDimension;
+                width = maxDimension;
+              } else {
+                width = (width / height) * maxDimension;
+                height = maxDimension;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
           }
-
-          canvas.width = width;
-          canvas.height = height;
-
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
 
           // Start with high quality and reduce if needed
           let quality = 0.9;
@@ -340,7 +373,7 @@ const ConfigurationPage = () => {
             compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
           }
 
-          console.log(`Compressed ${type}: original=${file.size} bytes, compressed=${Math.round(compressedDataUrl.length * 0.75)} bytes, quality=${quality.toFixed(1)}`);
+          console.log(`Compressed ${type}: original=${file.size} bytes, compressed=${Math.round(compressedDataUrl.length * 0.75)} bytes, quality=${quality.toFixed(1)}, dimensions=${canvas.width}x${canvas.height}`);
           resolve(compressedDataUrl);
         };
         img.onerror = reject;
@@ -350,7 +383,6 @@ const ConfigurationPage = () => {
       reader.readAsDataURL(file);
     });
   };
-
   // Handle image upload
   const handleImageUpload = async (type, event) => {
     const file = event.target.files[0];
@@ -1016,7 +1048,7 @@ Please change the event name and try again.`);
                 Images
               </h2>
               <p className="text-xs text-gray-500 mb-4">
-                Images will be automatically compressed. Logo: max 800px, Poster/Photo/Hero Background: max 1600px. Target size: ~500KB each.
+                Images will be automatically compressed. Logo: max 800px, Poster/Photo: max 1600px, Hero Background: 1920x1080. Target size: ~500KB each.
               </p>
 
               <div className="space-y-4">
@@ -1229,7 +1261,7 @@ Please change the event name and try again.`);
                         </>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">Click to upload or drag and drop. Recommended: wide landscape image (1600px+)</p>
+                    <p className="text-xs text-gray-500 mt-2">Click to upload or drag and drop. Images will be automatically resized to 1920x1080</p>
                   </div>
                   <input
                     ref={heroBackgroundInputRef}
