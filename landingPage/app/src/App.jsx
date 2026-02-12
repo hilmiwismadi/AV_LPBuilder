@@ -36,25 +36,33 @@ function App() {
   // Initialize AOS
   useEffect(() => {
     AOS.init({
-      duration: 800,
+      duration: 600,
       once: false,
       mirror: true,
-      offset: 50,
+      offset: 120,
       easing: 'ease-in-out',
-      anchorPlacement: 'top-bottom',
+      anchorPlacement: 'center-bottom',
       disable: false,
-      startEvent: 'DOMContentLoaded',
-      useClassNames: false,
-      disableMutationObserver: false,
-      throttleDelay: 99,
     });
 
-    // Refresh AOS on scroll to handle fade out properly
-    const handleScroll = () => {
-      AOS.refresh();
+    // Add custom style for fade out effect
+    const style = document.createElement('style');
+    style.textContent = `
+      [data-aos] {
+        transition-property: transform, opacity;
+      }
+      [data-aos][data-aos].aos-animate {
+        opacity: 1;
+      }
+      [data-aos]:not(.aos-animate) {
+        opacity: 0;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // If this is a subdomain, only show the subdomain landing page (no auth required)
