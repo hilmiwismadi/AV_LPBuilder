@@ -1168,6 +1168,11 @@ export const FooterSection = () => {
   const { currentTheme, customColors, heroText, sectionVisibility } = useCustomization();
   const { footer } = eventData;
 
+  // Don't render if section is hidden
+  if (!sectionVisibility.footer) {
+    return null;
+  }
+
   // Section labels
   const sectionLabels = {
     hero: 'Home',

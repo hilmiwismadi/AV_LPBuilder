@@ -125,6 +125,7 @@ const defaultSectionVisibility = {
   instagram: true,
   sponsors: false,
   contact: true,
+  footer: false,
 };
 
 export const CustomizationProvider = ({ children }) => {
@@ -933,6 +934,7 @@ export const CustomizationProvider = ({ children }) => {
       instagram: true,
       sponsors: false,
       contact: true,
+  footer: false,
     });
     setHeroText({
       title: 'Innovation Challenge 2024',
