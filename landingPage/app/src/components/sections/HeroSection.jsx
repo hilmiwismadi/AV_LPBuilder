@@ -141,7 +141,7 @@ const HeroSection = () => {
   const photoSrc = images.photo;
 
   return (
-    <section id="hero" style={customGradientStyle} className="min-h-screen flex items-center text-white relative overflow-hidden">
+    <section id="hero" style={customGradientStyle} className="min-h-screen flex items-center justify-center text-white relative overflow-hidden">
       {/* Mobile: Stacked layout with photo in middle */}
       <div className="flex flex-col md:hidden w-full p-6">
         {/* Top div: Logo, Title, Tagline */}
@@ -195,7 +195,7 @@ const HeroSection = () => {
       </div>
 
       {/* Desktop: Original asymmetric layout */}
-      <div className="hidden md:flex items-center relative p-8 md:p-12 lg:p-16 w-full min-h-screen">
+      <div className="hidden md:flex items-center w-full p-8 md:p-12 lg:p-16">
         <div className="max-w-2xl z-10" data-aos="fade-up" data-aos-duration="1000">
           <img src={logoSrc} alt="Event Logo" className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 rounded-2xl mb-6 shadow-xl object-cover" />
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">{heroText.title}</h1>
@@ -222,22 +222,24 @@ const HeroSection = () => {
             </a>
           </div>
         </div>
-        {photoSrc ? (
-          <div className="absolute right-16 md:right-20 lg:right-24 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px]" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
-            <img
-              src={photoSrc}
-              alt="Event Photo"
-              className="w-full h-full rounded-[3rem] shadow-2xl object-cover"
-            />
-          </div>
-        ) : (
-          <div className="absolute right-16 md:right-20 lg:right-24 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px] flex items-center justify-center" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
-            <div className="w-full h-full bg-white/10 rounded-[3rem] shadow-2xl border-2 border-white/30 border-dashed flex items-center justify-center">
-              <p className="text-white/60 text-center px-4 text-lg">Photo Placeholder</p>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Photo positioned relative to section, not the padded container */}
+      {photoSrc ? (
+        <div className="hidden md:block absolute right-16 md:right-20 lg:right-24 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px] max-w-[600px]" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+          <img
+            src={photoSrc}
+            alt="Event Photo"
+            className="w-full h-full rounded-[3rem] shadow-2xl object-cover"
+          />
+        </div>
+      ) : (
+        <div className="hidden md:flex absolute right-16 md:right-20 lg:right-24 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px] max-w-[600px] items-center justify-center" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+          <div className="w-full h-full bg-white/10 rounded-[3rem] shadow-2xl border-2 border-white/30 border-dashed flex items-center justify-center">
+            <p className="text-white/60 text-center px-4 text-lg">Photo Placeholder</p>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
