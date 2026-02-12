@@ -39,9 +39,22 @@ function App() {
       duration: 800,
       once: false,
       mirror: true,
-      offset: 100,
-      easing: 'ease-in-out'
+      offset: 50,
+      easing: 'ease-in-out',
+      anchorPlacement: 'top-bottom',
+      disable: false,
+      startEvent: 'DOMContentLoaded',
+      useClassNames: false,
+      disableMutationObserver: false,
+      throttleDelay: 99,
     });
+
+    // Refresh AOS on scroll to handle fade out properly
+    const handleScroll = () => {
+      AOS.refresh();
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // If this is a subdomain, only show the subdomain landing page (no auth required)

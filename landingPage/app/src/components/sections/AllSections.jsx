@@ -61,8 +61,8 @@ export const CategoriesSection = () => {
     background: `linear-gradient(135deg, ${customColors.color1} 0%, ${customColors.color2} 100%)`,
   };
 
-  const CategoryCard = ({ category }) => (
-    <div className={`relative p-1 rounded-xl group overflow-visible transition-all duration-500 ${layout === 'layout-1' ? 'hover:-translate-y-3' : ''}`}>
+  const CategoryCard = ({ category, index }) => (
+    <div className={`relative p-1 rounded-xl group overflow-visible transition-all duration-500 ${layout === 'layout-1' ? 'hover:-translate-y-3' : ''}`} data-aos="fade-up" data-aos-delay={index * 100}>
       <div
         className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={customGradientStyle}
@@ -120,8 +120,8 @@ export const CategoriesSection = () => {
           <h2 className="section-title">{categoriesText.sectionTitle}</h2>
           <p className="section-subtitle">Pilih kategori yang sesuai dengan keahlian Anda</p>
           <div className="max-w-4xl mx-auto space-y-6 overflow-x-hidden">
-            {categories.map((cat) => (
-              <div key={cat.id} className="bg-white p-6 rounded-xl shadow-lg flex items-center gap-6 hover:translate-x-3 transition-transform">
+            {categories.map((cat, index) => (
+              <div key={cat.id} className="bg-white p-6 rounded-xl shadow-lg flex items-center gap-6 hover:translate-x-3 transition-transform" data-aos="fade-up" data-aos-delay={index * 100}>
                 {/* Show image if available, otherwise show icon */}
                 {cat.image ? (
                   <div className="w-24 h-24 rounded-2xl flex-shrink-0 overflow-hidden">
@@ -172,9 +172,9 @@ export const CategoriesSection = () => {
 
           {/* Desktop - Grid instead of horizontal scroll */}
           <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">
-            {categories.map((cat) => (
+            {categories.map((cat, index) => (
               <div key={cat.id}>
-                <CategoryCard category={cat} />
+                <CategoryCard category={cat} index={index} />
               </div>
             ))}
           </div>
@@ -187,9 +187,9 @@ export const CategoriesSection = () => {
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               <div className="flex gap-4 pb-4">
-                {categories.map((cat) => (
+                {categories.map((cat, index) => (
                   <div key={cat.id} className="min-w-[85vw] snap-center">
-                    <CategoryCard category={cat} />
+                    <CategoryCard category={cat} index={index} />
                   </div>
                 ))}
               </div>
@@ -372,13 +372,11 @@ export const TimelineSection = () => {
               className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide px-4 -mx-4"
             >
               {timeline.map((item, index) => (
-                <div 
+                <div
                   key={item.id}
                   className="flex-shrink-0 w-[85vw] snap-center"
-                  style={{
-                    opacity: 0,
-                    animation: `fadeIn 0.5s ease-out ${index * 0.1}s forwards`
-                  }}
+                  data-aos="fade-up"
+                  data-aos-delay={index * 100}
                 >
                   <div className="relative p-1 rounded-xl group">
                     <div
@@ -736,8 +734,8 @@ export const JurySection = () => {
           <h2 className="section-title">{juryText.sectionTitle}</h2>
           <p className="section-subtitle">Bertemu dengan para ahli dan profesional terkemuka</p>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {jury.map((person) => (
-              <div key={person.id} className="bg-white rounded-xl overflow-hidden shadow-lg hover:-translate-y-3 transition-transform">
+            {jury.map((person, index) => (
+              <div key={person.id} className="bg-white rounded-xl overflow-hidden shadow-lg hover:-translate-y-3 transition-transform" data-aos="fade-up" data-aos-delay={index * 100}>
                 <div className="h-64 overflow-hidden">
                   <img src={person.image} alt={person.name} className="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
                 </div>
@@ -769,8 +767,8 @@ export const JurySection = () => {
           <h2 className="section-title">{juryText.sectionTitle}</h2>
           <p className="section-subtitle">Bertemu dengan para ahli dan profesional terkemuka</p>
           <div className="max-w-4xl mx-auto space-y-6">
-            {jury.map((person) => (
-              <div key={person.id} className="bg-white rounded-xl shadow-lg flex flex-col md:flex-row items-center gap-6 p-6 hover:shadow-xl transition-shadow">
+            {jury.map((person, index) => (
+              <div key={person.id} className="bg-white rounded-xl shadow-lg flex flex-col md:flex-row items-center gap-6 p-6 hover:shadow-xl transition-shadow" data-aos="fade-up" data-aos-delay={index * 100}>
                 <img src={person.image} alt={person.name} className="w-32 h-32 rounded-full object-cover flex-shrink-0 border-4 border-gray-200" />
                 <div className="flex-1 text-center md:text-left">
                   <h3 className="font-bold text-xl mb-2">{person.name}</h3>
@@ -894,6 +892,8 @@ export const InstagramSection = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative aspect-[4/5] overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+                  data-aos="zoom-in"
+                  data-aos-delay={index * 100}
                 >
                   <img
                     src={post}
