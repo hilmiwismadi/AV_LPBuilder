@@ -223,7 +223,7 @@ const HeroSection = () => {
           </div>
         </div>
         {photoSrc ? (
-          <div className="absolute right-8 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px]">
+          <div className="absolute right-16 md:right-20 lg:right-24 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px]">
             <img
               src={photoSrc}
               alt="Event Photo"
@@ -231,7 +231,7 @@ const HeroSection = () => {
             />
           </div>
         ) : (
-          <div className="absolute right-8 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px] flex items-center justify-center">
+          <div className="absolute right-16 md:right-20 lg:right-24 top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-h-[600px] flex items-center justify-center">
             <div className="w-full h-full bg-white/10 rounded-3xl shadow-2xl border-2 border-white/30 border-dashed flex items-center justify-center">
               <p className="text-white/60 text-center px-4 text-lg">Photo Placeholder</p>
             </div>
