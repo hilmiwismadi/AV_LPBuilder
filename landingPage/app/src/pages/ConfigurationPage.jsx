@@ -300,11 +300,14 @@ const ConfigurationPage = () => {
 
   // Compress image to fit within localStorage limits
   const compressImage = (file, type) => {
+    console.log(`[DEBUG] compressImage called for ${type}, file size: ${file.size}`);
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
+        console.log(`[DEBUG] FileReader loaded, creating image...`);
         const img = new Image();
         img.onload = () => {
+          console.log(`[DEBUG] Image loaded: ${img.width}x${img.height}`);
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
@@ -384,6 +387,8 @@ const ConfigurationPage = () => {
         img.onerror = reject;
         img.src = e.target.result;
       };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
     });
   };
   // Handle image upload
