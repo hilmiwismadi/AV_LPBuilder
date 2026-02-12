@@ -335,14 +335,68 @@ export const TimelineSection = () => {
   };
 
   if (layout === 'layout-2') {
-  if (layout === 'layout-2') {
     return (
       <section id="timeline" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="section-title">{timelineText.sectionTitle}</h2>
           <p className="section-subtitle">Jadwal lengkap pelaksanaan kompetisi</p>
-          <div className="max-w-3xl mx-auto relative pl-24 py-8">
-            {/* Extended vertical line that spans all timeline items */}
+          
+          {/* Mobile: Horizontal Scrollable Carousel */}
+          <div className="md:hidden">
+            <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide px-4 -mx-4">
+              {timeline.map((item, index) => (
+                <div 
+                  key={item.id}
+                  className="flex-shrink-0 w-[85vw] snap-center"
+                  style={{
+                    opacity: 0,
+                    animation: `fadeIn 0.5s ease-out ${index * 0.1}s forwards`
+                  }}
+                >
+                  <div className="relative p-1 rounded-xl group">
+                    <div
+                      className="absolute inset-0 rounded-xl opacity-20"
+                      style={customGradientStyle}
+                    />
+                    <div className="relative bg-white p-6 rounded-xl shadow-lg">
+                      {/* Icon/Image at top */}
+                      <div className="flex items-center gap-4 mb-4">
+                        {item.image ? (
+                          <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg border-2 border-white flex-shrink-0">
+                            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          item.icon && item.icon !== 'None' && (
+                            <div 
+                              style={customGradientStyle} 
+                              className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl shadow-lg border-2 border-white flex-shrink-0"
+                            >
+                              {getIcon(item.icon)}
+                            </div>
+                          )
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg font-bold mb-1 line-clamp-2">{item.title}</h3>
+                          <p style={{ color: customColors.color1 }} className="text-sm font-semibold">{item.date}</p>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 text-sm line-clamp-3">{item.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Scroll indicator dots */}
+            <div className="flex justify-center gap-2 mt-4">
+              {timeline.map((_, index) => (
+                <div key={index} className="w-2 h-2 rounded-full bg-gray-300"></div>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop: Vertical Timeline with Parallax */}
+          <div className="hidden md:block max-w-3xl mx-auto relative pl-24 py-8">
+            {/* Extended vertical line */}
             <div 
               style={{
                 ...customGradientStyle,
@@ -409,7 +463,7 @@ export const TimelineSection = () => {
           </div>
         </div>
         
-        {/* CSS Animation for parallax fade-in effect */}
+        {/* CSS Animations */}
         <style jsx>{`
           @keyframes fadeInUp {
             to {
@@ -418,14 +472,28 @@ export const TimelineSection = () => {
             }
           }
           
+          @keyframes fadeIn {
+            to {
+              opacity: 1;
+            }
+          }
+          
           .timeline-item:hover .timeline-icon {
             transform: scale(1.1) rotate(5deg);
             transition: transform 0.3s ease;
           }
+          
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+          
+          .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
         `}</style>
       </section>
     );
-  }
   }
 
   if (layout === 'layout-3') {
