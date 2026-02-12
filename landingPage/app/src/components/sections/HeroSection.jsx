@@ -29,7 +29,7 @@ const HeroSection = () => {
   const customGradientStyle = heroBackgroundSrc
     ? {
         backgroundImage: `url(${heroBackgroundSrc})`,
-        backgroundSize: 'cover',
+        backgroundSize: 'contain',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
       }
