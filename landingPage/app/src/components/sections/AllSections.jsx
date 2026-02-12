@@ -494,7 +494,7 @@ export const TimelineSection = () => {
           </div>
         </div>
         
-        <style jsx>{`
+        <style>{`
           @keyframes fadeInUp {
             to {
               opacity: 1;
