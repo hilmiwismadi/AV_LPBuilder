@@ -68,10 +68,10 @@ const HeroSection = () => {
             </a>
           </div>
           <div className="flex flex-col sm:flex-row justify-center gap-4 px-4 mb-12">
-            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="btn-primary bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto text-center">
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="btn-primary bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto text-center rounded-lg">
               {heroText.ctaPrimary}
             </a>
-            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary hover:bg-white hover:text-gray-800 w-full sm:w-auto text-center">
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary hover:bg-white hover:text-gray-800 w-full sm:w-auto text-center rounded-lg">
               {heroText.ctaSecondary}
             </a>
           </div>
@@ -110,10 +110,10 @@ const HeroSection = () => {
             </a>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="btn-primary bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto text-center">
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="btn-primary bg-white text-gray-800 hover:bg-gray-100 w-full sm:w-auto text-center rounded-lg">
               {heroText.ctaPrimary}
             </a>
-            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary hover:bg-white hover:text-gray-800 w-full sm:w-auto text-center">
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary hover:bg-white hover:text-gray-800 w-full sm:w-auto text-center rounded-lg">
               {heroText.ctaSecondary}
             </a>
           </div>
@@ -195,7 +195,7 @@ const HeroSection = () => {
       </div>
 
       {/* Desktop: Simple flex layout - Left text, Right photo */}
-      <div className="hidden md:flex items-center justify-between gap-8 w-full max-w-7xl mx-auto px-8 lg:px-16">
+      <div className="hidden md:flex items-center justify-between gap-12 lg:gap-16 w-full px-8 md:px-12 lg:px-16 xl:px-20">
 
         {/* Left side: Text content */}
         <div className="flex-1 max-w-xl" data-aos="fade-up" data-aos-duration="1000">
@@ -238,7 +238,7 @@ const HeroSection = () => {
         </div>
 
         {/* Right side: Event Photo */}
-        <div className="flex-shrink-0 w-[400px] h-[400px] lg:w-[500px] lg:h-[500px]" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+        <div className="flex-shrink-0 w-[350px] h-[350px] lg:w-[450px] lg:h-[450px] xl:w-[500px] xl:h-[500px]" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
           {photoSrc ? (
             <img
               src={photoSrc}
