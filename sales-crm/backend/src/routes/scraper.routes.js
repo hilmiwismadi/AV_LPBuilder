@@ -1,4 +1,6 @@
 import express from 'express';
+import { PrismaClient } from '@prisma/client';
+import { nanoid } from 'nanoid';
 import {
   startSession,
   registerConnection,
@@ -9,10 +11,167 @@ import {
 } from '../services/scraperService.js';
 
 const router = express.Router();
+const prisma = new PrismaClient();
+
+/**
+ * POST /api/scraper/local-session
+ * Create a session from local scraper data
+ */
+router.post('/local-session', async (req, res) => {
+  try {
+    const {
+      profileUrl,
+      startPostIndex = 0,
+      endPostIndex = 100,
+      useAuth = false
+    } = req.body;
+
+    console.log('[VPS] Receiving local scraper session creation request');
+    console.log('[VPS] Profile URL:', profileUrl);
+    console.log('[VPS] Post range:', startPostIndex, '-', endPostIndex);
+
+    // Validate required fields
+    if (!profileUrl) {
+      return res.status(400).json({ error: 'Profile URL is required' });
+    }
+
+    if (!profileUrl.includes('instagram.com/')) {
+      return res.status(400).json({ error: 'Invalid Instagram URL' });
+    }
+
+    // Extract username from profile URL
+    const usernameMatch = profileUrl.match(/instagram\.com\/([^\/]+)/);
+    const username = usernameMatch ? usernameMatch[1].replace('/', '') : 'unknown';
+
+    // Create session in database
+    const slug = nanoid(10);
+
+    const session = await prisma.scrapingSession.create({
+      data: {
+        slug,
+        profileUrl,
+        username,
+        startPostIndex,
+        endPostIndex,
+        status: 'PENDING',
+        useAuth,
+        totalPosts: 0,
+        successfulPosts: 0,
+        postsWithPhone: 0
+      }
+    });
+
+    console.log('[VPS] ✓ Session created with slug:', slug);
+
+    res.json({
+      success: true,
+      sessionId: session.id,
+      slug: session.slug,
+      status: session.status
+    });
+
+  } catch (error) {
+    console.error('[VPS] Error creating local session:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/scraper/posts
+ * Upload scraped posts from local scraper
+ */
+router.post('/posts', async (req, res) => {
+  try {
+    const { sessionId, posts } = req.body;
+
+    console.log('[VPS] Receiving posts upload request');
+    console.log('[VPS] Session ID:', sessionId);
+    console.log('[VPS] Number of posts:', posts?.length || 0);
+
+    if (!sessionId) {
+      return res.status(400).json({ error: 'sessionId is required' });
+    }
+
+    if (!posts || !Array.isArray(posts)) {
+      return res.status(400).json({ error: 'posts must be an array' });
+    }
+
+    // Find the session
+    const session = await prisma.scrapingSession.findUnique({
+      where: { id: sessionId }
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    // Insert all posts
+    let successCount = 0;
+    let postsWithPhoneCount = 0;
+
+    for (const post of posts) {
+      try {
+        await prisma.scrapedPost.create({
+          data: {
+            sessionId: session.id,
+            postIndex: post.postIndex,
+            postUrl: post.postUrl,
+            postDate: post.postDate ? new Date(post.postDate) : null,
+            eventTitle: post.eventTitle || null,
+            eventOrganizer: post.eventOrganizer || null,
+            phoneNumber1: post.phoneNumber1 || null,
+            phoneNumber2: post.phoneNumber2 || null,
+            location: post.location || null,
+            nextEventDate: post.nextEventDate ? new Date(post.nextEventDate) : null,
+            imageUrl: post.imageUrl || null,
+            caption: post.caption || null,
+            rawSource: post.rawSource || null
+          }
+        });
+
+        successCount++;
+
+        if (post.phoneNumber1 || post.phoneNumber2) {
+          postsWithPhoneCount++;
+        }
+      } catch (insertError) {
+        console.error('[VPS] Error inserting post:', insertError);
+      }
+    }
+
+    // Update session with results
+    await prisma.scrapingSession.update({
+      where: { id: session.id },
+      data: {
+        status: 'COMPLETED',
+        totalPosts: posts.length,
+        successfulPosts: successCount,
+        postsWithPhone: postsWithPhoneCount,
+        startedAt: new Date(),
+        completedAt: new Date()
+      }
+    });
+
+    console.log('[VPS] ✓ Uploaded', successCount, '/', posts.length, 'posts');
+    console.log('[VPS] ✓ Posts with phone:', postsWithPhoneCount);
+
+    res.json({
+      success: true,
+      message: 'Posts uploaded successfully',
+      uploaded: successCount,
+      total: posts.length,
+      postsWithPhone: postsWithPhoneCount
+    });
+
+  } catch (error) {
+    console.error('[VPS] Error uploading posts:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 /**
  * POST /api/scraper/start
- * Start a new scraping session
+ * Start a new scraping session (VPS-based scraping)
  */
 router.post('/start', async (req, res) => {
   try {

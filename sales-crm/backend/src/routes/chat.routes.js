@@ -12,29 +12,29 @@ const prisma = new PrismaClient();
 router.get('/:clientId', async (req, res) => {
   try {
     const { clientId } = req.params;
-    
+
     // Get client to find their phone number
     const client = await prisma.client.findUnique({
       where: { id: clientId }
     });
-    
+
     if (!client) {
       return res.json({ messages: [] });
     }
-    
+
     // Standardize phone number and create hash
     const standardizedPhone = standardizePhoneNumber(client.phoneNumber);
     const phoneHash = crypto.createHash('md5').update(standardizedPhone).digest('hex');
-    
+
     // Get all messages for this phone (both linked and orphan)
     const linkedMessages = await prisma.chatHistory.findMany({
-      where: { 
+      where: {
         clientId,
         phoneHash
       },
       orderBy: { timestamp: 'asc' }
     });
-    
+
     // Also get any orphan messages with this phoneHash
     const orphanMessages = await prisma.chatHistory.findMany({
       where: {
@@ -43,7 +43,7 @@ router.get('/:clientId', async (req, res) => {
       },
       orderBy: { timestamp: 'asc' }
     });
-    
+
     // Combine and format messages
     const allMessages = [...linkedMessages, ...orphanMessages]
       .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
@@ -54,7 +54,7 @@ router.get('/:clientId', async (req, res) => {
         sender: chat.isOutgoing ? 'user' : 'client',
         timestamp: chat.timestamp
       }));
-    
+
     res.json({ messages: allMessages });
   } catch (error) {
     console.error('Error fetching chat history:', error);
@@ -66,37 +66,23 @@ router.get('/:clientId', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { clientId, message, isOutgoing = true, sendViaWhatsApp = false } = req.body;
-    
+
     if (!clientId || !message) {
       return res.status(400).json({ error: 'clientId and message are required' });
     }
-    
+
     const client = await prisma.client.findUnique({
       where: { id: clientId }
     });
-    
+
     if (!client) {
       return res.status(404).json({ error: 'Client not found' });
     }
-    
+
     const standardizedPhone = standardizePhoneNumber(client.phoneNumber);
     const phoneHash = crypto.createHash('md5').update(standardizedPhone).digest('hex');
-    
-    let whatsappResult = null;
-    if (isOutgoing && sendViaWhatsApp) {
-      if (!whatsappService.isReady()) {
-        return res.status(503).json({ 
-          error: 'WhatsApp is not ready. Please scan QR code first.' 
-        });
-      }
-      
-      whatsappResult = await whatsappService.sendMessage(client.phoneNumber, message);
-      
-      if (!whatsappResult.success) {
-        return res.status(500).json({ error: whatsappResult.error });
-      }
-    }
-    
+
+    // Save to database first
     const chat = await prisma.chatHistory.create({
       data: {
         clientId,
@@ -105,20 +91,39 @@ router.post('/', async (req, res) => {
         isOutgoing
       }
     });
-    
+
     if (isOutgoing) {
       await prisma.client.update({
         where: { id: clientId },
         data: { lastContact: new Date() }
       });
     }
-    
+
+    // Then try to send via WhatsApp if requested
+    let whatsappResult = { success: false };
+    let whatsappWarning = null;
+
+    if (isOutgoing && sendViaWhatsApp) {
+      if (!whatsappService.isReady()) {
+        whatsappWarning = 'WhatsApp is not ready. Message saved to CRM but not sent via WhatsApp.';
+      } else {
+        whatsappResult = await whatsappService.sendMessage(client.phoneNumber, message);
+
+        if (!whatsappResult.success) {
+          whatsappWarning = `Message saved to CRM but WhatsApp send failed: ${whatsappResult.error}`;
+          console.log('WhatsApp send failed but message saved:', whatsappResult.error);
+        }
+      }
+    }
+
     res.json({
       id: chat.id,
       message: chat.message,
       isOutgoing: chat.isOutgoing,
       sender: chat.isOutgoing ? 'user' : 'client',
       timestamp: chat.timestamp,
+      whatsappSent: whatsappResult.success,
+      whatsappWarning,
       whatsappResult
     });
   } catch (error) {
@@ -132,15 +137,15 @@ router.post('/', async (req, res) => {
 router.get('/history/phone/:phoneNumber', async (req, res) => {
   try {
     const { phoneNumber } = req.params;
-    
+
     const standardizedPhone = standardizePhoneNumber(phoneNumber);
     const phoneHash = crypto.createHash('md5').update(standardizedPhone).digest('hex');
-    
+
     const chatHistory = await prisma.chatHistory.findMany({
       where: { phoneHash },
       orderBy: { timestamp: 'asc' }
     });
-    
+
     const messages = chatHistory.map(chat => ({
       id: chat.id,
       text: chat.message,
@@ -148,7 +153,7 @@ router.get('/history/phone/:phoneNumber', async (req, res) => {
       sender: chat.isOutgoing ? 'user' : 'client',
       timestamp: chat.timestamp
     }));
-    
+
     res.json({ messages });
   } catch (error) {
     console.error('Error fetching chat history by phone:', error);

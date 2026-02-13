@@ -30,7 +30,20 @@ class WhatsAppService {
       }),
       puppeteer: {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu'
+        ]
+      },
+      // Disable auto-marking as read to avoid WhatsApp Web.js errors
+      webVersionCache: {
+        type: 'remote',
+        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html'
       }
     });
 
@@ -53,49 +66,101 @@ class WhatsAppService {
       console.log('WhatsApp client authenticated!');
     });
 
-    // IMPORTANT: Only save INCOMING messages automatically
-    // Outgoing messages are saved by the chat route when user sends from CRM
-    this.client.on('message', async (message) => {
-      // Only process incoming messages (not fromMe)
-      if (message.fromMe) {
-        return;
-      }
+    this.client.on('auth_failure', (msg) => {
+      console.error('WhatsApp authentication failure:', msg);
+    });
 
+    this.client.on('disconnected', (reason) => {
+      console.log('WhatsApp client disconnected:', reason);
+      this.isInitialized = false;
+    });
+
+    // METHOD 1: Using message_create event (captures ALL messages including from phone)
+    this.client.on('message_create', async (message) => {
       try {
-        const phoneNumber = message.from;
+        // Skip group messages and status updates
+        if (message.from && (message.from.includes('@g.us') || message.from.includes('status@broadcast'))) {
+          return;
+        }
+        if (message.to && (message.to.includes('@g.us') || message.to.includes('status@broadcast'))) {
+          return;
+        }
+
+        const isOutgoing = message.fromMe;
+        const phoneNumber = isOutgoing ? message.to : message.from;
         const standardizedPhone = standardizePhoneNumber(phoneNumber);
         const phoneHash = crypto.createHash('md5').update(standardizedPhone).digest('hex');
-        
-        console.log('Incoming message from:', standardizedPhone, 'body:', message.body);
-        
-        // Find current client with this phone number
+
+        console.log(
+          '[WA-CREATE]',
+          isOutgoing ? 'Outgoing message to:' : 'Incoming message from:',
+          standardizedPhone,
+          'body:',
+          message.body || '[no text]'
+        );
+
+        // Skip media-only messages or empty messages
+        if (!message.body || message.body.trim() === '') {
+          console.log('[WA-CREATE] Skipping message without text content');
+          return;
+        }
+
+        // Find client with this phone number
         const client = await prisma.client.findFirst({
           where: { phoneNumber: standardizedPhone }
         });
-        
+
         let timestamp = message.timestamp;
         if (timestamp && timestamp < 10000000000) {
           timestamp = timestamp * 1000;
         }
-        
-        // Save incoming chat history
+
+        // Check for duplicates within 10 seconds
+        const recentMessage = await prisma.chatHistory.findFirst({
+          where: {
+            phoneHash,
+            message: message.body,
+            isOutgoing,
+            timestamp: {
+              gte: new Date(Date.now() - 10000)
+            }
+          },
+          orderBy: { timestamp: 'desc' }
+        });
+
+        if (recentMessage) {
+          console.log('[WA-CREATE] ✓ Message already exists, skipping duplicate');
+          return;
+        }
+
+        // Save to database
         await prisma.chatHistory.create({
           data: {
             phoneHash,
             clientId: client ? client.id : null,
             message: message.body,
-            isOutgoing: false,
+            isOutgoing,
             timestamp: new Date(timestamp || Date.now())
           }
         });
-        
+
         if (client) {
-          console.log('✓ Saved incoming message for client:', client.eventOrganizer);
+          console.log(
+            '[WA-CREATE] ✓ Saved',
+            isOutgoing ? 'outgoing' : 'incoming',
+            'message for client:',
+            client.eventOrganizer
+          );
         } else {
-          console.log('✓ Saved incoming orphan message for phone:', standardizedPhone);
+          console.log(
+            '[WA-CREATE] ✓ Saved',
+            isOutgoing ? 'outgoing' : 'incoming',
+            'orphan message for phone:',
+            standardizedPhone
+          );
         }
       } catch (error) {
-        console.error('Error in message handler:', error);
+        console.error('[WA-CREATE] Error in message_create handler:', error);
       }
     });
 
@@ -109,32 +174,89 @@ class WhatsAppService {
 
   async sendMessage(phoneNumber, message) {
     if (!this.client || !this.isInitialized) {
-      throw new Error('WhatsApp service not initialized');
+      return {
+        success: false,
+        error: 'WhatsApp service not initialized'
+      };
     }
 
     if (!this.client.info) {
-      throw new Error('WhatsApp not ready. Please scan QR code first.');
+      return {
+        success: false,
+        error: 'WhatsApp not ready. Please scan QR code first.'
+      };
     }
 
     const standardizedPhone = standardizePhoneNumber(phoneNumber);
     const formattedNumber = standardizedPhone + '@c.us';
-    
+
     try {
-      const sentMessage = await this.client.sendMessage(formattedNumber, message);
-      console.log('Message sent successfully to', formattedNumber);
-      
+      console.log('Sending message to:', formattedNumber);
+
+      // Check if number exists on WhatsApp
+      const numberId = await this.client.getNumberId(formattedNumber).catch((err) => {
+        console.log('Number ID check failed, trying anyway:', err.message);
+        return { _serialized: formattedNumber };
+      });
+
+      if (!numberId) {
+        return {
+          success: false,
+          error: 'Phone number not registered on WhatsApp'
+        };
+      }
+
+      // Send the message with retry logic
+      let sentMessage;
+      let lastError;
+
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          sentMessage = await this.client.sendMessage(numberId._serialized, message);
+          console.log('✓ Message sent successfully to', formattedNumber, 'on attempt', attempt);
+
+          return {
+            success: true,
+            messageId: sentMessage.id?._serialized || 'unknown',
+            timestamp: sentMessage.timestamp || Date.now()
+          };
+        } catch (sendError) {
+          lastError = sendError;
+          console.log(`Attempt ${attempt} failed:`, sendError.message);
+
+          // If it's the markedUnread error, wait and retry
+          if (sendError.message.includes('markedUnread') || sendError.message.includes('Cannot read properties')) {
+            if (attempt < 3) {
+              console.log('Retrying after 1 second...');
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              continue;
+            }
+          } else {
+            // For other errors, don't retry
+            break;
+          }
+        }
+      }
+
+      // If all attempts failed
+      console.error('All send attempts failed. Last error:', lastError);
       return {
-        success: true,
-        messageId: sentMessage.id._serialized,
-        timestamp: sentMessage.timestamp
+        success: false,
+        error: lastError?.message || 'Failed to send message after multiple attempts'
       };
+
     } catch (error) {
       console.error('Error sending message:', error);
       return {
         success: false,
-        error: error.message
+        error: error.message || 'Failed to send message'
       };
     }
+  }
+
+  parsePhoneNumber(phoneNumber) {
+    const standardized = standardizePhoneNumber(phoneNumber);
+    return standardized + '@c.us';
   }
 
   isReady() {
@@ -186,7 +308,7 @@ class WhatsAppService {
     this.isInitialized = false;
     this.qrCode = null;
     this.qrCodeImage = null;
-    
+
     if (this.client) {
       try {
         await this.client.destroy();
@@ -194,7 +316,7 @@ class WhatsAppService {
         console.error('Error destroying client:', error);
       }
     }
-    
+
     this.initialize();
   }
 }
