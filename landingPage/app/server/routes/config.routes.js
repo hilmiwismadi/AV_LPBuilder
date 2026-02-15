@@ -39,4 +39,7 @@ router.put('/:id', checkConfigOwnership, updateConfiguration);
 // DELETE configuration (with ownership check)
 router.delete('/:id', checkConfigOwnership, deleteConfiguration);
 
+// DELETE configuration by slug (for CRM integration)
+router.delete("/by-slug/:slug", deleteConfiguration);
+
 export default router;

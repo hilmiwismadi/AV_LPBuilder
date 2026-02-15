@@ -393,3 +393,73 @@ router.post('/:id/build-demo', authenticate, async (req, res) => {
 });
 
 export default router;
+
+// DELETE /api/clients/:id/delete-demo - Delete demo landing page
+router.delete('/:id/delete-demo', authenticate, async (req, res) => {
+  try {
+    const clientId = req.params.id;
+
+    // Fetch client
+    const client = await prisma.client.findUnique({
+      where: { id: clientId }
+    });
+
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+
+    if (!client.linkDemo) {
+      return res.status(400).json({ error: 'No demo to delete' });
+    }
+
+    // Extract slug from linkDemo URL
+    const slug = client.linkDemo.split('.webbuild.arachnova.id')[0].split('//')[1];
+
+    console.log('[Delete Demo] Deleting configuration for slug:', slug);
+
+    // Delete configuration from Landing Page API
+    try {
+      await axios.delete(
+        `${process.env.LANDING_PAGE_API_URL || 'https://webbuild.arachnova.id/api'}/configurations/by-slug/${slug}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.LANDING_PAGE_AUTH_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 30000
+        }
+      );
+      console.log('[Delete Demo] Configuration deleted from Landing Page');
+    } catch (error) {
+      console.error('[Delete Demo] Error deleting from Landing Page:', error.message);
+      // Continue to update client even if Landing Page deletion fails
+    }
+
+    // Update client to remove demo data
+    const updatedClient = await prisma.client.update({
+      where: { id: clientId },
+      data: {
+        linkDemo: null,
+        imgLogo: null,
+        imgPoster: null,
+        colorPalette: null,
+        eventType: null
+      }
+    });
+
+    console.log('[Delete Demo] Client demo data cleared');
+
+    res.json({
+      success: true,
+      message: 'Demo deleted successfully',
+      client: updatedClient
+    });
+
+  } catch (error) {
+    console.error('[Delete Demo] Error:', error);
+    return res.status(500).json({
+      error: 'Failed to delete demo',
+      details: error.message
+    });
+  }
+});

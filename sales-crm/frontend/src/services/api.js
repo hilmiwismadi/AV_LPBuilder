@@ -32,6 +32,10 @@ export const clientAPI = {
   checkAssignment: (postId) => api.get('/clients/check-assignment/' + postId),
 };
 
+export const buildDemoAPI = {
+  create: (clientId, demoData) => api.post("/clients/" + clientId + "/build-demo", demoData),
+};
+
 export const chatAPI = {
   getHistory: (clientId) => api.get("/chat/" + clientId),
   sendMessage: (clientId, message, isOutgoing, sendViaWhatsApp) =>
@@ -62,15 +66,15 @@ export const templateAPI = {
 };
 
 export const logsAPI = {
-  getLogs: (serviceName, lines, type) => 
+  getLogs: (serviceName, lines, type) =>
     api.get("/logs/" + serviceName + "?lines=" + (lines || 100) + "&type=" + (type || "all")),
-  getStatus: (serviceName) => 
+  getStatus: (serviceName) =>
     api.get("/logs/" + serviceName + "/status"),
-  restartService: (serviceName) => 
+  restartService: (serviceName) =>
     api.post("/logs/" + serviceName + "/restart"),
-  flushService: (serviceName) => 
+  flushService: (serviceName) =>
     api.post("/logs/" + serviceName + "/flush"),
-  getBackend: (lines, type) => 
+  getBackend: (lines, type) =>
     api.get("/logs/sales-crm-backend?lines=" + (lines || 100) + "&type=" + (type || "all")),
 };
 
@@ -85,9 +89,9 @@ export const scraperAPI = {
     const token = localStorage.getItem("token");
     const baseUrl = import.meta.env.VITE_API_URL || API_BASE_URL;
     const url = baseUrl + "/scraper/live/" + sessionId;
-    
+
     const eventSource = new EventSource(url);
-    
+
     eventSource.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -96,12 +100,12 @@ export const scraperAPI = {
         console.error("Failed to parse SSE data:", e);
       }
     };
-    
+
     eventSource.onerror = (error) => {
       if (onError) onError(error);
       eventSource.close();
     };
-    
+
     return eventSource;
   }
 };

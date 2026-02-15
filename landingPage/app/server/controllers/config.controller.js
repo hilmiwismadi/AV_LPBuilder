@@ -348,15 +348,22 @@ export async function updateConfiguration(req, res) {
 // DELETE configuration (with ownership check via middleware)
 export async function deleteConfiguration(req, res) {
   try {
-    const { id } = req.params;
+    const { id, slug } = req.params;
+
+    // Delete by slug if provided, otherwise by id
+    const whereClause = slug ? { slug } : { id };
 
     await prisma.configuration.delete({
-      where: { id }
+      where: whereClause
     });
 
     res.json({ message: 'Configuration deleted successfully' });
   } catch (error) {
     console.error('Error deleting configuration:', error);
-    res.status(500).json({ error: 'Failed to delete configuration' });
+    if (error.code === 'P2025') {
+      res.status(404).json({ error: 'Configuration not found' });
+    } else {
+      res.status(500).json({ error: 'Failed to delete configuration' });
+    }
   }
 }

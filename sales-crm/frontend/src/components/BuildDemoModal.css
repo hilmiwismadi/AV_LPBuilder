@@ -479,3 +479,46 @@
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
 }
+
+/* Edit Demo Button */
+.btn-edit-demo {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+  background: rgba(99, 102, 241, 0.2);
+  color: #6366f1;
+  border: 1px solid #6366f1;
+}
+
+.btn-edit-demo:hover {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+/* Delete Demo Button */
+.btn-delete-demo {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+.btn-delete-demo:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+/* Update success-actions for 4 buttons */
+.success-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}

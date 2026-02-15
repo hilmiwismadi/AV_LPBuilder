@@ -260,10 +260,43 @@ const BuildDemoModal = ({ client, onClose, onSuccess }) => {
   };
 
 
+  const handleDeleteDemo = async () => {
+    if (!confirm('Are you sure you want to delete this demo? This will remove it from both CRM and Landing Page.')) {
+      return;
+    }
+    try {
+      const response = await fetch(`/api/clients/${client.id}/delete-demo`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete demo');
+      }
+      alert('Demo deleted successfully!');
+      if (onSuccess) {
+        onSuccess(null);
+      }
+      onClose();
+    } catch (error) {
+      console.error('Failed to delete demo:', error);
+      alert('Failed to delete demo. Please try again.');
+    }
+  };
+
+  const handleEditDemo = () => {
+    setShowSuccess(false);
+  };
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(generatedLink);
     alert('Link copied to clipboard!');
   };
+
+
 
   if (showSuccess) {
     return (
@@ -287,6 +320,12 @@ const BuildDemoModal = ({ client, onClose, onSuccess }) => {
                 className="btn-open"
               >
                 🔗 Open in New Tab
+              </button>
+              <button onClick={handleEditDemo} className="btn-edit-demo">
+                ✏️ Edit Demo
+              </button>
+              <button onClick={handleDeleteDemo} className="btn-delete-demo">
+                🗑️ Delete Demo
               </button>
             </div>
           </div>
