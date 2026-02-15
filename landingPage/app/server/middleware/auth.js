@@ -1,10 +1,18 @@
 import { verifyAccessToken } from '../utils/jwt.js';
 
-// Authentication middleware - verifies JWT token from cookie
+// Authentication middleware - verifies JWT token from cookie OR Authorization header
 export function authenticate(req, res, next) {
   try {
-    // Get token from httpOnly cookie
-    const token = req.cookies.accessToken;
+    // Try to get token from httpOnly cookie first
+    let token = req.cookies.accessToken;
+
+    // If no cookie token, try Authorization header (for API-to-API communication)
+    if (!token) {
+      const authHeader = req.headers.authorization || req.headers.Authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      }
+    }
 
     if (!token) {
       return res.status(401).json({ 
@@ -44,7 +52,15 @@ export function authenticate(req, res, next) {
 // Optional authentication - doesn't fail if no token
 export function optionalAuthenticate(req, res, next) {
   try {
-    const token = req.cookies.accessToken;
+    let token = req.cookies.accessToken;
+
+    // Try Authorization header if no cookie
+    if (!token) {
+      const authHeader = req.headers.authorization || req.headers.Authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
 
     if (token) {
       const decoded = verifyAccessToken(token);

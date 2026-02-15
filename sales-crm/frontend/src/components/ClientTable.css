@@ -103,6 +103,12 @@
   color: var(--color-accent) !important;
 }
 
+.btn-build:hover {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  color: #10b981 !important;
+}
+
 .btn-edit:hover {
   background: rgba(99, 102, 241, 0.1) !important;
   border-color: rgba(99, 102, 241, 0.3) !important;
@@ -119,17 +125,17 @@
   .table-container {
     overflow-x: auto;
   }
-  
+
   .client-table th,
   .client-table td {
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: var(--font-size-sm);
   }
-  
+
   .action-buttons {
     flex-wrap: wrap;
   }
-  
+
   .action-buttons button {
     width: 32px;
     height: 32px;

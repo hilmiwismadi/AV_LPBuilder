@@ -2,6 +2,7 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { standardizePhoneNumber } from '../utils/phoneUtils.js';
 import { authenticate } from '../middleware/auth.middleware.js';
+import { createConfiguration, buildDemoConfiguration, generateSlug } from '../services/landingPageService.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -257,6 +258,137 @@ router.get('/check-assignment/:postId', authenticate, async (req, res) => {
   } catch (error) {
     console.error('Error checking assignment:', error);
     res.status(500).json({ error: 'Failed to check assignment' });
+  }
+});
+
+// POST /api/clients/:id/build-demo - Build demo landing page for client
+router.post('/:id/build-demo', authenticate, async (req, res) => {
+  try {
+    const clientId = req.params.id;
+    const {
+      eventName,
+      eventType,
+      logoImage,
+      posterImage,
+      color1,
+      color2,
+      eventDescription,
+    } = req.body;
+
+    // Validate required fields
+    if (!eventName || !eventType || !logoImage || !posterImage) {
+      return res.status(400).json({
+        error: 'Missing required fields: eventName, eventType, logoImage, posterImage'
+      });
+    }
+
+    // Fetch client to ensure it exists
+    const client = await prisma.client.findUnique({
+      where: { id: clientId }
+    });
+
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+
+    // Build configuration object
+    const demoData = {
+      eventName,
+      eventType,
+      logoImage,
+      posterImage,
+      color1,
+      color2,
+      eventDescription,
+    };
+
+    const configData = buildDemoConfiguration(demoData);
+
+    console.log('[Build Demo] Creating configuration for:', eventName);
+
+    // Try to create configuration, retry with suffix if slug exists
+    let attempt = 0;
+    let landingPageResponse;
+    let lastError;
+
+    while (attempt < 5) {
+      try {
+        landingPageResponse = await createConfiguration(configData);
+        break; // Success, exit loop
+      } catch (error) {
+        lastError = error;
+
+        if (error.response?.status === 409) {
+          // Slug conflict, try with suffix
+          attempt++;
+          console.log(`[Build Demo] Slug conflict, retrying with suffix (attempt ${attempt})`);
+
+          const newSlug = generateSlug(eventName, attempt);
+          configData.name = `${eventName} (${attempt})`;
+
+          // Update eventName in heroText to match
+          if (configData.heroText) {
+            configData.heroText.title = configData.name;
+          }
+        } else {
+          // Other error, don't retry
+          throw error;
+        }
+      }
+    }
+
+    if (!landingPageResponse) {
+      throw lastError || new Error('Failed to create configuration after multiple attempts');
+    }
+
+    console.log('[Build Demo] Landing page created:', landingPageResponse);
+
+    // Extract subdomain URL from response
+    const subdomainUrl = landingPageResponse.subdomainUrl ||
+                         `https://${landingPageResponse.slug}.webbuild.arachnova.id`;
+
+    // Update client with demo info
+    const updatedClient = await prisma.client.update({
+      where: { id: clientId },
+      data: {
+        imgLogo: logoImage,
+        imgPoster: posterImage,
+        linkDemo: subdomainUrl,
+        colorPalette: JSON.stringify({ color1, color2 }),
+        eventType: eventType
+      }
+    });
+
+    console.log('[Build Demo] Client updated with demo link:', subdomainUrl);
+
+    res.json({
+      success: true,
+      linkDemo: subdomainUrl,
+      slug: landingPageResponse.slug,
+      client: updatedClient
+    });
+
+  } catch (error) {
+    console.error('[Build Demo] Error:', error);
+
+    if (error.response?.status === 409) {
+      return res.status(409).json({
+        error: 'Event name already exists. Please modify the name.'
+      });
+    } else if (error.response?.status === 413) {
+      return res.status(413).json({
+        error: 'Images are too large. Please use smaller files.'
+      });
+    } else if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+      return res.status(503).json({
+        error: 'Landing Page service is unavailable. Please try again later.'
+      });
+    } else {
+      return res.status(500).json({
+        error: 'Failed to create demo landing page',
+        details: error.message
+      });
+    }
   }
 });
 

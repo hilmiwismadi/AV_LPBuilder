@@ -1,7 +1,7 @@
 import React from 'react';
 import './ClientTable.css';
 
-const ClientTable = ({ clients, onEdit, onDelete, onChat }) => {
+const ClientTable = ({ clients, onEdit, onDelete, onChat, onBuild }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'TODO':
@@ -114,6 +114,13 @@ const ClientTable = ({ clients, onEdit, onDelete, onChat }) => {
                     title="Chat"
                   >
                     💬
+                  </button>
+                  <button
+                    onClick={() => onBuild(client)}
+                    className="btn-build"
+                    title={client.linkDemo ? "Demo Created - Click to view" : "Build Demo Landing Page"}
+                  >
+                    {client.linkDemo ? '✅' : '🏗️'}
                   </button>
                   <button
                     onClick={() => onEdit(client)}

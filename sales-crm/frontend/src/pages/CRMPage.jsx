@@ -6,6 +6,8 @@ import ClientForm from '../components/ClientForm';
 import ChatModal from '../components/ChatModal';
 import WhatsAppQRModal from '../components/WhatsAppQRModal';
 import ClientDetailModal from '../components/ClientDetailModal';
+import BuildDemoModal from '../components/BuildDemoModal';
+import ViewDemoModal from '../components/ViewDemoModal';
 import './CRMPage.css';
 
 const CRMPage = () => {
@@ -18,6 +20,8 @@ const CRMPage = () => {
   const [showChat, setShowChat] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [showWhatsAppQR, setShowWhatsAppQR] = useState(false);
+  const [showBuildDemo, setShowBuildDemo] = useState(false);
+  const [showViewDemo, setShowViewDemo] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [editingClient, setEditingClient] = useState(null);
   const [whatsappStatus, setWhatsappStatus] = useState('unknown');
@@ -100,6 +104,22 @@ const CRMPage = () => {
     setShowChat(true);
   };
 
+  const handleBuild = (client) => {
+    setSelectedClient(client);
+    if (client.linkDemo) {
+      // If demo already exists, show view modal
+      setShowViewDemo(true);
+    } else {
+      // Otherwise, show build modal
+      setShowBuildDemo(true);
+    }
+  };
+
+  const handleRebuild = (client) => {
+    setSelectedClient(client);
+    setShowBuildDemo(true);
+  };
+
   const handleSaveClient = async (clientData) => {
     try {
       if (editingClient) {
@@ -126,6 +146,13 @@ const CRMPage = () => {
   const handleCloseDetail = () => {
     setShowDetail(false);
     setEditingClient(null);
+  };
+
+  const handleBuildDemoSuccess = (link) => {
+    console.log('Demo created successfully:', link);
+    setShowBuildDemo(false);
+    setSelectedClient(null);
+    fetchClients(); // Refresh client list to show updated linkDemo
   };
 
   const handleWhatsAppAuthenticated = (clientInfo) => {
@@ -190,6 +217,7 @@ const CRMPage = () => {
         onEdit={handleEditClient}
         onDelete={handleDeleteClient}
         onChat={handleChat}
+        onBuild={handleBuild}
       />
 
       {showForm && (
@@ -219,6 +247,28 @@ const CRMPage = () => {
         <WhatsAppQRModal
           onClose={() => setShowWhatsAppQR(false)}
           onAuthenticated={handleWhatsAppAuthenticated}
+        />
+      )}
+
+      {showBuildDemo && selectedClient && (
+        <BuildDemoModal
+          client={selectedClient}
+          onClose={() => {
+            setShowBuildDemo(false);
+            setSelectedClient(null);
+          }}
+          onSuccess={handleBuildDemoSuccess}
+        />
+      )}
+
+      {showViewDemo && selectedClient && (
+        <ViewDemoModal
+          client={selectedClient}
+          onClose={() => {
+            setShowViewDemo(false);
+            setSelectedClient(null);
+          }}
+          onRebuild={handleRebuild}
         />
       )}
     </div>
