@@ -59,6 +59,7 @@ const ConfigurationPage = () => {
     clearEditingConfig,
     resetToDefaults,
     setEditingConfig,
+    clearLocalStorage,
   } = useCustomization();
 
   const [selectedPalette, setSelectedPalette] = useState(null);
@@ -114,6 +115,9 @@ const ConfigurationPage = () => {
       }
 
       // If eventId exists, load the configuration
+      // First, clear localStorage to prevent old data from interfering
+      clearLocalStorage();
+
       setIsLoadingConfig(true);
       try {
         const response = await api.get(`/configurations/by-slug/${eventId}`);

@@ -125,139 +125,199 @@ export function buildDemoConfiguration(demoData) {
       instagram6: posterImage
     },
     layouts: {
-      hero: 'layout1',
-      about: 'layout1',
-      categories: 'layout1',
-      timeline: 'layout1',
-      prizes: 'layout1',
-      jury: 'layout1',
-      documentation: 'layout1',
-      instagram: 'layout1',
-      sponsors: 'layout1',
-      contact: 'layout1',
-      footer: 'layout1'
+      hero: 'layout-2',        // Variant 2
+      about: 'layout-2',       // Variant 2
+      categories: 'layout-3',  // Variant 3
+      timeline: 'layout-2',    // Variant 2
+      prizes: 'layout-1',
+      jury: 'layout-1',
+      documentation: 'layout-1',
+      instagram: 'layout-1',   // Variant 1
+      sponsors: 'layout-1',
+      contact: 'layout-1',     // Variant 1
+      footer: 'layout-1'
     },
     sectionVisibility,
+
+    // Hero Section - Variant 2
     heroText: {
       title: eventName,
-      tagline: eventDescription || preset.description,
-      date: 'Coming Soon',
-      location: 'TBA',
-      instagram: '@event',
-      ctaPrimary: 'Register Now',
-      ctaSecondary: 'Learn More'
+      tagline: eventDescription || 'Tagline event bisa diisi disini untuk menarik perhatian pengunjung',
+      date: 'Tanggal Event',
+      location: 'Lokasi Event',
+      instagram: '@instagram_event',
+      instagramUrl: 'https://instagram.com/event',
+      ctaPrimary: 'Daftar Sekarang',
+      ctaPrimaryUrl: '',
+      ctaSecondary: 'Info Lebih Lanjut',
+      ctaSecondaryUrl: ''
     },
+
+    // About Section - Variant 2 (with 2 subtitles)
     aboutText: {
-      title: 'About This Event',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+      mainTitle: 'Tentang Event',
+      mainDescription: 'Bagian ini bisa diisi panitia untuk menjelaskan deskripsi event, tujuan diselenggarakan, dan informasi umum lainnya yang penting untuk diketahui peserta.',
+      subTitle1: 'Sub Judul 1',
+      subDescription1: 'Bagian ini bisa diisi untuk menjelaskan poin-poin penting terkait event, seperti manfaat mengikuti, hal yang akan dipelajari, atau keunggulan event ini dibanding event sejenis.',
+      subTitle2: 'Sub Judul 2',
+      subDescription2: 'Bagian ini bisa diisi untuk menjelaskan persyaratan peserta, target audiens, atau informasi tambahan yang perlu disampaikan kepada calon peserta.',
+      subTitle3: '',
+      subDescription3: '',
+      subTitle4: '',
+      subDescription4: ''
     },
+
+    // Event Categories Section - Variant 3 (with 3 cards)
     categoriesText: {
-      title: 'Event Categories',
-      categories: [
-        {
-          id: '1',
-          name: 'Category 1',
-          description: 'Lorem ipsum dolor sit amet',
-          icon: 'FaTrophy'
-        },
-        {
-          id: '2',
-          name: 'Category 2',
-          description: 'Consectetur adipiscing elit',
-          icon: 'FaStar'
-        },
-        {
-          id: '3',
-          name: 'Category 3',
-          description: 'Sed do eiusmod tempor',
-          icon: 'FaAward'
-        }
-      ]
+      sectionTitle: 'Kategori',
+      sectionSubtitle: 'Bagian ini bisa diisi untuk menjelaskan kategori-kategori yang tersedia di event'
     },
+    categoriesCards: [
+      {
+        id: 1,
+        icon: 'FaPaintBrush',
+        image: null,
+        title: 'Kategori Jenis Lomba 1',
+        description: 'Disini bisa diisi deskripsi lomba kategori 1, aturan main, dan informasi penting lainnya',
+        requirements: [
+          { title: 'Tim', description: '2-3 orang per tim' },
+          { title: 'Peserta', description: 'Mahasiswa aktif S1/D3' },
+          { title: 'Karya', description: 'Original & belum dipublikasi' }
+        ],
+        buttonUrl: ''
+      },
+      {
+        id: 2,
+        icon: 'FaCode',
+        image: null,
+        title: 'Kategori Jenis Lomba 2',
+        description: 'Disini bisa diisi deskripsi lomba kategori 2, aturan main, dan informasi penting lainnya',
+        requirements: [
+          { title: 'Tim', description: '3-5 orang per tim' },
+          { title: 'Platform', description: 'Web, Mobile, atau Desktop' },
+          { title: 'Deliverable', description: 'Prototype dan dokumentasi' }
+        ],
+        buttonUrl: ''
+      },
+      {
+        id: 3,
+        icon: 'FaBriefcase',
+        image: null,
+        title: 'Kategori Jenis Lomba 3',
+        description: 'Disini bisa diisi deskripsi lomba kategori 3, aturan main, dan informasi penting lainnya',
+        requirements: [
+          { title: 'Tim', description: '3-4 orang per tim' },
+          { title: 'Proposal', description: 'Rencana bisnis lengkap' },
+          { title: 'Presentasi', description: 'Pitch deck maksimal 15 slide' }
+        ],
+        buttonUrl: ''
+      }
+    ],
+
+    // Timeline Section - Variant 2 (with 5 timeline cards)
     timelineText: {
-      title: 'Event Timeline',
-      events: [
-        {
-          id: '1',
-          date: 'Day 1',
-          title: 'Opening Ceremony',
-          description: 'Lorem ipsum dolor sit amet'
-        },
-        {
-          id: '2',
-          date: 'Day 2',
-          title: 'Main Event',
-          description: 'Consectetur adipiscing elit'
-        },
-        {
-          id: '3',
-          date: 'Day 3',
-          title: 'Closing Ceremony',
-          description: 'Sed do eiusmod tempor'
-        }
-      ]
+      sectionTitle: 'Timeline Event',
+      sectionSubtitle: 'Bagian ini bisa diisi untuk menjelaskan tahapan-tahapan penting dalam event'
     },
+    timelineCards: [
+      {
+        id: 1,
+        icon: 'FaFlag',
+        image: null,
+        title: 'Tahap 1',
+        date: '1-15 Bulan Tahun',
+        description: 'Bagian ini bisa diisi untuk menjelaskan kegiatan yang dilakukan di tahap 1, seperti pendaftaran, registrasi, atau pembukaan event.'
+      },
+      {
+        id: 2,
+        icon: 'FaFileAlt',
+        image: null,
+        title: 'Tahap 2',
+        date: '16-31 Bulan Tahun',
+        description: 'Bagian ini bisa diisi untuk menjelaskan kegiatan yang dilakukan di tahap 2, seperti pengumpulan berkas, seleksi administrasi, atau babak penyisihan.'
+      },
+      {
+        id: 3,
+        icon: 'FaCheckCircle',
+        image: null,
+        title: 'Tahap 3',
+        date: 'Tanggal Bulan Tahun',
+        description: 'Bagian ini bisa diisi untuk menjelaskan kegiatan yang dilakukan di tahap 3, seperti pengumuman hasil, technical meeting, atau persiapan final.'
+      },
+      {
+        id: 4,
+        icon: 'FaUsers',
+        image: null,
+        title: 'Tahap 4',
+        date: 'Tanggal Bulan Tahun',
+        description: 'Bagian ini bisa diisi untuk menjelaskan kegiatan yang dilakukan di tahap 4, seperti babak final, presentasi, penjurian, atau acara puncak.'
+      },
+      {
+        id: 5,
+        icon: 'FaTrophy',
+        image: null,
+        title: 'Tahap 5',
+        date: 'Tanggal Bulan Tahun',
+        description: 'Bagian ini bisa diisi untuk menjelaskan kegiatan yang dilakukan di tahap 5, seperti pengumuman pemenang, awarding, atau penutupan event.'
+      }
+    ],
+
+    // Prizes Section
     prizesText: {
-      title: 'Prizes & Awards',
-      prizes: [
-        {
-          id: '1',
-          rank: '1st Place',
-          prize: 'Grand Prize',
-          description: 'Lorem ipsum dolor sit amet'
-        },
-        {
-          id: '2',
-          rank: '2nd Place',
-          prize: 'Runner Up',
-          description: 'Consectetur adipiscing elit'
-        },
-        {
-          id: '3',
-          rank: '3rd Place',
-          prize: 'Honorable Mention',
-          description: 'Sed do eiusmod tempor'
-        }
-      ]
+      sectionTitle: 'Hadiah & Penghargaan',
+      sectionSubtitle: 'Bagian ini bisa diisi untuk menjelaskan total hadiah atau benefit yang akan didapatkan pemenang'
     },
+
+    // Jury Section (if enabled)
     juryText: {
-      title: 'Meet Our Jury',
-      members: [
-        {
-          id: '1',
-          name: 'John Doe',
-          role: 'Chief Judge',
-          bio: 'Lorem ipsum dolor sit amet',
-          photo: null
-        },
-        {
-          id: '2',
-          name: 'Jane Smith',
-          role: 'Expert Panelist',
-          bio: 'Consectetur adipiscing elit',
-          photo: null
-        }
-      ]
+      sectionTitle: 'Dewan Juri',
+      sectionSubtitle: 'Para ahli dan praktisi berpengalaman di bidangnya'
     },
-    documentationText: {
-      title: 'Event Gallery',
-      images: []
-    },
+
+    // Instagram Section - Variant 1
     instagramText: {
-      title: 'Follow Us on Instagram',
-      username: '@event'
+      username: '@event',
+      title: 'Follow Our Journey',
+      sectionTitle: 'Galeri Kegiatan'
     },
-    sponsorsText: {
-      title: 'Our Sponsors',
-      tiers: []
-    },
+
+    // Contact Section - Variant 1 (with 4 FAQ cards)
     contactText: {
-      title: 'Get In Touch',
-      description: 'Have questions? Feel free to reach out to us!',
+      mainTitle: 'Hubungi Kami',
+      mainDescription: 'Bagian ini bisa diisi untuk mengajak peserta menghubungi panitia jika ada pertanyaan',
+      contactTitle: 'Informasi Kontak',
       email: 'info@event.com',
-      phone: '+62 xxx-xxxx-xxxx',
-      address: 'Jakarta, Indonesia'
+      phone: '+62 812-3456-7890',
+      whatsapp: '+62 812-3456-7890',
+      address: 'Kota, Indonesia',
+      instagramUrl: 'https://instagram.com/event',
+      lineUrl: '',
+      twitterUrl: ''
     },
+    faqCards: [
+      {
+        id: 1,
+        question: 'Pertanyaan 1: Siapa yang boleh mendaftar?',
+        answer: 'Bagian ini bisa diisi untuk menjawab pertanyaan umum seputar persyaratan peserta, target audiens, atau eligibilitas mengikuti event.'
+      },
+      {
+        id: 2,
+        question: 'Pertanyaan 2: Apakah ada biaya pendaftaran?',
+        answer: 'Bagian ini bisa diisi untuk menjawab pertanyaan tentang biaya, early bird, atau sistem pembayaran yang berlaku untuk event ini.'
+      },
+      {
+        id: 3,
+        question: 'Pertanyaan 3: Bagaimana format event berlangsung?',
+        answer: 'Bagian ini bisa diisi untuk menjelaskan apakah event dilakukan online/offline, berapa lama durasinya, atau format kegiatan yang akan dilaksanakan.'
+      },
+      {
+        id: 4,
+        question: 'Pertanyaan 4: Bagaimana cara mendaftar?',
+        answer: 'Bagian ini bisa diisi untuk menjelaskan step-by-step proses pendaftaran, dokumen yang diperlukan, dan deadline pengumpulan berkas.'
+      }
+    ],
+
+    // Footer
     footerText: {
       copyrightText: `© ${new Date().getFullYear()} ${eventName}. All rights reserved.`,
       socialLinks: {

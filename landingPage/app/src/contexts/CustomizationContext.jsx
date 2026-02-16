@@ -930,6 +930,52 @@ export const CustomizationProvider = ({ children }) => {
     localStorage.setItem('faqCards', JSON.stringify(cards));
   };
 
+  // Clear all localStorage data
+  const clearLocalStorage = () => {
+    // Clear theme and colors
+    localStorage.removeItem('selectedTheme');
+    localStorage.removeItem('customColors');
+
+    // Clear layouts
+    sections.forEach((section) => {
+      localStorage.removeItem(`layout-${section}`);
+    });
+
+    // Clear images
+    localStorage.removeItem('logoImage');
+    localStorage.removeItem('posterImage');
+    localStorage.removeItem('heroBackgroundImage');
+    localStorage.removeItem('photoImage');
+    localStorage.removeItem('instagram1Image');
+    localStorage.removeItem('instagram2Image');
+    localStorage.removeItem('instagram3Image');
+    localStorage.removeItem('instagram4Image');
+    localStorage.removeItem('instagram5Image');
+    localStorage.removeItem('instagram6Image');
+
+    // Clear visibility
+    sections.forEach((section) => {
+      localStorage.removeItem(`visibility-${section}`);
+    });
+
+    // Clear text content
+    localStorage.removeItem('heroText');
+    localStorage.removeItem('aboutText');
+    localStorage.removeItem('categoriesText');
+    localStorage.removeItem('timelineText');
+    localStorage.removeItem('prizesText');
+    localStorage.removeItem('juryText');
+    localStorage.removeItem('documentationText');
+    localStorage.removeItem('instagramText');
+    localStorage.removeItem('sponsorsText');
+    localStorage.removeItem('contactText');
+
+    // Clear cards
+    localStorage.removeItem('categoriesCards');
+    localStorage.removeItem('timelineCards');
+    localStorage.removeItem('faqCards');
+  };
+
   // Reset all customizations
   const resetCustomizations = () => {
     setSelectedTheme('theme1');
@@ -1366,6 +1412,7 @@ export const CustomizationProvider = ({ children }) => {
     setEditingConfig,
     clearEditingConfig,
     resetToDefaults,
+    clearLocalStorage,
   };
 
   return (
