@@ -1,6 +1,7 @@
 import { useCustomization } from '../../contexts/CustomizationContext';
 import { eventData } from '../../data/eventData';
 import { getIcon } from '../../utils/iconMapper';
+import { toast } from 'react-toastify';
 
 const HeroSection = () => {
   const { layouts, currentTheme, customColors, images, sectionVisibility, heroText } = useCustomization();
@@ -11,6 +12,21 @@ const HeroSection = () => {
   if (!sectionVisibility.hero) {
     return null;
   }
+  // Handle button click - show toast if no valid link
+  const handleButtonClick = (e, url) => {
+    if (!url || url === '#' || url.trim() === '') {
+      e.preventDefault();
+      toast.info('Content not Available Yet', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
+  };
+
 
   // Button gradient styles
   const primaryButtonStyle = {
@@ -85,7 +101,7 @@ const HeroSection = () => {
             </a>
           </div>
           <div className="flex flex-col sm:flex-row justify-center gap-4 px-4 mb-12">
-            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="text-white w-full sm:w-auto text-center px-6 py-3 font-semibold shadow-lg transition-all duration-300 transform"
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => handleButtonClick(e, heroText.ctaPrimaryUrl)} className="text-white w-full sm:w-auto text-center px-6 py-3 font-semibold shadow-lg transition-all duration-300 transform"
               style={primaryButtonStyle}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'scale(1.05)';
@@ -99,7 +115,7 @@ const HeroSection = () => {
               }}>
               {heroText.ctaPrimary}
             </a>
-            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto text-center px-6 py-3 font-semibold transition-all duration-300 transform"
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => handleButtonClick(e, heroText.ctaSecondaryUrl)} className="w-full sm:w-auto text-center px-6 py-3 font-semibold transition-all duration-300 transform"
               style={secondaryButtonStyle}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = `linear-gradient(135deg, ${customColors.color1} 0%, ${customColors.color2} 100%)`;
@@ -132,12 +148,15 @@ const HeroSection = () => {
     const posterSrc = images.poster || hero.logo;
 
     return (
-      <section id="hero" style={customGradientStyle} className="min-h-screen grid md:grid-cols-2 text-white relative">
-        <div className="flex flex-col justify-center p-6 sm:p-8 md:p-12 lg:p-16 order-1" data-aos="fade-up" data-aos-duration="1000">
+      <section id="hero" style={customGradientStyle} className="min-h-screen flex flex-col md:grid md:grid-cols-2 text-white relative overflow-x-hidden">
+        {/* Mobile: Single column with poster in middle */}
+        <div className="flex flex-col justify-start md:justify-center items-center md:items-start text-center md:text-left pt-20 pb-6 px-6 sm:pt-24 sm:pb-8 sm:px-8 md:p-12 lg:p-16 order-1" data-aos="fade-up" data-aos-duration="1000">
           <img src={logoSrc} alt="Event Logo" className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-xl mb-6 shadow-xl object-cover" />
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">{heroText.title}</h1>
           <p className="text-base sm:text-lg md:text-xl mb-6 opacity-90">{heroText.tagline}</p>
-          <div className="flex flex-col gap-3 sm:gap-4 mb-8 text-sm sm:text-base">
+
+          {/* Date & Instagram - Side by side on mobile, stacked on desktop */}
+          <div className="flex flex-row md:flex-col gap-4 md:gap-3 mb-6 text-sm sm:text-base">
             <p className="flex items-center gap-2">
               {getIcon('FaCalendar')} <span>{heroText.date}</span>
             </p>
@@ -150,8 +169,25 @@ const HeroSection = () => {
               {getIcon('FaInstagram')} <span>{heroText.instagram}</span>
             </a>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="text-white w-full sm:w-auto text-center px-6 py-3 font-semibold shadow-lg transition-all duration-300 transform"
+
+          {/* Poster - Only visible on mobile, positioned between date/instagram and buttons */}
+          <div className="flex md:hidden items-center justify-center mb-6 w-full" data-aos="zoom-in" data-aos-duration="800" data-aos-delay="200">
+            {images.poster ? (
+              <img
+                src={posterSrc}
+                alt="Event Poster"
+                className="w-auto h-auto max-h-[320px] max-w-[80%] rounded-2xl shadow-2xl object-contain"
+              />
+            ) : (
+              <div className="w-48 h-72 bg-white/20 rounded-2xl shadow-2xl flex items-center justify-center border-2 border-white/30 border-dashed">
+                <p className="text-white/60 text-center px-4">Poster Placeholder</p>
+              </div>
+            )}
+          </div>
+
+          {/* Buttons - Side by side on all screen sizes */}
+          <div className="flex flex-row gap-3 sm:gap-4 mb-0 md:mb-8 w-full justify-center md:justify-start">
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => handleButtonClick(e, heroText.ctaPrimaryUrl)} className="text-white flex-1 sm:flex-initial sm:w-auto text-center px-4 sm:px-6 py-3 text-sm sm:text-base font-semibold shadow-lg transition-all duration-300 transform"
               style={primaryButtonStyle}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'scale(1.05)';
@@ -165,7 +201,7 @@ const HeroSection = () => {
               }}>
               {heroText.ctaPrimary}
             </a>
-            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto text-center px-6 py-3 font-semibold transition-all duration-300 transform"
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => handleButtonClick(e, heroText.ctaSecondaryUrl)} className="flex-1 sm:flex-initial sm:w-auto text-center px-4 sm:px-6 py-3 text-sm sm:text-base font-semibold transition-all duration-300 transform"
               style={secondaryButtonStyle}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = `linear-gradient(135deg, ${customColors.color1} 0%, ${customColors.color2} 100%)`;
@@ -182,17 +218,19 @@ const HeroSection = () => {
               {heroText.ctaSecondary}
             </a>
           </div>
-          
+
         </div>
-        <div className="flex items-center justify-center p-6 sm:p-8 order-2 min-h-[300px] md:min-h-0" data-aos="fade-up" data-aos-duration="1000">
+
+        {/* Desktop: Poster on right side */}
+        <div className="hidden md:flex items-center justify-center p-6 sm:p-8 order-2 min-h-[300px] md:min-h-0" data-aos="fade-up" data-aos-duration="1000">
           {images.poster ? (
             <img
               src={posterSrc}
               alt="Event Poster"
-              className="w-auto h-auto max-h-[600px] max-w-full rounded-2xl sm:rounded-3xl shadow-2xl object-contain"
+              className="w-auto h-auto max-h-[600px] max-w-full rounded-2xl sm:rounded-3xl shadow-2xl object-contain mx-auto"
             />
           ) : (
-            <div className="w-64 h-96 bg-white/20 rounded-2xl sm:rounded-3xl shadow-2xl flex items-center justify-center border-2 border-white/30 border-dashed">
+            <div className="w-64 h-96 bg-white/20 rounded-2xl sm:rounded-3xl shadow-2xl flex items-center justify-center border-2 border-white/30 border-dashed mx-auto">
               <p className="text-white/60 text-center px-4">Poster Placeholder</p>
             </div>
           )}
@@ -206,9 +244,9 @@ const HeroSection = () => {
   const photoSrc = images.photo;
 
   return (
-    <section id="hero" style={customGradientStyle} className="min-h-screen flex items-center justify-center text-white relative overflow-hidden">
+    <section id="hero" style={customGradientStyle} className="min-h-screen flex items-center justify-center text-white relative overflow-hidden overflow-x-hidden">
       {/* Mobile: Stacked layout with photo in middle */}
-      <div className="flex flex-col md:hidden w-full p-6">
+      <div className="flex flex-col md:hidden w-full p-6 max-w-full">
         {/* Top div: Logo, Title, Tagline */}
         <div className="flex flex-col items-center text-center z-10 mb-4" data-aos="fade-up" data-aos-duration="800">
           <img src={logoSrc} alt="Event Logo" className="w-20 h-20 rounded-2xl mb-4 shadow-xl object-cover" />
@@ -249,7 +287,7 @@ const HeroSection = () => {
             </a>
           </div>
           <div className="flex flex-col gap-3 w-full max-w-xs">
-            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" className="text-white text-center py-2 px-4 font-semibold shadow-lg transition-all duration-300 transform"
+            <a href={heroText.ctaPrimaryUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => handleButtonClick(e, heroText.ctaPrimaryUrl)} className="text-white text-center py-2 px-4 font-semibold shadow-lg transition-all duration-300 transform"
             style={primaryButtonStyle}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'scale(1.05)';
@@ -263,7 +301,7 @@ const HeroSection = () => {
             }}>
               {heroText.ctaPrimary}
             </a>
-            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" className="text-center py-2 px-4 font-semibold transition-all duration-300 transform"
+            <a href={heroText.ctaSecondaryUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => handleButtonClick(e, heroText.ctaSecondaryUrl)} className="text-center py-2 px-4 font-semibold transition-all duration-300 transform"
             style={secondaryButtonStyle}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = `linear-gradient(135deg, ${customColors.color1} 0%, ${customColors.color2} 100%)`;
@@ -311,7 +349,19 @@ const HeroSection = () => {
               href={heroText.ctaPrimaryUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white text-gray-800 hover:bg-gray-100 text-center px-6 py-3 font-semibold transition-colors" style={{ borderRadius: '0.5rem' }}
+              onClick={(e) => handleButtonClick(e, heroText.ctaPrimaryUrl)}
+              className="text-white w-full sm:w-auto text-center px-6 py-3 font-semibold shadow-lg transition-all duration-300 transform"
+              style={primaryButtonStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.filter = 'brightness(1.1)';
+                e.currentTarget.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.filter = 'brightness(1)';
+                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+              }}
             >
               {heroText.ctaPrimary}
             </a>
@@ -319,7 +369,21 @@ const HeroSection = () => {
               href={heroText.ctaSecondaryUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-transparent hover:bg-white text-white hover:text-gray-800 text-center px-6 py-3 font-semibold border-2 border-white transition-colors" style={{ borderRadius: '0.5rem' }}
+              onClick={(e) => handleButtonClick(e, heroText.ctaSecondaryUrl)}
+              className="w-full sm:w-auto text-center px-6 py-3 font-semibold transition-all duration-300 transform"
+              style={secondaryButtonStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = `linear-gradient(135deg, ${customColors.color1} 0%, ${customColors.color2} 100%)`;
+                e.currentTarget.style.color = 'white';
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.borderColor = 'transparent';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'white';
+                e.currentTarget.style.color = customColors.color1;
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.borderColor = customColors.color1;
+              }}
             >
               {heroText.ctaSecondary}
             </a>

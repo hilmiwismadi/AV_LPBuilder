@@ -5,6 +5,11 @@
 @layer base {
   body {
     @apply m-0 min-h-screen font-sans;
+    overflow-x: hidden;
+  }
+
+  html {
+    overflow-x: hidden;
   }
 }
 
