@@ -87,7 +87,7 @@ const BuildDemoModal = ({ client, onClose, onSuccess }) => {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingPoster, setUploadingPoster] = useState(false);
 
-  // Image compression function (copied from ConfigurationPage)
+  // Image compression function - preserves PNG transparency
   const compressImage = (file, type) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -97,6 +97,8 @@ const BuildDemoModal = ({ client, onClose, onSuccess }) => {
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
+
+          const isPNG = file.type === 'image/png';
 
           // Determine max dimension based on image type
           const maxDimension = type === 'logo' ? 800 : 1600;
@@ -115,18 +117,39 @@ const BuildDemoModal = ({ client, onClose, onSuccess }) => {
           canvas.width = width;
           canvas.height = height;
 
-          const ctx = canvas.getContext('2d');
+          const ctx = canvas.getContext('2d', { alpha: true });
+          if (isPNG) {
+            ctx.clearRect(0, 0, width, height);
+          }
           ctx.drawImage(img, 0, 0, width, height);
 
-          // Start with high quality and reduce if needed
-          let quality = 0.9;
-          let compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-
-          // Keep reducing quality until it fits in reasonable size (max 500KB)
+          let compressedDataUrl;
           const maxSize = 500 * 1024;
-          while (compressedDataUrl.length > maxSize && quality > 0.3) {
-            quality -= 0.1;
+
+          if (isPNG) {
+            // Use PNG format to preserve transparency
+            compressedDataUrl = canvas.toDataURL('image/png');
+            let scaleFactor = 1;
+            while (compressedDataUrl.length > maxSize && scaleFactor > 0.5) {
+              scaleFactor -= 0.1;
+              const sw = Math.floor(canvas.width * scaleFactor);
+              const sh = Math.floor(canvas.height * scaleFactor);
+              const tmp = document.createElement('canvas');
+              tmp.width = sw;
+              tmp.height = sh;
+              const tc = tmp.getContext('2d', { alpha: true });
+              tc.clearRect(0, 0, sw, sh);
+              tc.drawImage(canvas, 0, 0, sw, sh);
+              compressedDataUrl = tmp.toDataURL('image/png');
+            }
+          } else {
+            // Use JPEG with quality reduction for non-transparent images
+            let quality = 0.9;
             compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+            while (compressedDataUrl.length > maxSize && quality > 0.3) {
+              quality -= 0.1;
+              compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+            }
           }
 
           resolve(compressedDataUrl);
