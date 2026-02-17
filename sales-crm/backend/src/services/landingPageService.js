@@ -107,6 +107,7 @@ export function buildDemoConfiguration(demoData) {
 
   return {
     name: eventName,
+    configType: 'DEMO',
     customColors: {
       color1: color1 || '#667eea',
       color2: color2 || '#764ba2'

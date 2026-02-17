@@ -129,13 +129,61 @@ const SavedPage = () => {
     }
   };
 
+
+  const handleToggleProd = async (config) => {
+    const newType = config.configType === 'PROD' ? 'NEUTRAL' : 'PROD';
+    const label = newType === 'PROD' ? 'Mark as Prod?' : 'Remove Prod status?';
+    if (!confirm(label)) return;
+    try {
+      await api.put(`/configurations/${config.id}`, { configType: newType });
+      setSavedConfigs(savedConfigs.map(c =>
+        c.id === config.id ? { ...c, configType: newType } : c
+      ));
+    } catch (error) {
+      console.error('Error updating config type:', error);
+      alert('Failed to update status');
+    }
+  };
+
+  const getTypeBadge = (configType) => {
+    switch (configType) {
+      case 'DEMO':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-orange-100 text-orange-700 border border-orange-200">
+            Demo
+          </span>
+        );
+      case 'PROD':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
+            Prod
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200">
+            —
+          </span>
+        );
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Saved Configurations</h1>
-          <div className="text-sm text-gray-600">
-            Total: <span className="font-semibold">{savedConfigs.length}</span> configurations
+          <div className="flex items-center gap-4 text-sm text-gray-600">
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-2 h-2 rounded-full bg-orange-400"></span> Demo
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-2 h-2 rounded-full bg-green-400"></span> Prod
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-2 h-2 rounded-full bg-gray-300"></span> Neutral
+            </span>
+            <span className="ml-2">Total: <span className="font-semibold">{savedConfigs.length}</span> configurations</span>
           </div>
         </div>
 
@@ -155,6 +203,7 @@ const SavedPage = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Slug</th>
                     {isSuperadmin && (
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Owner (EO)</th>
@@ -170,6 +219,20 @@ const SavedPage = () => {
                     <tr key={config.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{config.name}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          {getTypeBadge(config.configType)}
+                          {isSuperadmin && config.configType !== 'DEMO' && (
+                            <button
+                              onClick={() => handleToggleProd(config)}
+                              className={config.configType === 'PROD' ? 'text-xs text-red-500 hover:text-red-700 underline' : 'text-xs text-green-600 hover:text-green-800 underline'}
+                              title={config.configType === 'PROD' ? 'Remove Prod status' : 'Set as Prod'}
+                            >
+                              {config.configType === 'PROD' ? 'Unset' : 'Set Prod'}
+                            </button>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500 font-mono">{config.slug}</div>

@@ -172,7 +172,8 @@ export async function createConfiguration(req, res) {
       instagramText,
       sponsorsText,
       contactText,
-      faqCards
+      faqCards,
+      configType
     } = req.body;
 
     if (!name || !customColors || !layouts || !sectionVisibility) {
@@ -212,6 +213,7 @@ export async function createConfiguration(req, res) {
         sponsorsText,
         contactText,
         faqCards,
+        configType: configType || 'NEUTRAL',
         ownerId: userId  // Assign to current user
       },
       include: {
@@ -263,7 +265,8 @@ export async function updateConfiguration(req, res) {
       sponsorsText,
       contactText,
       faqCards,
-      ownerId  // NEW: Allow superadmin to change owner
+      ownerId,  // NEW: Allow superadmin to change owner
+      configType
     } = req.body;
 
     // If slug is being updated, ensure it's unique
@@ -300,7 +303,8 @@ export async function updateConfiguration(req, res) {
       instagramText,
       sponsorsText,
       contactText,
-      faqCards
+      faqCards,
+      ...(configType !== undefined && { configType })
     };
 
     // Only allow superadmin to change ownerId
