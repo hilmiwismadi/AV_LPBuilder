@@ -310,7 +310,7 @@ const ConfigurationPage = () => {
 
   // Compress image to fit within localStorage limits
   const compressImage = (file, type) => {
-    console.log(`[DEBUG] compressImage called for ${type}, file size: ${file.size}`);
+    console.log(`[DEBUG] compressImage called for ${type}, file size: ${file.size}, file type: ${file.type}`);
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -321,6 +321,10 @@ const ConfigurationPage = () => {
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
+
+          // Detect if original file is PNG (to preserve transparency)
+          const isPNG = file.type === 'image/png';
+          console.log(`[DEBUG] File is PNG: ${isPNG}`);
 
           // Handle hero background with specific dimensions (1920x1080)
           if (type === 'heroBackground') {
@@ -376,22 +380,58 @@ const ConfigurationPage = () => {
             canvas.width = width;
             canvas.height = height;
 
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { alpha: true });
+            
+            // For PNG with transparency, clear canvas to transparent
+            if (isPNG) {
+              ctx.clearRect(0, 0, width, height);
+            }
+            
             ctx.drawImage(img, 0, 0, width, height);
           }
 
-          // Start with high quality and reduce if needed
-          let quality = 0.9;
-          let compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-
-          // Keep reducing quality until it fits in reasonable size (max 500KB)
-          const maxSize = 500 * 1024; // 500KB in base64
-          while (compressedDataUrl.length > maxSize && quality > 0.3) {
-            quality -= 0.1;
+          // Use PNG format for PNG files to preserve transparency, JPEG for others
+          let compressedDataUrl;
+          
+          if (isPNG) {
+            // PNG format - no quality parameter, transparency preserved
+            compressedDataUrl = canvas.toDataURL('image/png');
+            
+            // If PNG is too large, scale down further and retry
+            const maxSize = 500 * 1024;
+            let scaleFactor = 1;
+            
+            while (compressedDataUrl.length > maxSize && scaleFactor > 0.5) {
+              scaleFactor -= 0.1;
+              const scaledWidth = Math.floor(canvas.width * scaleFactor);
+              const scaledHeight = Math.floor(canvas.height * scaleFactor);
+              
+              const tempCanvas = document.createElement('canvas');
+              tempCanvas.width = scaledWidth;
+              tempCanvas.height = scaledHeight;
+              const tempCtx = tempCanvas.getContext('2d', { alpha: true });
+              tempCtx.clearRect(0, 0, scaledWidth, scaledHeight);
+              tempCtx.drawImage(canvas, 0, 0, scaledWidth, scaledHeight);
+              
+              compressedDataUrl = tempCanvas.toDataURL('image/png');
+            }
+            
+            console.log(`Compressed ${type} (PNG): original=${file.size} bytes, compressed=${Math.round(compressedDataUrl.length * 0.75)} bytes, scale=${scaleFactor.toFixed(1)}, dimensions=${canvas.width}x${canvas.height}`);
+          } else {
+            // JPEG format with quality compression
+            let quality = 0.9;
             compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+
+            // Keep reducing quality until it fits in reasonable size (max 500KB)
+            const maxSize = 500 * 1024;
+            while (compressedDataUrl.length > maxSize && quality > 0.3) {
+              quality -= 0.1;
+              compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+            }
+
+            console.log(`Compressed ${type} (JPEG): original=${file.size} bytes, compressed=${Math.round(compressedDataUrl.length * 0.75)} bytes, quality=${quality.toFixed(1)}, dimensions=${canvas.width}x${canvas.height}`);
           }
 
-          console.log(`Compressed ${type}: original=${file.size} bytes, compressed=${Math.round(compressedDataUrl.length * 0.75)} bytes, quality=${quality.toFixed(1)}, dimensions=${canvas.width}x${canvas.height}`);
           resolve(compressedDataUrl);
         };
         img.onerror = reject;
