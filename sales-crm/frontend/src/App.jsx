@@ -11,6 +11,7 @@ import ScraperLivePage from './pages/ScraperLivePage';
 import ScraperHistoryPage from './pages/ScraperHistoryPage';
 import ScraperSessionDetailPage from './pages/ScraperSessionDetailPage';
 import TemplateManagerPage from './pages/TemplateManagerPage';
+import FlowBuilderPage from './pages/FlowBuilderPage';
 import MonitorPage from './pages/MonitorPage';
 import SuperadminPage from './pages/SuperadminPage';
 import './App.css';
@@ -44,6 +45,7 @@ function MainLayout() {
           <Route path="/" element={<Navigate to="/crm" replace />} />
           <Route path="/crm" element={<CRMPage />} />
           <Route path="/crm/templates" element={<TemplateManagerPage />} />
+          <Route path="/crm/flow" element={<FlowBuilderPage />} />
           <Route path="/scraper" element={<ScraperPage />} />
           <Route path="/scraper/live" element={<ScraperLivePage />} />
           <Route path="/scraper/history" element={<ScraperHistoryPage />} />

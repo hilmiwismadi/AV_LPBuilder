@@ -13,6 +13,7 @@ import scraperRoutes from './routes/scraper.routes.js';
 import logsRoutes from './routes/logs.routes.js';
 import monitorRoutes from './routes/monitor.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import flowRoutes from './routes/flow.routes.js';
 
 dotenv.config();
 
@@ -61,6 +62,7 @@ app.use('/api/scraper', scraperRoutes);
 app.use('/api/logs', logsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/monitor', monitorRoutes);
+app.use('/api/flow', flowRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({

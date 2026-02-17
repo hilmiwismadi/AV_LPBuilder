@@ -78,11 +78,12 @@ const HeroSection = () => {
     return (
       <section id="hero" style={customGradientStyle} className="min-h-screen flex items-center justify-center text-white relative overflow-hidden px-4">
         <div className="container mx-auto text-center z-10 py-20" data-aos="fade-zoom-in" data-aos-duration="1000">
-          <div className="mb-6">
+          <div className="mb-6 bg-transparent">
             <img
               src={logoSrc}
               alt="Event Logo"
-              className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full mx-auto border-4 border-white/30 shadow-xl object-cover"
+              className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full mx-auto border-4 border-white/30 object-contain bg-transparent p-1"
+              style={{ backgroundColor: 'transparent' }}
             />
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-shadow px-4">{heroText.title}</h1>
@@ -151,7 +152,7 @@ const HeroSection = () => {
       <section id="hero" style={customGradientStyle} className="min-h-screen flex flex-col md:grid md:grid-cols-2 text-white relative overflow-x-hidden">
         {/* Mobile: Single column with poster in middle */}
         <div className="flex flex-col justify-start md:justify-center items-center md:items-start text-center md:text-left pt-20 pb-6 px-6 sm:pt-24 sm:pb-8 sm:px-8 md:p-12 lg:p-16 order-1" data-aos="fade-up" data-aos-duration="1000">
-          <img src={logoSrc} alt="Event Logo" className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-xl mb-6 shadow-xl object-cover" />
+          <img src={logoSrc} alt="Event Logo" className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-xl mb-6 object-contain bg-transparent p-1" style={{ backgroundColor: 'transparent' }} />
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">{heroText.title}</h1>
           <p className="text-base sm:text-lg md:text-xl mb-6 opacity-90">{heroText.tagline}</p>
 
@@ -249,7 +250,7 @@ const HeroSection = () => {
       <div className="flex flex-col md:hidden w-full p-6 max-w-full">
         {/* Top div: Logo, Title, Tagline */}
         <div className="flex flex-col items-center text-center z-10 mb-4" data-aos="fade-up" data-aos-duration="800">
-          <img src={logoSrc} alt="Event Logo" className="w-20 h-20 rounded-2xl mb-4 shadow-xl object-cover" />
+          <img src={logoSrc} alt="Event Logo" className="w-20 h-20 rounded-2xl mb-4 object-contain bg-transparent p-1" style={{ backgroundColor: 'transparent' }} />
           <h1 className="text-2xl sm:text-3xl font-bold mb-2 leading-tight">{heroText.title}</h1>
           <p className="text-base sm:text-lg">{heroText.tagline}</p>
         </div>
@@ -260,7 +261,7 @@ const HeroSection = () => {
             <img
               src={photoSrc}
               alt="Event Photo"
-              className="w-48 h-48 sm:w-64 sm:h-64 rounded-2xl shadow-2xl object-cover"
+              className="w-48 h-48 sm:w-64 sm:h-64 rounded-2xl shadow-2xl object-contain"
             />
           </div>
         ) : (
@@ -326,7 +327,7 @@ const HeroSection = () => {
 
         {/* Left side: Text content */}
         <div className="flex-1 max-w-xl" data-aos="fade-up" data-aos-duration="1000">
-          <img src={logoSrc} alt="Event Logo" className="w-24 h-24 md:w-32 md:h-32 rounded-2xl mb-6 shadow-xl object-cover" />
+          <img src={logoSrc} alt="Event Logo" className="w-24 h-24 md:w-32 md:h-32 rounded-2xl mb-6 object-contain bg-transparent p-1" style={{ backgroundColor: 'transparent' }} />
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">{heroText.title}</h1>
           <p className="text-lg md:text-xl mb-6">{heroText.tagline}</p>
 
@@ -396,7 +397,7 @@ const HeroSection = () => {
             <img
               src={photoSrc}
               alt="Event Photo"
-              className="w-full h-full rounded-[3rem] shadow-2xl object-cover"
+              className="w-full h-full rounded-[3rem] shadow-2xl object-contain"
             />
           ) : (
             <div className="w-full h-full bg-white/10 rounded-[3rem] shadow-2xl border-2 border-white/30 border-dashed flex items-center justify-center">

@@ -14,6 +14,7 @@ import {
 } from '../components/sections/AllSections';
 import DocumentationSection from '../components/sections/DocumentationSection';
 import SponsorsSection from '../components/sections/SponsorsSection';
+import { toast } from 'react-toastify';
 
 const SubdomainLandingPage = () => {
   const [loading, setLoading] = useState(true);
@@ -138,26 +139,47 @@ const SubdomainLandingPage = () => {
     fetchConfigurationBySubdomain();
   }, [setCustomColors, setImages, setLayouts, setSectionVisibility, setHeroText, setAboutText, setCategoriesText, setCategoriesCards, setTimelineText, setTimelineCards, setPrizesText, setJuryText, setDocumentationText, setInstagramText, setSponsorsText, setContactText, setFaqCards]);
 
-  // Smooth scroll for anchor links
+  // Smooth scroll for anchor links and handle empty links with toast
   useEffect(() => {
     const handleAnchorClick = (e) => {
-      const target = e.target.closest('a[href^="#"]');
+      const target = e.target.closest('a');
       if (!target) return;
 
       const href = target.getAttribute('href');
-      if (!href || href === '#') return;
+      const isTargetBlank = target.getAttribute('target') === '_blank';
 
-      e.preventDefault();
-      const element = document.querySelector(href);
-      if (element) {
-        const offset = 80;
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
+      // Handle links with # or empty href
+      if (!href || href === '#' || href.trim() === '') {
+        e.preventDefault();
+        
+        // Show toast notification for links that would open in new tab
+        if (isTargetBlank || !href || href === '#') {
+          toast.info('Content not Available Yet', {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        }
+        return;
+      }
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth',
-        });
+      // Handle smooth scroll for valid anchor links (starting with #)
+      if (href.startsWith('#')) {
+        e.preventDefault();
+        const element = document.querySelector(href);
+        if (element) {
+          const offset = 80;
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          });
+        }
       }
     };
 

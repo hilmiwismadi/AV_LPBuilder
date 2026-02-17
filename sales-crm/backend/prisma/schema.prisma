@@ -175,3 +175,14 @@ enum SessionStatus {
   FAILED
   CANCELLED
 }
+
+// ==================== FLOW CANVAS ====================
+
+model FlowCanvas {
+  id        String   @id @default("main")
+  nodes     Json     @default("[]")
+  edges     Json     @default("[]")
+  updatedAt DateTime @updatedAt
+
+  @@map("flow_canvas")
+}

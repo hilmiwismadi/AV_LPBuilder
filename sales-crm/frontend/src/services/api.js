@@ -124,6 +124,11 @@ export const adminAPI = {
   getSalesList: () => api.get('/admin/sales-list'),
 };
 
+export const flowAPI = {
+  getCanvas: () => api.get('/flow'),
+  saveCanvas: (data) => api.post('/flow', data),
+};
+
 export const createAdmin = adminAPI.create;
 export const changePassword = adminAPI.changePassword;
 export const getAdmins = adminAPI.getAll;

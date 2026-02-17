@@ -28,6 +28,7 @@ const Sidebar = () => {
     { section: 'CRM', items: [
       { path: '/crm', label: 'Clients', icon: '👥' },
       { path: '/crm/templates', label: 'Templates', icon: '📋' },
+      { path: '/crm/flow', label: 'Flow Builder', icon: '🔀' },
     ]},
     { section: 'Tools', items: [
       { path: '/scraper', label: 'Web Scraper', icon: '📸' },
