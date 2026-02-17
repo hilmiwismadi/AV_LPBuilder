@@ -69,6 +69,10 @@ server_name internal.webbuild.arachnova.id
 
 #### Database Schema
 
+Notes are stored as a **JSON array** because clients typically have 5-10 distinct requirement points.
+Each note item has a category (`tech_requirement` is the most critical — flags work for the tech team),
+a resolved flag, and a timestamp so the team can track when requirements were added.
+
 ```prisma
 model Client {
   id                 String       @id @default(uuid())
@@ -79,13 +83,15 @@ model Client {
   ticketCategories   Json?        // [{ name, price, quota }]
   platformFee        Float        @default(4.0)  // percentage
   customDevRequired  Boolean      @default(false)
-  customDevNotes     String?
   negotiationStatus  NegotiationStatus @default(INITIAL_CONTACT)
   dealStage          DealStage    @default(PROSPECT)
   timeline           Json?        // { eventDate, contractDeadline, launchDate }
   riskLevel          RiskLevel    @default(LOW)
   mouStatus          MoUStatus    @default(NONE)
-  notes              String?
+
+  // Notes stored as array — each client can have 5-10 requirement points
+  // Structure: [{ id, content, category, resolved, createdAt }]
+  notes              Json         @default("[]")
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
   tasks              Task[]
@@ -117,15 +123,49 @@ enum RiskLevel { LOW  MEDIUM  HIGH }
 enum MoUStatus { NONE  DRAFT  SENT  SIGNED  EXPIRED }
 ```
 
+#### Notes Array Structure
+
+Each item in the `notes` JSON array:
+
+```json
+{
+  "id": "uuid-v4",
+  "content": "Client requires custom BCA Virtual Account integration outside standard payment gateway",
+  "category": "tech_requirement",
+  "resolved": false,
+  "createdAt": "2026-02-17T10:30:00Z"
+}
+```
+
+**Category values:**
+
+| Category | Meaning |
+|---|---|
+| `tech_requirement` | Requires tech team action — **most critical, flagged in UI** |
+| `negotiation` | Pricing/scope discussion point |
+| `legal` | Legal/contract-related requirement |
+| `general` | General context, no action needed |
+
+**UI behavior:**
+- `tech_requirement` notes render with an 🔧 icon and orange border — visible at a glance that tech work is needed
+- `resolved: false` notes show with a checkbox; checking it marks `resolved: true`
+- Notes are displayed as a numbered list on the client detail page
+- Adding a note appends to the array (never overwrites existing notes)
+- Resolved notes are dimmed but kept for audit trail
+
 #### API Endpoints
 
 | Method | Route | Description |
 |---|---|---|
 | GET | `/api/cci` | List all clients (with filters: dealStage, riskLevel, mouStatus) |
+| GET | `/api/cci/flagged-tech` | List clients that have unresolved `tech_requirement` notes — for tech team view |
 | GET | `/api/cci/:id` | Get single client with tasks + MoUs |
 | POST | `/api/cci` | Create new client |
 | PUT | `/api/cci/:id` | Update client fields |
 | DELETE | `/api/cci/:id` | Delete client |
+| POST | `/api/cci/:id/notes` | Append a new note to the notes array |
+| PATCH | `/api/cci/:id/notes/:noteId` | Update a single note (e.g. mark resolved, edit content) |
+| DELETE | `/api/cci/:id/notes/:noteId` | Remove a specific note from the array |
 
 #### Frontend Pages
 
@@ -389,6 +429,38 @@ const OPENCLAW_TOOLS = [
     }
   },
 
+  // CCI - NOTES WRITE (requires confirmation)
+  {
+    name: "add_client_note",
+    description: "Add a note to a client's notes array. Use when user wants to record a requirement, decision, or context point. Always ask for the category.",
+    input_schema: {
+      type: "object",
+      properties: {
+        clientId: { type: "string" },
+        content:  { type: "string" },
+        category: {
+          type: "string",
+          enum: ["tech_requirement", "negotiation", "legal", "general"],
+          description: "tech_requirement = needs dev work. negotiation = pricing/scope. legal = contract. general = context only."
+        }
+      },
+      required: ["clientId", "content", "category"]
+    }
+  },
+
+  {
+    name: "resolve_client_note",
+    description: "Mark a specific note as resolved. Use when user says a requirement has been addressed.",
+    input_schema: {
+      type: "object",
+      properties: {
+        clientId: { type: "string" },
+        noteId:   { type: "string" }
+      },
+      required: ["clientId", "noteId"]
+    }
+  },
+
   // MOU - READ ONLY
   {
     name: "get_mous",
@@ -460,13 +532,19 @@ Rules:
 
 | Test | How to Test | Expected Result |
 |---|---|---|
-| Create client | POST `/api/cci` with full schema | 201, client returned with generated ID |
+| Create client | POST `/api/cci` with full schema | 201, client returned, `notes` defaults to `[]` |
 | List clients | GET `/api/cci?dealStage=NEGOTIATION` | Returns only negotiation-stage clients |
 | Filter by risk | GET `/api/cci?riskLevel=HIGH` | Returns only high-risk clients |
 | Update field | PUT `/api/cci/:id` `{ riskLevel: "HIGH" }` | Field updated, updatedAt refreshed |
 | Delete client | DELETE `/api/cci/:id` | 200, linked tasks set to unlinked (SetNull) |
 | View detail | Navigate to `/cci/:id` | All sections populated, tasks/MoUs panels visible |
 | Add client via form | Fill form, submit | Appears in list immediately |
+| **Add note** | POST `/api/cci/:id/notes` `{ content: "...", category: "tech_requirement" }` | Note appended to array with generated ID and timestamp |
+| **Add multiple notes** | POST 5 notes sequentially | All 5 appear in array, each with unique ID |
+| **Tech flag visibility** | Add `tech_requirement` note | Orange 🔧 badge appears on client in list view |
+| **Resolve note** | PATCH `/api/cci/:id/notes/:noteId` `{ resolved: true }` | Note shows resolved state, checkbox ticked |
+| **Delete note** | DELETE `/api/cci/:id/notes/:noteId` | Specific note removed, others intact |
+| **Flagged tech endpoint** | GET `/api/cci/flagged-tech` | Returns only clients with unresolved tech_requirement notes |
 
 ### 3.2 TechSprint Tests
 
@@ -504,6 +582,8 @@ These test Claude's tool-use end-to-end. Run via the chat UI or directly against
 | "Are there any overdue tasks?" | `get_tasks({ status: "TODO" })` | Tasks filtered + Claude identifies overdue |
 | "Which clients have no MoU yet?" | `get_clients({ mouStatus: "NONE" })` | List of clients needing MoU |
 | "Show all MoUs not yet signed" | `get_mous({ status: "DRAFT" })` | Unsigned MoU list |
+| "What tech requirements are pending for [ClientName]?" | `get_client({ id })` | Lists all unresolved `tech_requirement` notes for that client |
+| "Which clients still have open tech requirements?" | `get_clients({})` + filter notes | Returns clients with unresolved tech_requirement notes |
 
 #### Write Actions (confirmation flow required)
 
@@ -512,6 +592,8 @@ These test Claude's tool-use end-to-end. Run via the chat UI or directly against
 | "Create a task for Bian to fix login bug by next Monday" | Claude calls `create_task`, UI shows confirmation card, task created only after user confirms |
 | "Update [ClientName]'s deal stage to Contract" | Claude calls `update_client`, confirmation shown, field updated after confirm |
 | "Mark task [title] as done" | Claude calls `update_task({ status: "DONE" })`, confirm required |
+| "Add a note for [ClientName] — they need custom export for attendee data" | Claude calls `add_client_note({ category: "tech_requirement", content: "..." })`, confirmation shown, appended after confirm |
+| "Mark the BCA VA requirement as resolved for [ClientName]" | Claude calls `resolve_client_note`, shows which note it will resolve, confirm required |
 
 #### Safety Tests (should NOT execute)
 
@@ -524,7 +606,11 @@ These test Claude's tool-use end-to-end. Run via the chat UI or directly against
 ### 3.5 Acceptance Criteria
 
 All three phases considered done when:
-- [ ] All 5 CCI CRUD endpoints return correct data
+- [ ] All CCI CRUD endpoints return correct data
+- [ ] Notes array appends correctly (multiple notes, unique IDs, timestamps)
+- [ ] Tech requirement notes show orange 🔧 badge on client list
+- [ ] `/api/cci/flagged-tech` returns only clients with unresolved tech notes
+- [ ] Resolving a note marks it done without deleting it
 - [ ] TechSprint calendar view shows tasks on correct dates
 - [ ] MoU generate fills all template variables from CCI
 - [ ] OpenClaw answers all 6 read query tests correctly
