@@ -357,9 +357,28 @@ export async function deleteConfiguration(req, res) {
     // Delete by slug if provided, otherwise by id
     const whereClause = slug ? { slug } : { id };
 
+    // Fetch config BEFORE deleting so we know its type and slug
+    const configToDelete = await prisma.configuration.findUnique({
+      where: whereClause,
+      select: { id: true, slug: true, configType: true }
+    });
+
     await prisma.configuration.delete({
       where: whereClause
     });
+
+    // If this was a DEMO config, notify CRM to clear orphaned client fields
+    // Fire-and-forget: CRM sync failure must never block the delete response
+    if (configToDelete && configToDelete.configType === 'DEMO') {
+      const crmUrl = process.env.CRM_INTERNAL_URL || 'http://localhost:3002';
+      const secret = process.env.INTERNAL_SERVICE_SECRET || '';
+      fetch(`${crmUrl}/api/clients/internal/clear-demo/${configToDelete.slug}`, {
+        method: 'PATCH',
+        headers: { 'x-service-secret': secret, 'Content-Type': 'application/json' }
+      })
+        .then(r => console.log(`[Delete Config] CRM notified for slug ${configToDelete.slug}: ${r.status}`))
+        .catch(e => console.error(`[Delete Config] CRM notification failed (non-critical): ${e.message}`));
+    }
 
     res.json({ message: 'Configuration deleted successfully' });
   } catch (error) {

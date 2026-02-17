@@ -72,6 +72,40 @@ router.get('/', authenticate, async (req, res) => {
   }
 });
 
+
+// PATCH /api/clients/internal/clear-demo/:slug
+// Internal endpoint: called by LP backend when a DEMO config is deleted from /saved
+// Clears demo-related fields on the matching CRM client - never touches other data
+router.patch("/internal/clear-demo/:slug", async (req, res) => {
+  const serviceSecret = req.headers["x-service-secret"];
+  if (\!serviceSecret || serviceSecret \!== process.env.INTERNAL_SERVICE_SECRET) {
+    return res.status(401).json({ error: "Unauthorized - internal endpoint" });
+  }
+
+  try {
+    const { slug } = req.params;
+    const demoUrl = `https://${slug}.webbuild.arachnova.id`;
+
+    // Clear ONLY demo fields - never touches eventOrganizer, phone, status, etc.
+    const result = await prisma.client.updateMany({
+      where: { linkDemo: demoUrl },
+      data: {
+        linkDemo: null,
+        imgLogo: null,
+        imgPoster: null,
+        colorPalette: null,
+        eventType: null
+      }
+    });
+
+    console.log(`[Internal] Cleared demo for slug: ${slug}, affected: ${result.count} clients`);
+    res.json({ success: true, affectedClients: result.count });
+  } catch (error) {
+    console.error("[Internal] Error clearing demo data:", error);
+    res.status(500).json({ error: "Failed to clear demo data" });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const client = await prisma.client.findUnique({
