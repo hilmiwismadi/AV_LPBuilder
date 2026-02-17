@@ -1,3 +1,4 @@
+import axios from 'axios';
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { standardizePhoneNumber } from '../utils/phoneUtils.js';
@@ -78,7 +79,7 @@ router.get('/', authenticate, async (req, res) => {
 // Clears demo-related fields on the matching CRM client - never touches other data
 router.patch("/internal/clear-demo/:slug", async (req, res) => {
   const serviceSecret = req.headers["x-service-secret"];
-  if (\!serviceSecret || serviceSecret \!== process.env.INTERNAL_SERVICE_SECRET) {
+  if (!serviceSecret || serviceSecret !== process.env.INTERNAL_SERVICE_SECRET) {
     return res.status(401).json({ error: "Unauthorized - internal endpoint" });
   }
 
