@@ -1,0 +1,72 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+model Client {
+  id                  String     @id @default(cuid())
+  clientName          String
+  eventName           String?
+  eventType           String?
+  expectedVolume      Int?
+  ticketCategories    String?
+  platformFee         Float?     @default(4.0)
+  customDevRequired   Boolean    @default(false)
+  negotiationStatus   String?
+  dealStage           String?
+  timeline            String?
+  riskLevel           String?
+  mouStatus           String?
+  notes               Json?      @default("[]")
+  linkedTechSprintIds String[]   @default([])
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  tasks               Task[]
+  mouDrafts           MouDraft[]
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  assignedTo  String?
+  status      TaskStatus @default(TODO)
+  deadline    DateTime?
+  clientId    String?
+  client      Client?    @relation(fields: [clientId], references: [id])
+  parentId    String?
+  parent      Task?      @relation("SubTasks", fields: [parentId], references: [id])
+  subtasks    Task[]     @relation("SubTasks")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  BLOCKED
+}
+
+model MouDraft {
+  id        String    @id @default(cuid())
+  clientId  String
+  client    Client    @relation(fields: [clientId], references: [id])
+  title     String
+  content   String
+  variables Json?
+  status    MouStatus @default(DRAFT)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum MouStatus {
+  DRAFT
+  UNDER_REVIEW
+  SENT
+  SIGNED
+}

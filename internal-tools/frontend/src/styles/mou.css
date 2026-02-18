@@ -1,0 +1,14 @@
+.mou-list { display: flex; flex-direction: column; gap: 8px; }
+.mou-item { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 16px; display: flex; align-items: center; gap: 16px; }
+.mou-item:hover { border-color: var(--color-primary); cursor: pointer; }
+.mou-title { font-weight: 600; margin-bottom: 4px; }
+.mou-client { font-size: 12px; color: var(--text-secondary); }
+.mou-status { margin-left: auto; }
+.chip-draft { background: rgba(100,116,139,0.15); color: var(--text-muted); }
+.chip-under-review { background: rgba(245,158,11,0.15); color: var(--color-warning); }
+.chip-sent { background: rgba(59,130,246,0.15); color: var(--color-info); }
+.chip-signed { background: rgba(16,185,129,0.15); color: var(--color-success); }
+.mou-editor { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
+.mou-content-area { width: 100%; min-height: 400px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; color: var(--text-primary); resize: vertical; line-height: 1.6; }
+.mou-content-area:focus { outline: none; border-color: var(--color-primary); }
+.status-actions { display: flex; gap: 8px; flex-wrap: wrap; }
