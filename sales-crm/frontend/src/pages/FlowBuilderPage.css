@@ -437,3 +437,66 @@
 .sn-add-btn:hover {
   background: #7c73ff;
 }
+
+/* ── Delete buttons ──────────────────────────────────────────────────────────── */
+.sn-node-delete {
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e53935;
+  border: 2px solid #0d0d1a;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  padding: 0;
+  font-weight: 700;
+  transition: background 0.15s, transform 0.1s;
+}
+.sn-node-delete:hover {
+  background: #ff5252;
+  transform: scale(1.15);
+}
+.sn-template-node:hover .sn-node-delete,
+.sn-decision-node:hover .sn-node-delete {
+  display: flex;
+}
+
+/* Edge delete button */
+.sn-edge-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.sn-edge-delete {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e53935;
+  border: none;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+}
+.sn-edge-delete:hover {
+  background: #ff5252;
+  transform: scale(1.15);
+}
+.sn-edge-label-wrap:hover .sn-edge-delete {
+  display: flex;
+}

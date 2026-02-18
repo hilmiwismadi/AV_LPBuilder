@@ -36,6 +36,7 @@ const Sidebar = () => {
     ]},
     { section: 'System', items: [
       { path: '/logs', label: 'Logs', icon: '📄' },
+      { path: '/logs/wa', label: 'WA Logs', icon: '📱' },
       { path: '/monitor', label: 'Monitor', icon: '📊' },
       ...(user?.role === 'SUPERADMIN' ? [{ path: '/superadmin', label: 'Superadmin', icon: '⚙️' }] : []),
     ]},

@@ -129,6 +129,12 @@ export const flowAPI = {
   saveCanvas: (data) => api.post('/flow', data),
 };
 
+
+export const waLogsAPI = {
+  getLogs: (lines) =>
+    api.get('/logs/whatsapp?lines=' + (lines || 500)),
+};
+
 export const createAdmin = adminAPI.create;
 export const changePassword = adminAPI.changePassword;
 export const getAdmins = adminAPI.getAll;

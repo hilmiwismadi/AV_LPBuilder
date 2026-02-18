@@ -43,13 +43,15 @@ function StartNode() {
 }
 
 // TemplateNode
-function TemplateNode({ data }) {
+function TemplateNode({ id, data }) {
+  const { deleteElements } = useReactFlow();
   const color = catColor(data.category);
   const preview = data.message
     ? data.message.slice(0, 100) + (data.message.length > 100 ? '...' : '')
     : '';
   return (
     <div className="sn-template-node">
+      <button className="sn-node-delete" onClick={(e) => { e.stopPropagation(); deleteElements({ nodes: [{ id }] }); }} title="Delete node">×</button>
       <Handle type="target" position={Position.Left} />
       <div className="sn-tn-header">
         <span className="sn-tn-badge" style={{ backgroundColor: color }}>
@@ -87,8 +89,10 @@ function DecisionNode({ id, data }) {
     data.onLabelChange?.(id, label);
   };
 
+  const { deleteElements } = useReactFlow();
   return (
     <div className="sn-decision-node" onDoubleClick={() => setEditing(true)}>
+      <button className="sn-node-delete" onClick={(e) => { e.stopPropagation(); deleteElements({ nodes: [{ id }] }); }} title="Delete node">×</button>
       <Handle type="target" position={Position.Top} id="top" />
       <div className="sn-dn-diamond">
         <div className="sn-dn-content">
@@ -146,20 +150,23 @@ function EditableEdge({
             pointerEvents: 'all',
           }}
         >
-          {editing ? (
-            <input
-              ref={inputRef}
-              className="sn-edge-input"
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              onBlur={commit}
-              onKeyDown={(e) => e.key === 'Enter' && commit()}
-            />
-          ) : (
-            <div className="sn-edge-label" onClick={() => setEditing(true)}>
-              {label || <span className="sn-edge-placeholder">+ label</span>}
-            </div>
-          )}
+          <div className="sn-edge-actions">
+            {editing ? (
+              <input
+                ref={inputRef}
+                className="sn-edge-input"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                onBlur={commit}
+                onKeyDown={(e) => e.key === 'Enter' && commit()}
+              />
+            ) : (
+              <div className="sn-edge-label" onClick={() => setEditing(true)}>
+                {label || <span className="sn-edge-placeholder">+ label</span>}
+              </div>
+            )}
+            <button className="sn-edge-delete" onClick={(e) => { e.stopPropagation(); data?.onDeleteEdge?.(id); }} title="Delete connection">×</button>
+          </div>
         </div>
       </EdgeLabelRenderer>
     </>
@@ -346,14 +353,19 @@ function FlowBuilderInner() {
     );
   }, []);
 
+  // Delete edge
+  const handleDeleteEdge = useCallback((edgeId) => {
+    setEdges((eds) => eds.filter((e) => e.id !== edgeId));
+  }, []);
+
   // Inject callbacks
   const nodesWithCb = useMemo(
     () => nodes.map((n) => ({ ...n, data: { ...n.data, onLabelChange: handleDecisionLabelChange } })),
     [nodes, handleDecisionLabelChange],
   );
   const edgesWithCb = useMemo(
-    () => edges.map((e) => ({ ...e, data: { ...e.data, onLabelChange: handleEdgeLabelChange } })),
-    [edges, handleEdgeLabelChange],
+    () => edges.map((e) => ({ ...e, data: { ...e.data, onLabelChange: handleEdgeLabelChange, onDeleteEdge: handleDeleteEdge } })),
+    [edges, handleEdgeLabelChange, handleDeleteEdge],
   );
 
   // Drag-and-drop

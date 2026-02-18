@@ -14,6 +14,7 @@ class WhatsAppService {
     this.qrCode = null;
     this.qrCodeImage = null;
     this.readyPromise = null;
+    this.lastReadyTime = 0; // track last ready for stability grace period
   }
 
   initialize() {
@@ -55,6 +56,7 @@ class WhatsAppService {
 
     this.client.on('ready', () => {
       console.log('WhatsApp client is ready!');
+      this.lastReadyTime = Date.now();
       this.qrCode = null;
       this.qrCodeImage = null;
       if (this.readyResolve) {
@@ -193,6 +195,14 @@ class WhatsAppService {
     try {
       console.log('Sending message to:', formattedNumber);
 
+      // Grace period: wait until 4s after last ready event so page internals fully stabilize
+      const timeSinceReady = Date.now() - this.lastReadyTime;
+      if (timeSinceReady < 4000) {
+        const wait = 4000 - timeSinceReady;
+        console.log('[WA] Waiting ' + wait + 'ms for client to stabilize after reconnect...');
+        await new Promise(resolve => setTimeout(resolve, wait));
+      }
+
       // Check if number exists on WhatsApp
       const numberId = await this.client.getNumberId(formattedNumber).catch((err) => {
         console.log('Number ID check failed, trying anyway:', err.message);
@@ -227,8 +237,8 @@ class WhatsAppService {
           // If it's the markedUnread error, wait and retry
           if (sendError.message.includes('markedUnread') || sendError.message.includes('Cannot read properties')) {
             if (attempt < 3) {
-              console.log('Retrying after 1 second...');
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              console.log('Retrying after 3 seconds...');
+              await new Promise(resolve => setTimeout(resolve, 3000));
               continue;
             }
           } else {

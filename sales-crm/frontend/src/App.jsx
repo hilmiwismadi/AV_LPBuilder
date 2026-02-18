@@ -12,6 +12,7 @@ import ScraperHistoryPage from './pages/ScraperHistoryPage';
 import ScraperSessionDetailPage from './pages/ScraperSessionDetailPage';
 import TemplateManagerPage from './pages/TemplateManagerPage';
 import FlowBuilderPage from './pages/FlowBuilderPage';
+import WALogsPage from './pages/WALogsPage';
 import MonitorPage from './pages/MonitorPage';
 import SuperadminPage from './pages/SuperadminPage';
 import './App.css';
@@ -51,6 +52,7 @@ function MainLayout() {
           <Route path="/scraper/history" element={<ScraperHistoryPage />} />
           <Route path="/scraper/history/:slug" element={<ScraperSessionDetailPage />} />
           <Route path="/logs" element={<LogsPage />} />
+          <Route path="/logs/wa" element={<WALogsPage />} />
           <Route path="/monitor" element={<MonitorPage />} />
           <Route
             path="/superadmin"
