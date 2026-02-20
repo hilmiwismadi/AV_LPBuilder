@@ -22,13 +22,14 @@ const TOOLS = [
   { type: "function", function: { name: "list_tasks", description: "List TechSprint tasks with optional filters.", parameters: { type: "object", properties: { assignedTo: { type: "string", description: "Filter by assignee name" }, status: { type: "string", description: "TODO, IN_PROGRESS, DONE, BLOCKED" }, clientId: { type: "string", description: "Filter by client ID" }, week: { type: "string", description: "YYYY-WNN format" } } } } },
   { type: "function", function: { name: "get_workload_summary", description: "Get per-person task count summary.", parameters: { type: "object", properties: {} } } },
   { type: "function", function: { name: "get_flagged_tech_notes", description: "Get all clients with unresolved tech_requirement notes.", parameters: { type: "object", properties: {} } } },
+  { type: "function", function: { name: "create_client", description: "Create a new CCI client record. WRITE action - requires user confirmation.", parameters: { type: "object", properties: { clientName: { type: "string", description: "Client/organization name" }, eventName: { type: "string", description: "Name of the event" }, eventType: { type: "string", description: "Type of event (concert, conference, competition, etc.)" }, expectedVolume: { type: "number", description: "Expected number of attendees/registrants" }, platformFee: { type: "number", description: "Platform fee percentage or amount" }, timeline: { type: "string", description: "Event timeline/date" }, dealStage: { type: "string", description: "Prospect, Negotiation, Closed Won, Closed Lost, On Hold" }, riskLevel: { type: "string", description: "Low, Medium, High" }, customDevRequired: { type: "boolean", description: "Whether custom development is needed" }, negotiationStatus: { type: "string", description: "Current negotiation status" }, mouStatus: { type: "string", description: "MoU status" } }, required: ["clientName"] } } },
   { type: "function", function: { name: "update_client_field", description: "Update a field on a CCI client record. WRITE action - requires user confirmation.", parameters: { type: "object", properties: { clientId: { type: "string", description: "The client ID to update" }, field: { type: "string", description: "clientName, eventName, eventType, expectedVolume, dealStage, riskLevel, platformFee, timeline, negotiationStatus, customDevRequired, mouStatus" }, value: { type: "string", description: "New value for the field" } }, required: ["clientId", "field", "value"] } } },
   { type: "function", function: { name: "add_client_note", description: "Add a note to a client. WRITE action - requires user confirmation.", parameters: { type: "object", properties: { clientId: { type: "string", description: "The client ID" }, content: { type: "string", description: "Note content" }, category: { type: "string", description: "tech_requirement, negotiation, legal, general" } }, required: ["clientId", "content", "category"] } } },
   { type: "function", function: { name: "create_task", description: "Create a new TechSprint task. WRITE action - requires user confirmation.", parameters: { type: "object", properties: { title: { type: "string", description: "Task title" }, description: { type: "string", description: "Task description (optional)" }, assignedTo: { type: "string", description: "Person to assign to (optional)" }, deadline: { type: "string", description: "Deadline in ISO format (optional)" }, clientId: { type: "string", description: "Related client ID (optional)" }, status: { type: "string", description: "Initial status: TODO, IN_PROGRESS, DONE, BLOCKED. Defaults to TODO." } }, required: ["title"] } } },
   { type: "function", function: { name: "update_task", description: "Update a TechSprint task. WRITE action - requires user confirmation.", parameters: { type: "object", properties: { taskId: { type: "string", description: "The task ID to update" }, status: { type: "string", description: "New status: TODO, IN_PROGRESS, DONE, BLOCKED" }, assignedTo: { type: "string", description: "New assignee" }, deadline: { type: "string", description: "New deadline in ISO format" }, title: { type: "string", description: "New title" } }, required: ["taskId"] } } },
 ];
 
-const WRITE_TOOLS = new Set(["update_client_field", "add_client_note", "create_task", "update_task"]);
+const WRITE_TOOLS = new Set(["create_client", "update_client_field", "add_client_note", "create_task", "update_task"]);
 
 const SYSTEM_PROMPT = `You are OpenClaw, an internal AI assistant for Roetix (a ticketing technology company). You help the founder and team manage client relationships (CCI), tasks (TechSprint), and MoU documents.
 
@@ -150,6 +151,21 @@ async function resolveClientId(prisma, clientId) {
 async function executeWriteTool(toolName, toolArgs) {
   const prisma = getPrisma();
   switch (toolName) {
+    case "create_client": {
+      const data = {};
+      if (toolArgs.clientName) data.clientName = toolArgs.clientName;
+      if (toolArgs.eventName) data.eventName = toolArgs.eventName;
+      if (toolArgs.eventType) data.eventType = toolArgs.eventType;
+      if (toolArgs.expectedVolume) data.expectedVolume = parseInt(toolArgs.expectedVolume) || 0;
+      if (toolArgs.platformFee) data.platformFee = parseFloat(toolArgs.platformFee) || 4.0;
+      if (toolArgs.timeline) data.timeline = toolArgs.timeline;
+      if (toolArgs.dealStage) data.dealStage = toolArgs.dealStage;
+      if (toolArgs.riskLevel) data.riskLevel = toolArgs.riskLevel;
+      if (toolArgs.negotiationStatus) data.negotiationStatus = toolArgs.negotiationStatus;
+      if (toolArgs.mouStatus) data.mouStatus = toolArgs.mouStatus;
+      if (toolArgs.customDevRequired !== undefined) data.customDevRequired = toolArgs.customDevRequired;
+      return await prisma.client.create({ data });
+    }
     case "update_client_field": {
       const c = await resolveClientId(prisma, toolArgs.clientId);
       if (!c) return { error: "Client not found: " + toolArgs.clientId };
@@ -185,6 +201,7 @@ async function executeWriteTool(toolName, toolArgs) {
 
 function buildConfirmationPreview(toolName, toolArgs) {
   switch (toolName) {
+    case "create_client": return { action: "Create new client", clientName: toolArgs.clientName, eventName: toolArgs.eventName, eventType: toolArgs.eventType, volume: toolArgs.expectedVolume, fee: toolArgs.platformFee, timeline: toolArgs.timeline, dealStage: toolArgs.dealStage };
     case "update_client_field": return { action: "Update client field", field: toolArgs.field, newValue: toolArgs.value, clientId: toolArgs.clientId };
     case "add_client_note": return { action: "Add note to client", content: toolArgs.content, category: toolArgs.category, clientId: toolArgs.clientId };
     case "create_task": return { action: "Create task", title: toolArgs.title, assignedTo: toolArgs.assignedTo, deadline: toolArgs.deadline, clientId: toolArgs.clientId };

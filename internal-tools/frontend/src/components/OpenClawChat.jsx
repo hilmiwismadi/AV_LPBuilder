@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { openclaw } from '../services/api.js';
 
 const CONFIRMATION_LABELS = {
+  create_client: 'Create New Client',
   update_client_field: 'Update Client Field',
   add_client_note: 'Add Client Note',
   create_task: 'Create Task',
