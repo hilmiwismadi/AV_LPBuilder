@@ -35,6 +35,9 @@ export const mou = {
 export const openclaw = {
   chat: (data) => api.post('/openclaw/chat', data),
   confirm: (data) => api.post('/openclaw/confirm', data),
+  listConversations: () => api.get('/openclaw/conversations'),
+  getConversation: (id) => api.get(`/openclaw/conversations/${id}`),
+  deleteConversation: (id) => api.delete(`/openclaw/conversations/${id}`),
 };
 
 export default api;

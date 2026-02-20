@@ -1,4 +1,4 @@
-.table-container { overflow-x: auto; }
+.table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -16,6 +16,7 @@
   color: var(--text-muted);
   background: rgba(0,0,0,0.2);
   border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
 }
 .data-table td {
   padding: 12px 16px;
@@ -31,6 +32,7 @@
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
+  white-space: nowrap;
 }
 .chip-prospect { background: rgba(99,102,241,0.15); color: var(--color-primary-light); }
 .chip-negotiation { background: rgba(245,158,11,0.15); color: var(--color-warning); }
@@ -73,6 +75,7 @@
   border-radius: var(--radius-sm);
   font-weight: 500;
   transition: all 0.15s;
+  white-space: nowrap;
 }
 .btn-primary { background: var(--color-primary); color: white; }
 .btn-primary:hover { background: var(--color-primary-dark); }
@@ -87,6 +90,7 @@
   background: rgba(0,0,0,0.6);
   display: flex; align-items: center; justify-content: center;
   z-index: 1000;
+  padding: 16px;
 }
 .modal {
   background: var(--bg-card);
@@ -94,6 +98,7 @@
   border-radius: var(--radius);
   padding: 24px;
   width: 540px;
+  max-width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow);
@@ -146,9 +151,9 @@
   align-items: flex-start;
 }
 .note-card.resolved { opacity: 0.5; }
-.note-content { flex: 1; }
-.note-text { color: var(--text-primary); margin-bottom: 6px; line-height: 1.5; }
-.note-meta { display: flex; gap: 8px; align-items: center; }
+.note-content { flex: 1; min-width: 0; }
+.note-text { color: var(--text-primary); margin-bottom: 6px; line-height: 1.5; word-break: break-word; }
+.note-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .note-category { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
 .note-cat-tech { background: rgba(249,115,22,0.15); color: var(--color-tech); }
 .note-cat-negotiation { background: rgba(59,130,246,0.15); color: var(--color-negotiation); }
@@ -164,3 +169,55 @@
 .linked-item { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); }
 .linked-item a { color: var(--color-primary); }
 .empty-state { text-align: center; padding: 48px; color: var(--text-muted); }
+
+/* ── Mobile card view for client list ── */
+.client-cards { display: none; }
+.client-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.client-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.client-card-name { font-weight: 600; font-size: 15px; }
+.client-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 13px;
+}
+.client-card-label { color: var(--text-muted); }
+.client-card-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — Mobile (≤768px)
+   ═══════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Hide table, show cards */
+  .table-container { display: none; }
+  .client-cards { display: block; }
+
+  .filter-bar { gap: 8px; }
+  .filter-bar select { flex: 1; min-width: 0; font-size: 13px; }
+
+  .form-row { grid-template-columns: 1fr; }
+  .modal { padding: 18px; }
+
+  .detail-grid { grid-template-columns: 1fr; gap: 12px; }
+
+  .section-card { padding: 14px; }
+
+  .note-card { flex-direction: column; gap: 8px; }
+  .note-actions { align-self: flex-end; }
+
+  .add-note-row { flex-direction: column; }
+
+  .empty-state { padding: 32px 16px; }
+}

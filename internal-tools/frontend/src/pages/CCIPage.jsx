@@ -64,34 +64,65 @@ export default function CCIPage() {
       ) : clients.length === 0 ? (
         <div className="empty-state">No clients found. Add your first client!</div>
       ) : (
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Client Name</th>
-                <th>Event</th>
-                <th>Deal Stage</th>
-                <th>Risk Level</th>
-                <th>Volume</th>
-                <th>Notes</th>
-                <th>Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clients.map(c => (
-                <tr key={c.id} onClick={() => navigate(`/cci/${c.id}`)}>
-                  <td style={{fontWeight:600}}>{c.clientName}</td>
-                  <td>{c.eventName || '—'}</td>
-                  <td>{c.dealStage ? <span className={"chip " + getDealChip(c.dealStage)}>{c.dealStage}</span> : '—'}</td>
-                  <td>{c.riskLevel ? <span className={"chip " + getRiskChip(c.riskLevel)}>{c.riskLevel}</span> : '—'}</td>
-                  <td>{c.expectedVolume?.toLocaleString() || '—'}</td>
-                  <td><span className="badge">{Array.isArray(c.notes) ? c.notes.length : 0}</span></td>
-                  <td style={{color:'var(--text-muted)'}}>{new Date(c.updatedAt).toLocaleDateString()}</td>
+        <>
+          {/* Desktop table */}
+          <div className="table-container">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Client Name</th>
+                  <th>Event</th>
+                  <th>Deal Stage</th>
+                  <th>Risk Level</th>
+                  <th>Volume</th>
+                  <th>Notes</th>
+                  <th>Updated</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {clients.map(c => (
+                  <tr key={c.id} onClick={() => navigate(`/cci/${c.id}`)}>
+                    <td style={{fontWeight:600}}>{c.clientName}</td>
+                    <td>{c.eventName || '—'}</td>
+                    <td>{c.dealStage ? <span className={"chip " + getDealChip(c.dealStage)}>{c.dealStage}</span> : '—'}</td>
+                    <td>{c.riskLevel ? <span className={"chip " + getRiskChip(c.riskLevel)}>{c.riskLevel}</span> : '—'}</td>
+                    <td>{c.expectedVolume?.toLocaleString() || '—'}</td>
+                    <td><span className="badge">{Array.isArray(c.notes) ? c.notes.length : 0}</span></td>
+                    <td style={{color:'var(--text-muted)'}}>{new Date(c.updatedAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="client-cards">
+            {clients.map(c => (
+              <div key={c.id} className="client-card" onClick={() => navigate(`/cci/${c.id}`)}>
+                <div className="client-card-header">
+                  <span className="client-card-name">{c.clientName}</span>
+                  <span className="badge">{Array.isArray(c.notes) ? c.notes.length : 0} notes</span>
+                </div>
+                <div className="client-card-row">
+                  <span className="client-card-label">Event</span>
+                  <span>{c.eventName || '—'}</span>
+                </div>
+                <div className="client-card-row">
+                  <span className="client-card-label">Volume</span>
+                  <span>{c.expectedVolume?.toLocaleString() || '—'}</span>
+                </div>
+                <div className="client-card-row">
+                  <span className="client-card-label">Updated</span>
+                  <span style={{color:'var(--text-muted)'}}>{new Date(c.updatedAt).toLocaleDateString()}</span>
+                </div>
+                <div className="client-card-chips">
+                  {c.dealStage && <span className={"chip " + getDealChip(c.dealStage)}>{c.dealStage}</span>}
+                  {c.riskLevel && <span className={"chip " + getRiskChip(c.riskLevel)}>{c.riskLevel}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
       {showForm && <ClientForm onSubmit={handleCreate} onClose={() => setShowForm(false)} />}
     </div>

@@ -18,6 +18,7 @@ const MODELS = [
 const TOOLS = [
   { type: "function", function: { name: "search_clients", description: "Search CCI clients by name, deal stage, risk level, or event type.", parameters: { type: "object", properties: { query: { type: "string", description: "Partial client name (optional)" }, dealStage: { type: "string", description: "Prospect, Negotiation, Closed Won, Closed Lost, On Hold" }, riskLevel: { type: "string", description: "Low, Medium, High" }, eventType: { type: "string", description: "Filter by event type (partial match)" } } } } },
   { type: "function", function: { name: "get_client_detail", description: "Get full detail of a specific client including all notes, tasks, and MoU drafts.", parameters: { type: "object", properties: { clientId: { type: "string", description: "The client ID or client name" } }, required: ["clientId"] } } },
+  { type: "function", function: { name: "search_notes", description: "Search across ALL clients' notes by content text. Use this when user asks about specific note content, reminders, or information stored in notes.", parameters: { type: "object", properties: { query: { type: "string", description: "Text to search for in note content (partial match, case-insensitive)" }, category: { type: "string", description: "Optional: filter by category - tech_requirement, negotiation, legal, general" } }, required: ["query"] } } },
   { type: "function", function: { name: "list_tasks", description: "List TechSprint tasks with optional filters.", parameters: { type: "object", properties: { assignedTo: { type: "string", description: "Filter by assignee name" }, status: { type: "string", description: "TODO, IN_PROGRESS, DONE, BLOCKED" }, clientId: { type: "string", description: "Filter by client ID" }, week: { type: "string", description: "YYYY-WNN format" } } } } },
   { type: "function", function: { name: "get_workload_summary", description: "Get per-person task count summary.", parameters: { type: "object", properties: {} } } },
   { type: "function", function: { name: "get_flagged_tech_notes", description: "Get all clients with unresolved tech_requirement notes.", parameters: { type: "object", properties: {} } } },
@@ -29,7 +30,24 @@ const TOOLS = [
 
 const WRITE_TOOLS = new Set(["update_client_field", "add_client_note", "create_task", "update_task"]);
 
-const SYSTEM_PROMPT = "You are OpenClaw, an internal AI assistant for Roetix (a ticketing technology company). You help the founder and team manage client relationships (CCI), tasks (TechSprint), and MoU documents.\n\nYou have access to tools to read and write data. For READ operations, use them freely. For WRITE operations, you will propose the action and the user will confirm before it executes.\n\nKey context:\n- CCI: client database with notes, deal stages, risk levels\n- TechSprint: lightweight task tracker (TODO, IN_PROGRESS, DONE, BLOCKED)\n- MoU Maker: memorandum of understanding drafts\n\nWhen classifying note categories:\n- tech_requirement: custom features, technical needs, integrations, dev work\n- negotiation: pricing, terms, discounts, fees\n- legal: contracts, compliance, liability\n- general: everything else\n\nBe concise and helpful. When proposing write actions, briefly explain what you will do.";
+const SYSTEM_PROMPT = `You are OpenClaw, an internal AI assistant for Roetix (a ticketing technology company). You help the founder and team manage client relationships (CCI), tasks (TechSprint), and MoU documents.
+
+You have access to tools to read and write data. For READ operations, use them freely. For WRITE operations, you will propose the action and the user will confirm before it executes.
+
+Key context:
+- CCI: client database with notes, deal stages, risk levels
+- TechSprint: lightweight task tracker (TODO, IN_PROGRESS, DONE, BLOCKED)
+- MoU Maker: memorandum of understanding drafts
+
+IMPORTANT: When the user asks about information stored in notes (reminders, standby schedules, action items, etc.), ALWAYS use the search_notes tool to search note content. Do NOT rely on search_clients alone - it does not search note content.
+
+When classifying note categories:
+- tech_requirement: custom features, technical needs, integrations, dev work
+- negotiation: pricing, terms, discounts, fees
+- legal: contracts, compliance, liability
+- general: everything else (reminders, schedules, standby, follow-ups)
+
+Be concise and helpful. When proposing write actions, briefly explain what you will do.`;
 
 async function callLLM(messages) {
   let lastErr;
@@ -83,6 +101,23 @@ async function executeReadTool(toolName, toolArgs) {
       }
       return c || { error: "Client not found" };
     }
+    case "search_notes": {
+      const clients = await prisma.client.findMany({ orderBy: { updatedAt: "desc" } });
+      const queryLower = (toolArgs.query || "").toLowerCase();
+      const results = [];
+      for (const client of clients) {
+        const notes = Array.isArray(client.notes) ? client.notes : [];
+        const matched = notes.filter((n) => {
+          const contentMatch = (n.content || "").toLowerCase().includes(queryLower);
+          const categoryMatch = !toolArgs.category || n.category === toolArgs.category;
+          return contentMatch && categoryMatch;
+        });
+        if (matched.length > 0) {
+          results.push({ clientId: client.id, clientName: client.clientName, matchedNotes: matched });
+        }
+      }
+      return results.length > 0 ? results : { message: "No notes found matching: " + toolArgs.query };
+    }
     case "list_tasks": {
       const where = { parentId: null };
       if (toolArgs.assignedTo) where.assignedTo = { contains: toolArgs.assignedTo, mode: "insensitive" };
@@ -104,22 +139,37 @@ async function executeReadTool(toolName, toolArgs) {
   }
 }
 
+async function resolveClientId(prisma, clientId) {
+  let client = await prisma.client.findUnique({ where: { id: clientId } });
+  if (!client) {
+    client = await prisma.client.findFirst({ where: { clientName: { contains: clientId, mode: "insensitive" } } });
+  }
+  return client;
+}
+
 async function executeWriteTool(toolName, toolArgs) {
   const prisma = getPrisma();
   switch (toolName) {
     case "update_client_field": {
-      return await prisma.client.update({ where: { id: toolArgs.clientId }, data: { [toolArgs.field]: toolArgs.value } });
+      const c = await resolveClientId(prisma, toolArgs.clientId);
+      if (!c) return { error: "Client not found: " + toolArgs.clientId };
+      return await prisma.client.update({ where: { id: c.id }, data: { [toolArgs.field]: toolArgs.value } });
     }
     case "add_client_note": {
-      const c = await prisma.client.findUnique({ where: { id: toolArgs.clientId } });
+      const c = await resolveClientId(prisma, toolArgs.clientId);
+      if (!c) return { error: "Client not found: " + toolArgs.clientId };
       const notes = Array.isArray(c.notes) ? c.notes : [];
       const newNote = { id: uuidv4(), content: toolArgs.content, category: toolArgs.category || "general", resolved: false, createdAt: new Date().toISOString() };
       notes.push(newNote);
-      await prisma.client.update({ where: { id: toolArgs.clientId }, data: { notes } });
+      await prisma.client.update({ where: { id: c.id }, data: { notes } });
       return newNote;
     }
     case "create_task": {
       const data = { ...toolArgs };
+      if (data.clientId) {
+        const c = await resolveClientId(prisma, data.clientId);
+        if (c) data.clientId = c.id; else delete data.clientId;
+      }
       if (data.deadline) data.deadline = new Date(data.deadline);
       if (!data.status) data.status = "TODO";
       return await prisma.task.create({ data, include: { client: { select: { clientName: true } } } });
@@ -145,9 +195,54 @@ function buildConfirmationPreview(toolName, toolArgs) {
 
 const MAX_TOOL_ROUNDS = 5;
 
+// ── Helper: save messages to DB conversation ──
+async function saveConversation(conversationId, title, messages) {
+  const prisma = getPrisma();
+  if (conversationId) {
+    // Append new messages to existing conversation
+    const existing = await prisma.conversation.findUnique({ where: { id: conversationId } });
+    if (existing) {
+      // Get count of existing messages to know which are new
+      const existingCount = await prisma.chatMessage.count({ where: { conversationId } });
+      const newMsgs = messages.slice(existingCount);
+      if (newMsgs.length > 0) {
+        await prisma.chatMessage.createMany({
+          data: newMsgs.map((m) => ({
+            conversationId,
+            role: m.role,
+            content: m.content || null,
+            toolCalls: m.tool_calls || null,
+          })),
+        });
+        await prisma.conversation.update({ where: { id: conversationId }, data: { updatedAt: new Date() } });
+      }
+      return conversationId;
+    }
+  }
+  // Create new conversation
+  const convo = await prisma.conversation.create({
+    data: {
+      title: title || null,
+      messages: {
+        create: messages.map((m) => ({
+          role: m.role,
+          content: m.content || null,
+          toolCalls: m.tool_calls || null,
+        })),
+      },
+    },
+  });
+  return convo.id;
+}
+
+// Generate a short title from the first user message
+function generateTitle(message) {
+  return message.length > 60 ? message.slice(0, 57) + "..." : message;
+}
+
 export const chat = async (req, res) => {
   try {
-    const { message, conversationHistory = [] } = req.body;
+    const { message, conversationHistory = [], conversationId } = req.body;
 
     const messages = [
       { role: "system", content: SYSTEM_PROMPT },
@@ -160,10 +255,16 @@ export const chat = async (req, res) => {
 
       // No tool calls - return text
       if (!reply.tool_calls || reply.tool_calls.length === 0) {
+        const updatedHistory = [...conversationHistory, { role: "user", content: message }, { role: "assistant", content: reply.content }];
+        // Save to DB
+        const title = conversationHistory.length === 0 ? generateTitle(message) : undefined;
+        const savedId = await saveConversation(conversationId, title, updatedHistory);
+
         return res.json({
           requiresConfirmation: false,
           reply: reply.content || "I'm not sure how to help with that.",
-          updatedHistory: [...conversationHistory, { role: "user", content: message }, { role: "assistant", content: reply.content }],
+          updatedHistory,
+          conversationId: savedId,
         });
       }
 
@@ -174,6 +275,10 @@ export const chat = async (req, res) => {
 
       // Write tool - ask for confirmation
       if (WRITE_TOOLS.has(toolName)) {
+        const updatedHistory = [...conversationHistory, { role: "user", content: message }];
+        const title = conversationHistory.length === 0 ? generateTitle(message) : undefined;
+        const savedId = await saveConversation(conversationId, title, updatedHistory);
+
         return res.json({
           requiresConfirmation: true,
           reply: reply.content || "I will " + toolName.replace(/_/g, " ") + ". Please confirm:",
@@ -182,7 +287,8 @@ export const chat = async (req, res) => {
           toolUseId: tc.id,
           confirmationPreview: buildConfirmationPreview(toolName, toolArgs),
           assistantMessage: reply,
-          updatedHistory: [...conversationHistory, { role: "user", content: message }],
+          updatedHistory,
+          conversationId: savedId,
         });
       }
 
@@ -196,6 +302,7 @@ export const chat = async (req, res) => {
       requiresConfirmation: false,
       reply: "I performed several lookups but could not fully answer. Please try a more specific question.",
       updatedHistory: conversationHistory,
+      conversationId,
     });
   } catch (err) {
     console.error("OpenClaw error:", err.response?.data || err.message);
@@ -205,9 +312,9 @@ export const chat = async (req, res) => {
 
 export const confirm = async (req, res) => {
   try {
-    const { toolName, toolArgs, toolUseId, assistantMessage, confirmed, conversationHistory = [], userMessage } = req.body;
+    const { toolName, toolArgs, toolUseId, assistantMessage, confirmed, conversationHistory = [], userMessage, conversationId } = req.body;
 
-    if (!confirmed) return res.json({ reply: "Action cancelled. Let me know if you need anything else." });
+    if (!confirmed) return res.json({ reply: "Action cancelled. Let me know if you need anything else.", conversationId });
 
     const result = await executeWriteTool(toolName, toolArgs);
 
@@ -220,13 +327,57 @@ export const confirm = async (req, res) => {
     ];
 
     const reply = await callLLM(messages);
+    const updatedHistory = [...messages.slice(1), { role: "assistant", content: reply.content }];
+    const savedId = await saveConversation(conversationId, undefined, updatedHistory);
+
     return res.json({
       reply: reply.content || "Done! Action completed successfully.",
       result,
-      updatedHistory: [...messages.slice(1), { role: "assistant", content: reply.content }],
+      updatedHistory,
+      conversationId: savedId,
     });
   } catch (err) {
     console.error("OpenClaw confirm error:", err.response?.data || err.message);
     res.status(500).json({ error: err.response?.data?.error?.message || err.message });
+  }
+};
+
+// ── Conversation CRUD endpoints ──
+
+export const listConversations = async (req, res) => {
+  try {
+    const prisma = getPrisma();
+    const conversations = await prisma.conversation.findMany({
+      orderBy: { updatedAt: "desc" },
+      take: 50,
+      select: { id: true, title: true, createdAt: true, updatedAt: true, _count: { select: { messages: true } } },
+    });
+    res.json(conversations);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getConversation = async (req, res) => {
+  try {
+    const prisma = getPrisma();
+    const convo = await prisma.conversation.findUnique({
+      where: { id: req.params.id },
+      include: { messages: { orderBy: { createdAt: "asc" } } },
+    });
+    if (!convo) return res.status(404).json({ error: "Conversation not found" });
+    res.json(convo);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const deleteConversation = async (req, res) => {
+  try {
+    const prisma = getPrisma();
+    await prisma.conversation.delete({ where: { id: req.params.id } });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
