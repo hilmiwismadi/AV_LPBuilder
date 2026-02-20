@@ -51,7 +51,7 @@
   display: flex;
   flex-direction: column;
   z-index: 100;
-  transition: transform 0.25s ease;
+  transition: width 0.2s ease, transform 0.25s ease;
 }
 .sidebar-logo {
   padding: 20px 24px;
@@ -86,12 +86,63 @@
 }
 .sidebar-icon { font-size: 16px; width: 20px; text-align: center; }
 
+/* ── Collapse button (desktop only) ── */
+.sidebar-collapse-btn {
+  padding: 12px;
+  border: none;
+  border-top: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 18px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar-collapse-btn:hover {
+  background: var(--bg-dark);
+  color: var(--text-primary);
+}
+.collapse-arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+  font-weight: 700;
+  line-height: 1;
+}
+.collapse-arrow.flipped {
+  transform: rotate(180deg);
+}
+
+/* ── Collapsed state (desktop) ── */
+.sidebar.collapsed {
+  width: 60px;
+}
+.sidebar.collapsed .sidebar-logo {
+  padding: 20px 0;
+  text-align: center;
+}
+.sidebar.collapsed .sidebar-logo h1 {
+  font-size: 14px;
+}
+.sidebar.collapsed .sidebar-link {
+  justify-content: center;
+  padding: 10px 0;
+}
+.sidebar.collapsed .sidebar-icon {
+  width: auto;
+}
+
 /* ── Main Content ── */
 .main-content {
   margin-left: var(--sidebar-width);
   min-height: 100vh;
   padding: 24px;
+  transition: margin-left 0.2s ease;
 }
+body.sidebar-collapsed .main-content {
+  margin-left: 60px;
+}
+
 .page-header {
   display: flex;
   align-items: center;
@@ -116,10 +167,27 @@
   /* Show hamburger */
   .sidebar-toggle { display: flex; }
 
-  /* Sidebar: hidden offscreen by default */
+  /* Hide collapse button on mobile */
+  .sidebar-collapse-btn { display: none; }
+
+  /* Sidebar: hidden offscreen by default, always full width on mobile */
   .sidebar {
     width: 260px;
     transform: translateX(-100%);
+  }
+  .sidebar.collapsed {
+    width: 260px;
+  }
+  .sidebar.collapsed .sidebar-logo {
+    padding: 20px 24px;
+    text-align: left;
+  }
+  .sidebar.collapsed .sidebar-logo h1 {
+    font-size: 18px;
+  }
+  .sidebar.collapsed .sidebar-link {
+    justify-content: flex-start;
+    padding: 10px 24px;
   }
   .sidebar.sidebar-open {
     transform: translateX(0);
@@ -133,6 +201,9 @@
   .main-content {
     margin-left: 0;
     padding: 68px 16px 16px;
+  }
+  body.sidebar-collapsed .main-content {
+    margin-left: 0;
   }
 
   /* Page header stacks */

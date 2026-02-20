@@ -5,6 +5,7 @@ const CONFIRMATION_LABELS = {
   create_client: 'Create New Client',
   update_client_field: 'Update Client Field',
   add_client_note: 'Add Client Note',
+  add_client_link: 'Add Client Link',
   create_task: 'Create Task',
   update_task: 'Update Task',
 };
@@ -152,7 +153,7 @@ function HistoryPanel({ onSelect, onClose, onNewChat }) {
                 onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
                 onMouseLeave={e => e.currentTarget.style.color = '#475569'}
                 title="Delete conversation"
-              >✕</button>
+              >&#10005;</button>
             </div>
           </div>
         ))}

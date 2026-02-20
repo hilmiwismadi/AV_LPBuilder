@@ -8,25 +8,54 @@ generator client {
 }
 
 model Client {
-  id                  String     @id @default(cuid())
+  id                  String       @id @default(cuid())
   clientName          String
   eventName           String?
   eventType           String?
   expectedVolume      Int?
   ticketCategories    String?
-  platformFee         Float?     @default(4.0)
-  customDevRequired   Boolean    @default(false)
+  platformFee         Float?       @default(4.0)
+  customDevRequired   Boolean      @default(false)
   negotiationStatus   String?
   dealStage           String?
   timeline            String?
   riskLevel           String?
   mouStatus           String?
-  notes               Json?      @default("[]")
-  linkedTechSprintIds String[]   @default([])
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
+  notes               Json?        @default("[]")
+  linkedTechSprintIds String[]     @default([])
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
   tasks               Task[]
   mouDrafts           MouDraft[]
+  clientNotes         Note[]
+  links               ClientLink[]
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  content   String
+  category  String   @default("general")
+  author    String   @default("manual")
+  pinned    Boolean  @default(false)
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([clientId])
+  @@index([category])
+}
+
+model ClientLink {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name        String
+  linkType    String
+  url         String
+  description String?
+  createdAt   DateTime @default(now())
+  @@index([clientId])
 }
 
 model Task {

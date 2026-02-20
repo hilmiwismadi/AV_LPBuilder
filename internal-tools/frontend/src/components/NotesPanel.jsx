@@ -15,15 +15,21 @@ const CAT_CLASS = {
   general: 'note-cat-general',
 };
 
+function timeAgo(dateStr) {
+  const now = new Date();
+  const d = new Date(dateStr);
+  const diff = Math.floor((now - d) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+  if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+  return d.toLocaleDateString();
+}
+
 export default function NotesPanel({ clientId, notes = [], onNotesChange }) {
   const [newContent, setNewContent] = useState('');
   const [newCategory, setNewCategory] = useState('general');
   const [adding, setAdding] = useState(false);
-
-  const sorted = [...notes].sort((a, b) => {
-    if (a.resolved === b.resolved) return new Date(b.createdAt) - new Date(a.createdAt);
-    return a.resolved ? 1 : -1;
-  });
 
   const handleAdd = async () => {
     if (!newContent.trim()) return;
@@ -42,6 +48,11 @@ export default function NotesPanel({ clientId, notes = [], onNotesChange }) {
     onNotesChange();
   };
 
+  const handlePin = async (note) => {
+    await cci.updateNote(clientId, note.id, { pinned: !note.pinned });
+    onNotesChange();
+  };
+
   const handleDelete = async (noteId) => {
     if (!confirm('Delete this note?')) return;
     await cci.deleteNote(clientId, noteId);
@@ -50,19 +61,25 @@ export default function NotesPanel({ clientId, notes = [], onNotesChange }) {
 
   return (
     <div>
-      {sorted.length === 0 && (
+      {notes.length === 0 && (
         <div className="empty-state" style={{padding:'24px'}}>No notes yet</div>
       )}
-      {sorted.map(note => (
-        <div key={note.id} className={"note-card " + (note.resolved ? 'resolved' : '')}>
+      {notes.map(note => (
+        <div key={note.id} className={"note-card " + (note.resolved ? 'resolved' : '') + (note.pinned ? ' pinned' : '')}>
           <div className="note-content">
             <div className="note-text">{note.content}</div>
             <div className="note-meta">
               <span className={"note-category " + CAT_CLASS[note.category]}>{CAT_LABELS[note.category] || note.category}</span>
-              <span className="note-date">{new Date(note.createdAt).toLocaleDateString()}</span>
+              {note.author && note.author !== 'manual' && (
+                <span className="note-author">by {note.author}</span>
+              )}
+              <span className="note-date">{timeAgo(note.createdAt)}</span>
             </div>
           </div>
           <div className="note-actions">
+            <button className="icon-btn" title={note.pinned ? 'Unpin' : 'Pin'} onClick={() => handlePin(note)}>
+              {note.pinned ? '📍' : '📌'}
+            </button>
             <button className="icon-btn" title={note.resolved ? 'Unresolve' : 'Resolve'} onClick={() => handleResolve(note)}>
               {note.resolved ? '↩️' : '✓'}
             </button>

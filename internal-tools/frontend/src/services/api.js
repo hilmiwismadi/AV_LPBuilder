@@ -12,6 +12,10 @@ export const cci = {
   updateNote: (id, noteId, data) => api.patch(`/cci/${id}/notes/${noteId}`, data),
   deleteNote: (id, noteId) => api.delete(`/cci/${id}/notes/${noteId}`),
   flaggedTech: () => api.get('/cci/flagged-tech'),
+  searchNotes: (params) => api.get('/cci/notes/search', { params }),
+  addLink: (id, data) => api.post(`/cci/${id}/links`, data),
+  updateLink: (id, linkId, data) => api.patch(`/cci/${id}/links/${linkId}`, data),
+  deleteLink: (id, linkId) => api.delete(`/cci/${id}/links/${linkId}`),
 };
 
 export const techsprint = {

@@ -6,6 +6,8 @@ import '../styles/cci.css';
 
 const DEAL_STAGES = ['Prospect', 'Negotiation', 'Closed Won', 'Closed Lost', 'On Hold'];
 const RISK_LEVELS = ['Low', 'Medium', 'High'];
+const LINK_TYPES = ['MOU', 'EVENT', 'PAYMENT', 'DRIVE', 'WA_GROUP', 'CUSTOM'];
+const LINK_ICONS = { MOU: '\u{1F4C4}', EVENT: '\u{1F3AB}', PAYMENT: '\u{1F4B3}', DRIVE: '\u{1F4C1}', WA_GROUP: '\u{1F4AC}', CUSTOM: '\u{1F517}' };
 
 export default function CCIDetailPage() {
   const { id } = useParams();
@@ -13,6 +15,9 @@ export default function CCIDetailPage() {
   const [client, setClient] = useState(null);
   const [editing, setEditing] = useState({});
   const [saving, setSaving] = useState(false);
+  const [showAddLink, setShowAddLink] = useState(false);
+  const [newLink, setNewLink] = useState({ name: '', linkType: 'CUSTOM', url: '', description: '' });
+  const [addingLink, setAddingLink] = useState(false);
 
   const load = async () => {
     const res = await cci.get(id);
@@ -44,6 +49,25 @@ export default function CCIDetailPage() {
     navigate('/cci');
   };
 
+  const handleAddLink = async () => {
+    if (!newLink.name.trim() || !newLink.url.trim()) return;
+    setAddingLink(true);
+    try {
+      await cci.addLink(id, newLink);
+      setNewLink({ name: '', linkType: 'CUSTOM', url: '', description: '' });
+      setShowAddLink(false);
+      load();
+    } finally {
+      setAddingLink(false);
+    }
+  };
+
+  const handleDeleteLink = async (linkId) => {
+    if (!confirm('Delete this link?')) return;
+    await cci.deleteLink(id, linkId);
+    load();
+  };
+
   const renderField = (field, label, type = 'text', options = null) => {
     const isEditing = field in editing;
     return (
@@ -65,8 +89,8 @@ export default function CCIDetailPage() {
               ) : (
                 <input type={type} value={editing[field]} onChange={e => setEditing(en => ({...en,[field]:e.target.value}))} />
               )}
-              <button className="btn btn-primary btn-sm" onClick={() => saveField(field)} disabled={saving}>✓</button>
-              <button className="btn btn-ghost btn-sm" onClick={() => cancelEdit(field)}>✕</button>
+              <button className="btn btn-primary btn-sm" onClick={() => saveField(field)} disabled={saving}>&#10003;</button>
+              <button className="btn btn-ghost btn-sm" onClick={() => cancelEdit(field)}>&#10005;</button>
             </div>
           ) : (
             <span onClick={() => startEdit(field)} style={{cursor:'pointer',borderBottom:'1px dashed var(--border-color)',paddingBottom:'1px'}}>
@@ -80,7 +104,8 @@ export default function CCIDetailPage() {
 
   const tasks = client.tasks || [];
   const mous = client.mouDrafts || [];
-  const notes = Array.isArray(client.notes) ? client.notes : [];
+  const notes = client.clientNotes || [];
+  const links = client.links || [];
 
   return (
     <div>
@@ -113,17 +138,68 @@ export default function CCIDetailPage() {
         <div className="section-card">
           <div className="linked-counts">
             <div className="linked-item">
-              <span>⚡ Tasks</span>
+              <span>&#9889; Tasks</span>
               <span className="badge">{tasks.length}</span>
-              <Link to={`/techsprint?clientId=${id}`} style={{color:'var(--color-primary)',fontSize:'12px'}}>View →</Link>
+              <Link to={`/techsprint?clientId=${id}`} style={{color:'var(--color-primary)',fontSize:'12px'}}>View &#8594;</Link>
             </div>
             <div className="linked-item">
-              <span>📄 MoUs</span>
+              <span>&#128196; MoUs</span>
               <span className="badge">{mous.length}</span>
-              <Link to={`/mou?clientId=${id}`} style={{color:'var(--color-primary)',fontSize:'12px'}}>View →</Link>
+              <Link to={`/mou?clientId=${id}`} style={{color:'var(--color-primary)',fontSize:'12px'}}>View &#8594;</Link>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Links Section */}
+      <div className="section-card">
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}}>
+          <h3 style={{margin:0}}>Links ({links.length})</h3>
+          <button className="btn btn-primary btn-sm" onClick={() => setShowAddLink(!showAddLink)}>
+            {showAddLink ? 'Cancel' : '+ Add Link'}
+          </button>
+        </div>
+        {showAddLink && (
+          <div className="add-link-form">
+            <div className="form-row">
+              <div className="form-group">
+                <label>Name</label>
+                <input value={newLink.name} onChange={e => setNewLink(l => ({...l, name: e.target.value}))} placeholder="e.g. MoU Draft" />
+              </div>
+              <div className="form-group">
+                <label>Type</label>
+                <select value={newLink.linkType} onChange={e => setNewLink(l => ({...l, linkType: e.target.value}))}>
+                  {LINK_TYPES.map(t => <option key={t} value={t}>{LINK_ICONS[t]} {t}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="form-group">
+              <label>URL</label>
+              <input value={newLink.url} onChange={e => setNewLink(l => ({...l, url: e.target.value}))} placeholder="https://..." />
+            </div>
+            <div className="form-group">
+              <label>Description (optional)</label>
+              <input value={newLink.description} onChange={e => setNewLink(l => ({...l, description: e.target.value}))} placeholder="Brief description" />
+            </div>
+            <button className="btn btn-primary btn-sm" onClick={handleAddLink} disabled={addingLink}>
+              {addingLink ? '...' : 'Save Link'}
+            </button>
+          </div>
+        )}
+        {links.length === 0 && !showAddLink && (
+          <div className="empty-state" style={{padding:'16px'}}>No links yet</div>
+        )}
+        {links.map(link => (
+          <div key={link.id} className="link-row">
+            <span className="link-icon">{LINK_ICONS[link.linkType] || '\u{1F517}'}</span>
+            <div className="link-info">
+              <a href={link.url} target="_blank" rel="noopener noreferrer" className="link-name">{link.name}</a>
+              {link.description && <span className="link-desc">{link.description}</span>}
+            </div>
+            <span className="chip link-type-chip">{link.linkType}</span>
+            <button className="icon-btn" title="Delete" onClick={() => handleDeleteLink(link.id)}>{'\u{1F5D1}\uFE0F'}</button>
+          </div>
+        ))}
       </div>
 
       <div className="section-card">
