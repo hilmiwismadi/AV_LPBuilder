@@ -1,21 +1,32 @@
 import getPrisma from '../lib/prisma.js';
+import { extractDate } from '../utils/dateExtractor.js';
 
 export const listClients = async (req, res) => {
   const prisma = getPrisma();
   try {
-    const { dealStage, riskLevel, sortBy } = req.query;
+    const { dealStage, riskLevel, sortBy, test } = req.query;
     const where = {};
+
+    // Filter by isTest — default to real clients only
+    where.isTest = test === 'true';
+
     if (dealStage) where.dealStage = dealStage;
     if (riskLevel) where.riskLevel = riskLevel;
 
     const clients = await prisma.client.findMany({
       where,
       include: {
-        _count: { select: { clientNotes: true } },
+        _count: { select: { clientNotes: true, deadlines: true } },
         clientNotes: {
           orderBy: { createdAt: 'desc' },
           take: 1,
           select: { createdAt: true },
+        },
+        deadlines: {
+          where: { completed: false, dueDate: { gte: new Date() } },
+          orderBy: { dueDate: 'asc' },
+          take: 1,
+          select: { dueDate: true },
         },
       },
       orderBy: { updatedAt: 'desc' },
@@ -26,8 +37,14 @@ export const listClients = async (req, res) => {
       const lastActivity = latestNote && new Date(latestNote) > new Date(c.updatedAt)
         ? latestNote
         : c.updatedAt;
-      const { clientNotes, _count, ...rest } = c;
-      return { ...rest, noteCount: _count.clientNotes, lastActivity };
+      const { clientNotes, _count, deadlines, ...rest } = c;
+      return {
+        ...rest,
+        noteCount: _count.clientNotes,
+        upcomingDeadlineCount: _count.deadlines,
+        nextDeadline: deadlines[0]?.dueDate || null,
+        lastActivity,
+      };
     });
 
     // Sort
@@ -47,6 +64,8 @@ export const createClient = async (req, res) => {
   const prisma = getPrisma();
   try {
     const { notes, ...data } = req.body;
+    // Preserve isTest flag if provided
+    if (data.isTest !== undefined) data.isTest = Boolean(data.isTest);
     const client = await prisma.client.create({ data });
     res.status(201).json(client);
   } catch (err) {
@@ -72,6 +91,13 @@ export const getClient = async (req, res) => {
         links: {
           orderBy: { createdAt: 'desc' },
         },
+        deadlines: {
+          orderBy: { dueDate: 'asc' },
+          include: {
+            task: { select: { id: true, title: true } },
+            note: { select: { id: true, content: true } },
+          },
+        },
       },
     });
     if (!client) return res.status(404).json({ error: 'Client not found' });
@@ -84,9 +110,14 @@ export const getClient = async (req, res) => {
 export const updateClient = async (req, res) => {
   const prisma = getPrisma();
   try {
+    const data = { ...req.body };
+    // Handle targetDate as ISO string
+    if (data.targetDate !== undefined) {
+      data.targetDate = data.targetDate ? new Date(data.targetDate) : null;
+    }
     const client = await prisma.client.update({
       where: { id: req.params.id },
-      data: req.body,
+      data,
     });
     res.json(client);
   } catch (err) {
@@ -107,16 +138,45 @@ export const deleteClient = async (req, res) => {
 export const addNote = async (req, res) => {
   const prisma = getPrisma();
   try {
-    const note = await prisma.note.create({
-      data: {
-        clientId: req.params.id,
-        content: req.body.content,
-        category: req.body.category || 'general',
-        author: req.body.author || 'manual',
-        pinned: req.body.pinned || false,
-      },
+    let dueDate = req.body.dueDate ? new Date(req.body.dueDate) : null;
+
+    // Fallback: extract date from content if not explicitly provided
+    if (!dueDate) {
+      const extracted = extractDate(req.body.content);
+      if (extracted) dueDate = extracted.date;
+    }
+
+    // Use transaction to create note + deadline atomically
+    const result = await prisma.$transaction(async (tx) => {
+      const note = await tx.note.create({
+        data: {
+          clientId: req.params.id,
+          content: req.body.content,
+          category: req.body.category || 'general',
+          author: req.body.author || 'manual',
+          pinned: req.body.pinned || false,
+          dueDate: dueDate || null,
+        },
+      });
+
+      // If there is a date, also create a Deadline row
+      if (dueDate) {
+        await tx.deadline.create({
+          data: {
+            title: req.body.content.slice(0, 100),
+            dueDate,
+            type: 'followup',
+            clientId: req.params.id,
+            noteId: note.id,
+            createdBy: req.body.author || 'manual',
+          },
+        });
+      }
+
+      return note;
     });
-    res.status(201).json(note);
+
+    res.status(201).json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -130,11 +190,61 @@ export const updateNote = async (req, res) => {
     if (req.body.resolved !== undefined) data.resolved = req.body.resolved;
     if (req.body.pinned !== undefined) data.pinned = req.body.pinned;
     if (req.body.category !== undefined) data.category = req.body.category;
+    if (req.body.dueDate !== undefined) {
+      data.dueDate = req.body.dueDate ? new Date(req.body.dueDate) : null;
+    }
 
-    const note = await prisma.note.update({
-      where: { id: req.params.noteId },
-      data,
+    const note = await prisma.$transaction(async (tx) => {
+      const updated = await tx.note.update({
+        where: { id: req.params.noteId },
+        data,
+      });
+
+      // Sync linked Deadline if dueDate changed
+      if (req.body.dueDate !== undefined) {
+        const existingDeadline = await tx.deadline.findFirst({
+          where: { noteId: req.params.noteId },
+        });
+
+        if (data.dueDate) {
+          if (existingDeadline) {
+            await tx.deadline.update({
+              where: { id: existingDeadline.id },
+              data: {
+                dueDate: data.dueDate,
+                title: (req.body.content || updated.content).slice(0, 100),
+              },
+            });
+          } else {
+            await tx.deadline.create({
+              data: {
+                title: (req.body.content || updated.content).slice(0, 100),
+                dueDate: data.dueDate,
+                type: 'followup',
+                clientId: updated.clientId,
+                noteId: updated.id,
+                createdBy: 'manual',
+              },
+            });
+          }
+        } else if (existingDeadline) {
+          await tx.deadline.delete({ where: { id: existingDeadline.id } });
+        }
+      } else if (req.body.content !== undefined) {
+        const existingDeadline = await tx.deadline.findFirst({
+          where: { noteId: req.params.noteId },
+        });
+        if (existingDeadline) {
+          await tx.deadline.update({
+            where: { id: existingDeadline.id },
+            data: { title: req.body.content.slice(0, 100) },
+          });
+        }
+      }
+
+      return updated;
     });
+
     res.json(note);
   } catch (err) {
     res.status(500).json({ error: err.message });

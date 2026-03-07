@@ -44,4 +44,12 @@ export const openclaw = {
   deleteConversation: (id) => api.delete(`/openclaw/conversations/${id}`),
 };
 
+export const deadlines = {
+  list: (params) => api.get('/deadlines', { params }),
+  calendar: (params) => api.get('/deadlines/calendar', { params }),
+  create: (data) => api.post('/deadlines', data),
+  update: (id, data) => api.patch(`/deadlines/${id}`, data),
+  delete: (id) => api.delete(`/deadlines/${id}`),
+};
+
 export default api;

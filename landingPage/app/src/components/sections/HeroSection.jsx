@@ -245,7 +245,7 @@ const HeroSection = () => {
   const photoSrc = images.photo;
 
   return (
-    <section id="hero" style={customGradientStyle} className="min-h-screen flex items-center justify-center text-white relative overflow-hidden overflow-x-hidden">
+    <section id="hero" style={customGradientStyle} className="min-h-screen flex items-center justify-center text-white relative overflow-hidden">
       {/* Mobile: Stacked layout with photo in middle */}
       <div className="flex flex-col md:hidden w-full p-6 max-w-full">
         {/* Top div: Logo, Title, Tagline */}
@@ -261,7 +261,7 @@ const HeroSection = () => {
             <img
               src={photoSrc}
               alt="Event Photo"
-              className="w-48 h-48 sm:w-64 sm:h-64 rounded-2xl shadow-2xl object-contain"
+              className="max-w-[80%] max-h-[280px] sm:max-h-[320px] w-auto h-auto rounded-2xl shadow-2xl object-contain"
             />
           </div>
         ) : (
@@ -392,15 +392,15 @@ const HeroSection = () => {
         </div>
 
         {/* Right side: Event Photo */}
-        <div className="flex-shrink-0 w-[350px] h-[350px] lg:w-[450px] lg:h-[450px] xl:w-[500px] xl:h-[500px]" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+        <div className="flex items-center justify-center min-w-0" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
           {photoSrc ? (
             <img
               src={photoSrc}
               alt="Event Photo"
-              className="w-full h-full rounded-[3rem] shadow-2xl object-contain"
+              className="max-w-[350px] max-h-[450px] lg:max-w-[450px] lg:max-h-[500px] xl:max-w-[500px] xl:max-h-[550px] w-auto h-auto rounded-[3rem] shadow-2xl object-contain"
             />
           ) : (
-            <div className="w-full h-full bg-white/10 rounded-[3rem] shadow-2xl border-2 border-white/30 border-dashed flex items-center justify-center">
+            <div className="w-[350px] h-[350px] lg:w-[450px] lg:h-[450px] xl:w-[500px] xl:h-[500px] bg-white/10 rounded-[3rem] shadow-2xl border-2 border-white/30 border-dashed flex items-center justify-center">
               <p className="text-white/60 text-center px-4 text-lg">Photo Placeholder</p>
             </div>
           )}

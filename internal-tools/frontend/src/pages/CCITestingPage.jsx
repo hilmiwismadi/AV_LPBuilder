@@ -36,7 +36,7 @@ function getStaleness(lastActivity) {
   return { label: diffDays + 'd ago', cls: 'stale-cold' };
 }
 
-export default function CCIPage() {
+export default function CCITestingPage() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -46,7 +46,7 @@ export default function CCIPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const params = {};
+      const params = { test: 'true' };
       if (filters.dealStage) params.dealStage = filters.dealStage;
       if (filters.riskLevel) params.riskLevel = filters.riskLevel;
       if (filters.sortBy) params.sortBy = filters.sortBy;
@@ -60,7 +60,7 @@ export default function CCIPage() {
   useEffect(() => { load(); }, [filters]);
 
   const handleCreate = async (data) => {
-    await cci.create(data);
+    await cci.create({ ...data, isTest: true });
     setShowForm(false);
     load();
   };
@@ -69,10 +69,13 @@ export default function CCIPage() {
     <div>
       <div className="page-header">
         <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
-          <h1 className="page-title">CCI — Client Context Integration</h1>
-          <span className="chip" style={{background:'rgba(16,185,129,0.15)',color:'#10b981',fontSize:'11px',fontWeight:700,letterSpacing:'0.05em'}}>PRODUCTION</span>
+          <h1 className="page-title">CCI — Testing Environment</h1>
+          <span className="chip" style={{background:'rgba(245,158,11,0.15)',color:'#f59e0b',fontSize:'11px',fontWeight:700,letterSpacing:'0.05em'}}>SANDBOX</span>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowForm(true)}>+ Add Client</button>
+        <button className="btn btn-primary" onClick={() => setShowForm(true)}>+ Add Test Client</button>
+      </div>
+      <div style={{background:'rgba(245,158,11,0.08)',border:'1px solid rgba(245,158,11,0.2)',borderRadius:'var(--radius-sm)',padding:'10px 16px',marginBottom:'16px',fontSize:'13px',color:'#fbbf24'}}>
+        This is the testing sandbox. Clients here are dummy data for testing purposes. Real client data lives in <a href="/cci" style={{color:'#818cf8',fontWeight:600}}>CCI Production</a>.
       </div>
       <div className="filter-bar">
         <select value={filters.dealStage} onChange={e => setFilters(f => ({ ...f, dealStage: e.target.value }))}>
@@ -84,21 +87,12 @@ export default function CCIPage() {
         <select value={filters.sortBy} onChange={e => setFilters(f => ({ ...f, sortBy: e.target.value }))}>
           {SORT_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
-        <span style={{color:'var(--text-muted)',fontSize:'13px'}}>{clients.length} client{clients.length !== 1 ? 's' : ''}</span>
+        <span style={{color:'var(--text-muted)',fontSize:'13px'}}>{clients.length} test client{clients.length !== 1 ? 's' : ''}</span>
       </div>
       {loading ? (
         <div className="empty-state">Loading...</div>
       ) : clients.length === 0 ? (
-        <div className="section-card">
-          <div className="empty-state" style={{padding:'48px'}}>
-            <div style={{fontSize:'48px',marginBottom:'16px'}}>{'\u{1F3E2}'}</div>
-            <h2 style={{margin:'0 0 8px',fontSize:'20px',color:'var(--text-primary)'}}>No clients yet</h2>
-            <p style={{color:'var(--text-muted)',fontSize:'14px',marginBottom:'16px'}}>
-              Add your first real client to get started. Need to test first?
-            </p>
-            <a href="/cci/testing" className="btn btn-ghost" style={{textDecoration:'none',display:'inline-block'}}>Go to Testing Sandbox</a>
-          </div>
-        </div>
+        <div className="empty-state">No test clients. Add a test client to get started!</div>
       ) : (
         <>
           {/* Desktop table */}
@@ -166,7 +160,7 @@ export default function CCIPage() {
           </div>
         </>
       )}
-      {showForm && <ClientForm onSubmit={handleCreate} onClose={() => setShowForm(false)} />}
+      {showForm && <ClientForm onSubmit={handleCreate} onClose={() => setShowForm(false)} title="Add Test Client" />}
     </div>
   );
 }

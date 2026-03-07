@@ -19,16 +19,19 @@ model Client {
   negotiationStatus   String?
   dealStage           String?
   timeline            String?
+  targetDate          DateTime?
   riskLevel           String?
   mouStatus           String?
   notes               Json?        @default("[]")
   linkedTechSprintIds String[]     @default([])
+  isTest              Boolean      @default(false)
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
   tasks               Task[]
   mouDrafts           MouDraft[]
   clientNotes         Note[]
   links               ClientLink[]
+  deadlines           Deadline[]
 }
 
 model Note {
@@ -40,8 +43,10 @@ model Note {
   author    String   @default("manual")
   pinned    Boolean  @default(false)
   resolved  Boolean  @default(false)
+  dueDate   DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deadlines Deadline[]
   @@index([clientId])
   @@index([category])
 }
@@ -70,6 +75,7 @@ model Task {
   parentId    String?
   parent      Task?      @relation("SubTasks", fields: [parentId], references: [id])
   subtasks    Task[]     @relation("SubTasks")
+  deadlines   Deadline[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }
@@ -79,6 +85,27 @@ enum TaskStatus {
   IN_PROGRESS
   DONE
   BLOCKED
+}
+
+model Deadline {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime
+  type        String   @default("general")
+  completed   Boolean  @default(false)
+  clientId    String?
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  taskId      String?  @unique
+  task        Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  noteId      String?
+  note        Note?    @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  createdBy   String   @default("manual")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([dueDate])
+  @@index([clientId])
+  @@index([completed])
 }
 
 model MouDraft {

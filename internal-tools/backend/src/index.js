@@ -5,6 +5,7 @@ import cciRoutes from './routes/cci.routes.js';
 import techsprintRoutes from './routes/techsprint.routes.js';
 import mouRoutes from './routes/mou.routes.js';
 import openclawRoutes from './routes/openclaw.routes.js';
+import deadlineRoutes from './routes/deadline.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3004;
@@ -20,6 +21,7 @@ app.use('/api/cci', cciRoutes);
 app.use('/api/techsprint', techsprintRoutes);
 app.use('/api/mou', mouRoutes);
 app.use('/api/openclaw', openclawRoutes);
+app.use('/api/deadlines', deadlineRoutes);
 
 app.listen(PORT, () => {
   console.log(`Internal Tools backend running on port ${PORT}`);

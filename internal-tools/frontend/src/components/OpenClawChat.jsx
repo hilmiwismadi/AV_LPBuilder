@@ -8,6 +8,7 @@ const CONFIRMATION_LABELS = {
   add_client_link: 'Add Client Link',
   create_task: 'Create Task',
   update_task: 'Update Task',
+  create_deadline: 'Create Deadline',
 };
 
 const CAT_ICONS = {
@@ -164,7 +165,9 @@ function HistoryPanel({ onSelect, onClose, onNewChat }) {
 
 
 export default function OpenClawChat() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(() => {
+    try { return localStorage.getItem('openclaw_open') === 'true'; } catch { return false; }
+  });
   const [showHistory, setShowHistory] = useState(false);
   const [messages, setMessages] = useState([
     { id: 1, role: 'assistant', content: 'Hi! I am OpenClaw. Ask me about clients, tasks, or anything about Roetix operations. I can also update records - I will ask for your confirmation first.' }
@@ -173,9 +176,36 @@ export default function OpenClawChat() {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
   const [conversationId, setConversationId] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 480);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const pendingConfirmRef = useRef(null);
+  const [isTouchDevice] = useState(() => window.matchMedia('(hover: none)').matches);
+
+  // Responsive listener
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth <= 480);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  // Persist open state
+  useEffect(() => {
+    try { localStorage.setItem('openclaw_open', String(open)); } catch {}
+  }, [open]);
+
+  // Persist conversationId
+  useEffect(() => {
+    if (conversationId) {
+      try { localStorage.setItem('openclaw_lastConvo', conversationId); } catch {}
+    }
+  }, [conversationId]);
+
+  // Auto-load last conversation on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('openclaw_lastConvo');
+    if (saved) loadConversation(saved);
+  }, []);
 
   useEffect(() => {
     if (open && inputRef.current && !showHistory) inputRef.current.focus();
@@ -193,20 +223,19 @@ export default function OpenClawChat() {
     setConversationId(null);
     setShowHistory(false);
     pendingConfirmRef.current = null;
+    try { localStorage.removeItem('openclaw_lastConvo'); } catch {}
   };
 
   const loadConversation = async (id) => {
     try {
       const res = await openclaw.getConversation(id);
       const convo = res.data;
-      // Rebuild display messages from DB messages (skip system messages)
       const dbMessages = convo.messages.filter(m => m.role !== 'system' && m.role !== 'tool');
       const displayMsgs = dbMessages.map((m, i) => ({
         id: m.id || i,
         role: m.role,
         content: m.content || ''
       }));
-      // Rebuild conversation history for API (exclude system)
       const apiHistory = convo.messages
         .filter(m => m.role !== 'system')
         .map(m => ({
@@ -220,6 +249,8 @@ export default function OpenClawChat() {
       setShowHistory(false);
       pendingConfirmRef.current = null;
     } catch {
+      // Saved conversation may have been deleted — clear and start fresh
+      try { localStorage.removeItem('openclaw_lastConvo'); } catch {}
       setShowHistory(false);
     }
   };
@@ -295,24 +326,47 @@ export default function OpenClawChat() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
+  const insertNewline = () => {
+    const ta = inputRef.current;
+    if (!ta) return;
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const val = input;
+    setInput(val.substring(0, start) + '\n' + val.substring(end));
+    setTimeout(() => { ta.selectionStart = ta.selectionEnd = start + 1; ta.focus(); }, 0);
+  };
+
+  // Popup styles
+  const popupStyle = isMobile ? {
+    position: 'fixed', bottom: '0', left: '0', right: '0',
+    width: '100%', height: 'calc(100vh - 60px)',
+    background: '#0f172a', border: '1px solid #334155', borderRadius: '12px 12px 0 0',
+    display: 'flex', flexDirection: 'column', zIndex: 999,
+    boxShadow: '0 -10px 40px rgba(0,0,0,0.5)'
+  } : {
+    position: 'fixed', bottom: '88px', right: '24px',
+    width: 'min(400px, calc(100vw - 16px))', height: 'min(560px, calc(100vh - 120px))',
+    background: '#0f172a', border: '1px solid #334155', borderRadius: '12px',
+    display: 'flex', flexDirection: 'column', zIndex: 999,
+    boxShadow: '0 20px 60px rgba(0,0,0,0.5)'
+  };
+
   return (
     <>
-      <button onClick={() => setOpen(o => !o)} style={{
-        position: 'fixed', bottom: '24px', right: '24px', width: '52px', height: '52px',
-        background: 'linear-gradient(135deg, #6366f1, #4f46e5)', border: 'none', borderRadius: '50%',
-        color: 'white', fontSize: '14px', fontWeight: 700, cursor: 'pointer', zIndex: 1000,
-        boxShadow: '0 4px 20px rgba(99,102,241,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center'
-      }} title="OpenClaw AI">
-        {open ? 'X' : 'AI'}
-      </button>
+      {/* FAB button — hide on mobile when chat is open */}
+      {!(isMobile && open) && (
+        <button onClick={() => setOpen(o => !o)} style={{
+          position: 'fixed', bottom: '24px', right: '24px', width: '52px', height: '52px',
+          background: 'linear-gradient(135deg, #6366f1, #4f46e5)', border: 'none', borderRadius: '50%',
+          color: 'white', fontSize: '14px', fontWeight: 700, cursor: 'pointer', zIndex: 1000,
+          boxShadow: '0 4px 20px rgba(99,102,241,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }} title="OpenClaw AI">
+          {open ? 'X' : 'AI'}
+        </button>
+      )}
 
       {open && (
-        <div style={{
-          position: 'fixed', bottom: '88px', right: '24px', width: '400px', height: '560px',
-          background: '#0f172a', border: '1px solid #334155', borderRadius: '12px',
-          display: 'flex', flexDirection: 'column', zIndex: 999,
-          boxShadow: '0 20px 60px rgba(0,0,0,0.5)'
-        }}>
+        <div style={popupStyle}>
           {showHistory ? (
             <HistoryPanel
               onSelect={loadConversation}
@@ -335,6 +389,12 @@ export default function OpenClawChat() {
                     style={{ background: 'none', border: '1px solid #334155', borderRadius: '6px', color: '#94a3b8', padding: '4px 10px', cursor: 'pointer', fontSize: '12px' }}>
                     New Chat
                   </button>
+                  {isMobile && (
+                    <button onClick={() => setOpen(false)}
+                      style={{ background: 'none', border: '1px solid #334155', borderRadius: '6px', color: '#94a3b8', padding: '4px 10px', cursor: 'pointer', fontSize: '12px' }}>
+                      Close
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -356,8 +416,16 @@ export default function OpenClawChat() {
                     onKeyDown={handleKeyDown} placeholder="Ask about clients, tasks... (Enter to send)"
                     disabled={loading} rows={2} style={{
                       flex: 1, padding: '8px 12px', background: '#1e293b', border: '1px solid #334155',
-                      borderRadius: '8px', color: '#f1f5f9', resize: 'none', fontSize: '13px', fontFamily: 'inherit'
+                      borderRadius: '8px', color: '#f1f5f9', resize: 'none',
+                      fontSize: isMobile ? '16px' : '13px', fontFamily: 'inherit'
                     }} />
+                  {isTouchDevice && (
+                    <button onClick={insertNewline} disabled={loading} title="New line" style={{
+                      padding: '8px 10px', background: '#1e293b', color: '#94a3b8',
+                      border: '1px solid #334155', borderRadius: '8px', cursor: 'pointer',
+                      fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}>{'\u21B5'}</button>
+                  )}
                   <button onClick={sendMessage} disabled={loading || !input.trim()} style={{
                     padding: '8px 14px',
                     background: input.trim() && !loading ? '#6366f1' : '#1e293b',

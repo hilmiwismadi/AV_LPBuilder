@@ -15,7 +15,7 @@ const CRMPage = () => {
   const [clients, setClients] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [otwFilter, setOtwFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
@@ -27,6 +27,9 @@ const CRMPage = () => {
   const [whatsappStatus, setWhatsappStatus] = useState('unknown');
   const [loading, setLoading] = useState(true);
 
+  // OTW Status categories for filter
+  const otwCategories = ['all', 'OTW chat (prospect)', 'Nanti aja', 'Gausah'];
+
   useEffect(() => {
     fetchClients();
     checkWhatsAppStatus();
@@ -37,7 +40,7 @@ const CRMPage = () => {
 
   useEffect(() => {
     filterClients();
-  }, [clients, searchTerm, statusFilter]);
+  }, [clients, searchTerm, otwFilter]);
 
   const fetchClients = async () => {
     try {
@@ -59,6 +62,20 @@ const CRMPage = () => {
     }
   };
 
+  // Parse OTW status to category
+  const getOtwCategory = (client) => {
+    const status = client.otwStatus || 'OTW_PROSPECT';
+
+    if (status === 'URGENT' || status === 'URGENT_BERJALAN' || status === 'BENTAR_LAGI_MULAI' || status === 'OTW_PROSPECT' || status.startsWith('ETC_OTW_')) {
+      return 'OTW chat (prospect)';
+    } else if (status === 'FEE_KECIL_ATAU_GRATIS' || status.startsWith('UDAH_BERJALAN') || status.startsWith('HP_DI_GAMBAR') || status.startsWith('ETC_NANTI_')) {
+      return 'Nanti aja';
+    } else if (status === 'GA_RELEVAN' || status === 'GADA_NOMER_HP' || status === 'NOMER_HP_KONTAK' || status.startsWith('ETC_GAUSAH_')) {
+      return 'Gausah';
+    }
+    return 'OTW chat (prospect)';
+  };
+
   const filterClients = () => {
     let filtered = clients;
 
@@ -70,9 +87,21 @@ const CRMPage = () => {
       );
     }
 
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter((client) => client.status === statusFilter);
+    if (otwFilter !== 'all') {
+      filtered = filtered.filter((client) => getOtwCategory(client) === otwFilter);
     }
+
+    // Prioritize clients with phone numbers at the top
+    filtered.sort((a, b) => {
+      // Both have phone: keep original order
+      if (a.phoneNumber && b.phoneNumber) return 0;
+      // A has phone, B doesn't: A first
+      if (a.phoneNumber && !b.phoneNumber) return -1;
+      // A doesn't have phone, B has: B first
+      if (!a.phoneNumber && b.phoneNumber) return 1;
+      // Neither has phone: keep original order
+      return 0;
+    });
 
     setFilteredClients(filtered);
   };
@@ -112,6 +141,28 @@ const CRMPage = () => {
     } else {
       // Otherwise, show build modal
       setShowBuildDemo(true);
+    }
+  };
+
+  const handleClientUpdate = async (client, updateData) => {
+    try {
+      await clientAPI.update(client.id, updateData);
+      // Refresh client list to show updated data
+      fetchClients();
+    } catch (error) {
+      console.error('Failed to update client:', error);
+      alert('Failed to update client');
+    }
+  };
+
+  const handleOtwStatusChange = async (client, status) => {
+    try {
+      await clientAPI.update(client.id, { otwStatus: status });
+      // Refresh client list to show updated data
+      fetchClients();
+    } catch (error) {
+      console.error('Failed to update OTW status:', error);
+      alert('Failed to update OTW status');
     }
   };
 
@@ -200,15 +251,15 @@ const CRMPage = () => {
           className="search-input"
         />
         <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          value={otwFilter}
+          onChange={(e) => setOtwFilter(e.target.value)}
           className="status-filter"
         >
-          <option value="all">All Status</option>
-          <option value="TODO">To Do</option>
-          <option value="FOLLOW_UP">Follow Up</option>
-          <option value="NEXT_YEAR">Next Year</option>
-          <option value="GHOSTED_FOLLOW_UP">Ghosted</option>
+          {otwCategories.map(category => (
+            <option key={category} value={category}>
+              {category === 'all' ? 'All OTW Status' : category}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -218,6 +269,8 @@ const CRMPage = () => {
         onDelete={handleDeleteClient}
         onChat={handleChat}
         onBuild={handleBuild}
+        onClientUpdate={handleClientUpdate}
+        onOtwStatusChange={handleOtwStatusChange}
       />
 
       {showForm && (

@@ -43,7 +43,7 @@
 .chip-medium { background: rgba(245,158,11,0.15); color: var(--color-warning); }
 .chip-high { background: rgba(239,68,68,0.15); color: var(--color-danger); }
 
-/* ── Staleness chips ── */
+/* Staleness chips */
 .stale-fresh { background: rgba(16,185,129,0.15); color: #34d399; }
 .stale-recent { background: rgba(59,130,246,0.15); color: #60a5fa; }
 .stale-warning { background: rgba(245,158,11,0.15); color: #fbbf24; }
@@ -171,7 +171,7 @@
 .note-date { font-size: 11px; color: var(--text-muted); }
 .note-author { font-size: 11px; color: var(--text-muted); font-style: italic; }
 .note-actions { display: flex; gap: 6px; }
-.icon-btn { background: none; border: none; color: var(--text-muted); padding: 4px; border-radius: 4px; font-size: 14px; }
+.icon-btn { background: none; border: none; color: var(--text-muted); padding: 4px; border-radius: 4px; font-size: 14px; cursor: pointer; }
 .icon-btn:hover { background: var(--bg-card-hover); color: var(--text-primary); }
 .add-note-form { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); }
 .add-note-row { display: flex; gap: 8px; }
@@ -180,7 +180,73 @@
 .linked-item a { color: var(--color-primary); }
 .empty-state { text-align: center; padding: 48px; color: var(--text-muted); }
 
-/* ── Link rows ── */
+/* Note deadline badge */
+.note-deadline {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+  background: rgba(59,130,246,0.15);
+  color: #60a5fa;
+  white-space: nowrap;
+}
+.note-deadline.overdue {
+  background: rgba(239,68,68,0.15);
+  color: #f87171;
+}
+
+/* Note edit form */
+.note-edit-form textarea {
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+/* Calendar edit form */
+.cal-edit-form input[type="text"] {
+  font-family: inherit;
+}
+
+/* Deadline rows */
+.deadline-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+.deadline-row.completed {
+  opacity: 0.5;
+}
+.deadline-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.deadline-due {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.deadline-due.overdue {
+  color: #f87171;
+  font-weight: 600;
+}
+.deadline-type-chip {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Link rows */
 .link-row {
   display: flex;
   align-items: center;
@@ -199,7 +265,7 @@
 .link-type-chip { font-size: 10px; padding: 1px 8px; background: rgba(100,116,139,0.15); color: var(--text-muted); }
 .add-link-form { background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 12px; }
 
-/* ── Mobile card view for client list ── */
+/* Mobile card view for client list */
 .client-cards { display: none; }
 .client-card {
   background: var(--bg-card);
@@ -225,9 +291,7 @@
 .client-card-label { color: var(--text-muted); }
 .client-card-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 
-/* ═══════════════════════════════════════
-   RESPONSIVE — Mobile (≤768px)
-   ═══════════════════════════════════════ */
+/* RESPONSIVE — Mobile */
 @media (max-width: 768px) {
   /* Hide table, show cards */
   .table-container { display: none; }
@@ -249,6 +313,7 @@
   .add-note-row { flex-direction: column; }
 
   .link-row { flex-wrap: wrap; }
+  .deadline-row { flex-wrap: wrap; }
 
   .empty-state { padding: 32px 16px; }
 }

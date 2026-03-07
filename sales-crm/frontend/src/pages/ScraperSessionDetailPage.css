@@ -77,6 +77,22 @@
   background: #2563eb;
 }
 
+.bulk-assign-btn {
+  background: #10b981;
+}
+
+.bulk-assign-btn:hover {
+  background: #059669;
+}
+
+.bulk-unassign-btn {
+  background: #6b7280;
+}
+
+.bulk-unassign-btn:hover {
+  background: #4b5563;
+}
+
 /* Session Info Cards */
 .session-info {
   display: grid;

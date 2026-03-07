@@ -1,5 +1,6 @@
 import axios from "axios";
 import getPrisma from "../lib/prisma.js";
+import { extractDate } from "../utils/dateExtractor.js";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
@@ -22,17 +23,23 @@ const TOOLS = [
   { type: "function", function: { name: "get_workload_summary", description: "Get per-person task count summary.", parameters: { type: "object", properties: {} } } },
   { type: "function", function: { name: "get_flagged_tech_notes", description: "Get all clients with unresolved tech_requirement notes.", parameters: { type: "object", properties: {} } } },
   { type: "function", function: { name: "get_client_links", description: "Get all links for a specific client (MOU, EVENT, PAYMENT, DRIVE, WA_GROUP, CUSTOM).", parameters: { type: "object", properties: { clientId: { type: "string", description: "The client ID or client name" } }, required: ["clientId"] } } },
-  { type: "function", function: { name: "create_client", description: "Create a new CCI client record. WRITE action - requires user confirmation.", parameters: { type: "object", properties: { clientName: { type: "string", description: "Client/organization name" }, eventName: { type: "string", description: "Name of the event" }, eventType: { type: "string", description: "Type of event (concert, conference, competition, etc.)" }, expectedVolume: { type: "number", description: "Expected number of attendees/registrants" }, platformFee: { type: "number", description: "Platform fee percentage or amount" }, timeline: { type: "string", description: "Event timeline/date" }, dealStage: { type: "string", description: "Prospect, Negotiation, Closed Won, Closed Lost, On Hold" }, riskLevel: { type: "string", description: "Low, Medium, High" }, customDevRequired: { type: "boolean", description: "Whether custom development is needed" }, negotiationStatus: { type: "string", description: "Current negotiation status" }, mouStatus: { type: "string", description: "MoU status" } }, required: ["clientName"] } } },
-  { type: "function", function: { name: "update_client_field", description: "Update a field on a CCI client record. WRITE action - requires user confirmation.", parameters: { type: "object", properties: { clientId: { type: "string", description: "The client ID to update" }, field: { type: "string", description: "clientName, eventName, eventType, expectedVolume, dealStage, riskLevel, platformFee, timeline, negotiationStatus, customDevRequired, mouStatus" }, value: { type: "string", description: "New value for the field" } }, required: ["clientId", "field", "value"] } } },
-  { type: "function", function: { name: "add_client_note", description: "Add a note to a client. WRITE action - requires user confirmation.", parameters: { type: "object", properties: { clientId: { type: "string", description: "The client ID" }, content: { type: "string", description: "Note content" }, category: { type: "string", description: "tech_requirement, negotiation, legal, general" } }, required: ["clientId", "content", "category"] } } },
+  { type: "function", function: { name: "create_client", description: "Create a new CCI client record. WRITE action - requires user confirmation.", parameters: { type: "object", properties: { clientName: { type: "string", description: "Client/organization name" }, eventName: { type: "string", description: "Name of the event" }, eventType: { type: "string", description: "Type of event (concert, conference, competition, etc.)" }, expectedVolume: { type: "number", description: "Expected number of attendees/registrants" }, platformFee: { type: "number", description: "Platform fee percentage or amount" }, timeline: { type: "string", description: "Event timeline/date" }, targetDate: { type: "string", description: "Target event date in ISO 8601 format (e.g. 2026-03-15T00:00:00Z). Extract from timeline if a specific date is mentioned." }, dealStage: { type: "string", description: "Prospect, Negotiation, Closed Won, Closed Lost, On Hold" }, riskLevel: { type: "string", description: "Low, Medium, High" }, customDevRequired: { type: "boolean", description: "Whether custom development is needed" }, negotiationStatus: { type: "string", description: "Current negotiation status" }, mouStatus: { type: "string", description: "MoU status" } }, required: ["clientName"] } } },
+  { type: "function", function: { name: "update_client_field", description: "Update a field on a CCI client record. WRITE action - requires user confirmation.", parameters: { type: "object", properties: { clientId: { type: "string", description: "The client ID to update" }, field: { type: "string", description: "clientName, eventName, eventType, expectedVolume, dealStage, riskLevel, platformFee, timeline, targetDate, negotiationStatus, customDevRequired, mouStatus" }, value: { type: "string", description: "New value for the field" } }, required: ["clientId", "field", "value"] } } },
+  { type: "function", function: { name: "add_client_note", description: "Add a note to a client. WRITE action - requires user confirmation. When the note mentions a date/time (e.g. 'standby by 21st at 14:00', 'meeting on March 5'), ALWAYS extract the date and pass it as dueDate in ISO 8601 format.", parameters: { type: "object", properties: { clientId: { type: "string", description: "The client ID" }, content: { type: "string", description: "Note content" }, category: { type: "string", description: "tech_requirement, negotiation, legal, general" }, dueDate: { type: "string", description: "Extracted deadline/date from the note content in ISO 8601 format with +07:00 timezone (e.g. 2026-03-21T14:00:00+07:00). ALWAYS extract and include if any date/time is mentioned. NEVER use Z suffix." } }, required: ["clientId", "content", "category"] } } },
   { type: "function", function: { name: "add_client_link", description: "Add a link to a client (MOU, EVENT, PAYMENT, DRIVE, WA_GROUP, CUSTOM). WRITE action - requires user confirmation.", parameters: { type: "object", properties: { clientId: { type: "string", description: "The client ID or client name" }, name: { type: "string", description: "Display name for the link" }, linkType: { type: "string", description: "MOU, EVENT, PAYMENT, DRIVE, WA_GROUP, CUSTOM" }, url: { type: "string", description: "The URL" }, description: { type: "string", description: "Optional description" } }, required: ["clientId", "name", "linkType", "url"] } } },
   { type: "function", function: { name: "create_task", description: "Create a new TechSprint task. WRITE action - requires user confirmation.", parameters: { type: "object", properties: { title: { type: "string", description: "Task title" }, description: { type: "string", description: "Task description (optional)" }, assignedTo: { type: "string", description: "Person to assign to (optional)" }, deadline: { type: "string", description: "Deadline in ISO format (optional)" }, clientId: { type: "string", description: "Related client ID (optional)" }, status: { type: "string", description: "Initial status: TODO, IN_PROGRESS, DONE, BLOCKED. Defaults to TODO." } }, required: ["title"] } } },
   { type: "function", function: { name: "update_task", description: "Update a TechSprint task. WRITE action - requires user confirmation.", parameters: { type: "object", properties: { taskId: { type: "string", description: "The task ID to update" }, status: { type: "string", description: "New status: TODO, IN_PROGRESS, DONE, BLOCKED" }, assignedTo: { type: "string", description: "New assignee" }, deadline: { type: "string", description: "New deadline in ISO format" }, title: { type: "string", description: "New title" } }, required: ["taskId"] } } },
+  { type: "function", function: { name: "list_deadlines", description: "List upcoming deadlines across all clients. Use this when asked about deadlines, upcoming dates, schedules, or what is due soon.", parameters: { type: "object", properties: { clientId: { type: "string", description: "Optional: filter by client ID or client name" }, type: { type: "string", description: "Optional: filter by type - event, task, followup, meeting, general" }, from: { type: "string", description: "Optional: start date in ISO format" }, to: { type: "string", description: "Optional: end date in ISO format" }, completed: { type: "boolean", description: "Optional: filter by completed status. Default shows all." } } } } },
+  { type: "function", function: { name: "create_deadline", description: "Create a standalone deadline (not tied to a note). WRITE action - requires user confirmation.", parameters: { type: "object", properties: { title: { type: "string", description: "Deadline title" }, description: { type: "string", description: "Optional description" }, dueDate: { type: "string", description: "Due date in ISO 8601 format" }, type: { type: "string", description: "event, task, followup, meeting, general" }, clientId: { type: "string", description: "Optional: client ID or name to link to" } }, required: ["title", "dueDate"] } } },
 ];
 
-const WRITE_TOOLS = new Set(["create_client", "update_client_field", "add_client_note", "add_client_link", "create_task", "update_task"]);
+const WRITE_TOOLS = new Set(["create_client", "update_client_field", "add_client_note", "add_client_link", "create_task", "update_task", "create_deadline"]);
 
-const SYSTEM_PROMPT = `You are OpenClaw, an internal AI assistant for Roetix (a ticketing technology company). You help the founder and team manage client relationships (CCI), tasks (TechSprint), and MoU documents.
+function buildSystemPrompt() {
+  return `You are OpenClaw, an internal AI assistant for Roetix (a ticketing technology company). You help the founder and team manage client relationships (CCI), tasks (TechSprint), and MoU documents.
+
+Current date/time: ${new Date().toISOString()}
+Timezone: Asia/Jakarta (UTC+7). ALL user dates are in this timezone.
 
 You have access to tools to read and write data. For READ operations, use them freely. For WRITE operations, you will propose the action and the user will confirm before it executes.
 
@@ -40,10 +47,15 @@ Key context:
 - CCI: client database with notes (stored in Note table), links (MOU, EVENT, PAYMENT, DRIVE, WA_GROUP, CUSTOM), deal stages, risk levels
 - TechSprint: lightweight task tracker (TODO, IN_PROGRESS, DONE, BLOCKED)
 - MoU Maker: memorandum of understanding drafts
+- Deadlines: structured date tracking across clients, notes, and tasks
 
 IMPORTANT: When the user asks about information stored in notes (reminders, standby schedules, action items, etc.), ALWAYS use the search_notes tool to search note content. Do NOT rely on search_clients alone - it does not search note content.
 
 IMPORTANT: When creating a client WITH notes, you MUST use create_client first, then IMMEDIATELY call add_client_note for each note. Do NOT stop after creating the client - continue to add all notes the user mentioned.
+
+IMPORTANT: When adding notes that mention a date or time (e.g. "standby by 21st at 14:00", "meeting on March 5", "deadline March 10"), ALWAYS extract the date and pass it as the dueDate parameter in ISO 8601 format WITH timezone offset +07:00. Example: "14 April 12:00" becomes "2026-04-14T12:00:00+07:00". "20/8/26" becomes "2026-08-20T00:00:00+07:00". NEVER use "Z" suffix - always use "+07:00".
+
+IMPORTANT: Use list_deadlines to show upcoming deadlines when the user asks about schedules, what is coming up, or deadlines.
 
 When the user asks about links (MoU documents, Google Drive, WhatsApp groups, payment links, etc.), use get_client_links or get_client_detail which includes links.
 
@@ -54,6 +66,7 @@ When classifying note categories:
 - general: everything else (reminders, schedules, standby, follow-ups)
 
 Be concise and helpful. When proposing write actions, briefly explain what you will do.`;
+}
 
 async function callLLM(messages) {
   let lastErr;
@@ -117,6 +130,7 @@ async function executeReadTool(toolName, toolArgs) {
           mouDrafts: { select: { id: true, title: true, status: true } },
           clientNotes: { orderBy: [{ pinned: "desc" }, { resolved: "asc" }, { createdAt: "desc" }] },
           links: { orderBy: { createdAt: "desc" } },
+          deadlines: { orderBy: { dueDate: "asc" } },
         },
       });
       if (!c) {
@@ -127,6 +141,7 @@ async function executeReadTool(toolName, toolArgs) {
             mouDrafts: { select: { id: true, title: true, status: true } },
             clientNotes: { orderBy: [{ pinned: "desc" }, { resolved: "asc" }, { createdAt: "desc" }] },
             links: { orderBy: { createdAt: "desc" } },
+            deadlines: { orderBy: { dueDate: "asc" } },
           },
         });
       }
@@ -160,6 +175,7 @@ async function executeReadTool(toolName, toolArgs) {
           author: note.author,
           pinned: note.pinned,
           resolved: note.resolved,
+          dueDate: note.dueDate,
           createdAt: note.createdAt,
         });
       }
@@ -207,6 +223,33 @@ async function executeReadTool(toolName, toolArgs) {
       });
       return { clientId: c.id, clientName: c.clientName, links };
     }
+    case "list_deadlines": {
+      const where = {};
+      if (toolArgs.type) where.type = toolArgs.type;
+      if (toolArgs.completed !== undefined) where.completed = toolArgs.completed;
+      if (toolArgs.from || toolArgs.to) {
+        where.dueDate = {};
+        if (toolArgs.from) where.dueDate.gte = new Date(toolArgs.from);
+        if (toolArgs.to) where.dueDate.lte = new Date(toolArgs.to);
+      }
+      // Resolve clientId by name if needed
+      if (toolArgs.clientId) {
+        const c = await resolveClientId(prisma, toolArgs.clientId);
+        if (c) where.clientId = c.id;
+        else where.clientId = toolArgs.clientId;
+      }
+      const deadlines = await prisma.deadline.findMany({
+        where,
+        include: {
+          client: { select: { id: true, clientName: true } },
+          task: { select: { id: true, title: true } },
+          note: { select: { id: true, content: true } },
+        },
+        orderBy: { dueDate: "asc" },
+        take: 50,
+      });
+      return deadlines;
+    }
     default: return { error: "Unknown tool" };
   }
 }
@@ -252,12 +295,32 @@ async function executeWriteTool(toolName, toolArgs) {
       if (toolArgs.negotiationStatus) data.negotiationStatus = toolArgs.negotiationStatus;
       if (toolArgs.mouStatus) data.mouStatus = toolArgs.mouStatus;
       if (toolArgs.customDevRequired !== undefined) data.customDevRequired = toolArgs.customDevRequired;
-      return await prisma.client.create({ data });
+      // Handle targetDate
+      if (toolArgs.targetDate) data.targetDate = new Date(toolArgs.targetDate);
+      const client = await prisma.client.create({ data });
+      // If targetDate provided, also create a Deadline row
+      if (data.targetDate) {
+        await prisma.deadline.create({
+          data: {
+            title: `${data.clientName} - ${data.eventName || "Event"}`,
+            dueDate: data.targetDate,
+            type: "event",
+            clientId: client.id,
+            createdBy: "OpenClaw",
+          },
+        });
+      }
+      return client;
     }
     case "update_client_field": {
       const c = await resolveClientId(prisma, toolArgs.clientId);
       if (!c) return { error: "Client not found: " + toolArgs.clientId };
-      return await prisma.client.update({ where: { id: c.id }, data: { [toolArgs.field]: toolArgs.value } });
+      let value = toolArgs.value;
+      // Handle targetDate specially
+      if (toolArgs.field === "targetDate") {
+        value = value ? new Date(value) : null;
+      }
+      return await prisma.client.update({ where: { id: c.id }, data: { [toolArgs.field]: value } });
     }
     case "add_client_note": {
       const c = await resolveClientId(prisma, toolArgs.clientId);
@@ -266,23 +329,48 @@ async function executeWriteTool(toolName, toolArgs) {
       const raw = (toolArgs.content || "").trim();
       console.log("OpenClaw add_client_note raw:", JSON.stringify(raw));
 
+      // Resolve dueDate: LLM-provided first, regex fallback second
+      let dueDate = toolArgs.dueDate ? new Date(toolArgs.dueDate) : null;
+      if (!dueDate) {
+        const extracted = extractDate(raw);
+        if (extracted) dueDate = extracted.date;
+      }
+      if (dueDate && isNaN(dueDate.getTime())) dueDate = null;
+
       // Robust multi-note splitting
       const noteTexts = splitIntoNotes(raw);
       console.log("OpenClaw add_client_note split into:", noteTexts.length, "notes");
 
       const created = [];
       for (const text of noteTexts) {
-        const note = await prisma.note.create({
-          data: {
-            clientId: c.id,
-            content: text,
-            category: toolArgs.category || "general",
-            author: "OpenClaw",
-          },
+        const result = await prisma.$transaction(async (tx) => {
+          const note = await tx.note.create({
+            data: {
+              clientId: c.id,
+              content: text,
+              category: toolArgs.category || "general",
+              author: "OpenClaw",
+              dueDate: dueDate || null,
+            },
+          });
+          // Create Deadline if date found
+          if (dueDate) {
+            await tx.deadline.create({
+              data: {
+                title: text.slice(0, 100),
+                dueDate,
+                type: "followup",
+                clientId: c.id,
+                noteId: note.id,
+                createdBy: "OpenClaw",
+              },
+            });
+          }
+          return note;
         });
-        created.push(note);
+        created.push(result);
       }
-      console.log(`OpenClaw: created ${created.length} notes for ${c.clientName}`);
+      console.log(`OpenClaw: created ${created.length} notes for ${c.clientName}${dueDate ? " with deadline " + dueDate.toISOString() : ""}`);
       return created.length === 1 ? created[0] : { notesAdded: created.length, notes: created };
     }
 
@@ -314,25 +402,46 @@ async function executeWriteTool(toolName, toolArgs) {
       if (data.deadline) data.deadline = new Date(data.deadline);
       return await prisma.task.update({ where: { id: taskId }, data, include: { client: { select: { clientName: true } } } });
     }
+    case "create_deadline": {
+      let clientId = null;
+      if (toolArgs.clientId) {
+        const c = await resolveClientId(prisma, toolArgs.clientId);
+        if (c) clientId = c.id;
+      }
+      return await prisma.deadline.create({
+        data: {
+          title: toolArgs.title,
+          description: toolArgs.description || null,
+          dueDate: new Date(toolArgs.dueDate),
+          type: toolArgs.type || "general",
+          clientId,
+          createdBy: "OpenClaw",
+        },
+        include: {
+          client: { select: { id: true, clientName: true } },
+        },
+      });
+    }
     default: return { error: "Unknown write tool" };
   }
 }
 
 function buildConfirmationPreview(toolName, toolArgs) {
   switch (toolName) {
-    case "create_client": return { action: "Create new client", clientName: toolArgs.clientName, eventName: toolArgs.eventName, eventType: toolArgs.eventType, volume: toolArgs.expectedVolume, fee: toolArgs.platformFee, timeline: toolArgs.timeline, dealStage: toolArgs.dealStage };
+    case "create_client": return { action: "Create new client", clientName: toolArgs.clientName, eventName: toolArgs.eventName, eventType: toolArgs.eventType, volume: toolArgs.expectedVolume, fee: toolArgs.platformFee, timeline: toolArgs.timeline, targetDate: toolArgs.targetDate, dealStage: toolArgs.dealStage };
     case "update_client_field": return { action: "Update client field", field: toolArgs.field, newValue: toolArgs.value, clientId: toolArgs.clientId };
-    case "add_client_note": return { action: "Add note to client", content: toolArgs.content, category: toolArgs.category, clientId: toolArgs.clientId };
+    case "add_client_note": return { action: "Add note to client", content: toolArgs.content, category: toolArgs.category, dueDate: toolArgs.dueDate, clientId: toolArgs.clientId };
     case "add_client_link": return { action: "Add link to client", name: toolArgs.name, linkType: toolArgs.linkType, url: toolArgs.url, clientId: toolArgs.clientId };
     case "create_task": return { action: "Create task", title: toolArgs.title, assignedTo: toolArgs.assignedTo, deadline: toolArgs.deadline, clientId: toolArgs.clientId };
     case "update_task": return { action: "Update task", taskId: toolArgs.taskId, changes: Object.fromEntries(Object.entries(toolArgs).filter(([k]) => k !== "taskId")) };
+    case "create_deadline": return { action: "Create deadline", title: toolArgs.title, dueDate: toolArgs.dueDate, type: toolArgs.type, clientId: toolArgs.clientId };
     default: return { action: toolName, args: toolArgs };
   }
 }
 
 const MAX_TOOL_ROUNDS = 5;
 
-// ── Helper: save messages to DB conversation ──
+// Helper: save messages to DB conversation
 async function saveConversation(conversationId, title, messages) {
   const prisma = getPrisma();
   if (conversationId) {
@@ -378,7 +487,7 @@ export const chat = async (req, res) => {
     const { message, conversationHistory = [], conversationId } = req.body;
 
     const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: buildSystemPrompt() },
       ...conversationHistory,
       { role: "user", content: message },
     ];
@@ -451,7 +560,7 @@ export const confirm = async (req, res) => {
     const result = await executeWriteTool(toolName, toolArgs);
 
     const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: buildSystemPrompt() },
       ...conversationHistory,
       { role: "user", content: userMessage || "Please proceed." },
       { role: "assistant", content: assistantMessage.content || null, tool_calls: assistantMessage.tool_calls },
@@ -508,7 +617,7 @@ export const confirm = async (req, res) => {
   }
 };
 
-// ── Conversation CRUD endpoints ──
+// Conversation CRUD endpoints
 
 export const listConversations = async (req, res) => {
   try {

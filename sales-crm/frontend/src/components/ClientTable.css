@@ -2,12 +2,16 @@
   background: var(--color-dark-card);
   border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: var(--shadow-lg);
+  width: 98%;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .client-table {
   width: 100%;
+  min-width: 1500px;
   border-collapse: collapse;
 }
 
@@ -17,13 +21,50 @@
 }
 
 .client-table th {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
   text-align: left;
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-gray-light);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Column widths */
+.col-organizer {
+  width: 16%;
+  min-width: 200px;
+}
+
+.col-ig-link {
+  width: 8%;
+  min-width: 120px;
+}
+
+.col-contact {
+  width: 12%;
+  min-width: 150px;
+}
+
+.col-otw-status {
+  width: 30%;
+  min-width: 350px;
+}
+
+.col-pic {
+  width: 8%;
+  min-width: 110px;
+}
+
+.col-last-contact {
+  width: 10%;
+  min-width: 120px;
+}
+
+.col-actions {
+  width: 16%;
+  min-width: 200px;
 }
 
 .client-table tbody tr {
@@ -36,8 +77,9 @@
 }
 
 .client-table td {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
   color: var(--color-white);
+  vertical-align: top;
 }
 
 .organizer-name {
@@ -60,9 +102,122 @@
   display: inline-block;
 }
 
+.display-id {
+  color: #f59e0b;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.phone-id-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.phone-id-container .display-id {
+  margin-top: 0;
+}
+
+.phone-number {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.previous-phone {
+  font-size: 10px;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+}
+
+.ig-link {
+  color: #e1306c;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(225, 48, 108, 0.1);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  transition: all 0.2s ease;
+}
+
+.ig-link:hover {
+  background: rgba(225, 48, 108, 0.2);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+/* OTW Status Dropdowns */
+.otw-dropdowns {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.otw-category-select,
+.otw-subcategory-select {
+  background: var(--color-dark-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-white);
+  padding: 5px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.otw-category-select:focus,
+.otw-subcategory-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.otw-category-select:hover,
+.otw-subcategory-select:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.otw-category-select option,
+.otw-subcategory-select option {
+  background: var(--color-dark-bg);
+  color: var(--color-white);
+}
+
+.otw-etc-input {
+  background: var(--color-dark-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-white);
+  padding: 5px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  width: 100%;
+  margin-top: 4px;
+  transition: border-color 0.2s ease;
+}
+
+.otw-etc-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.otw-etc-input::placeholder {
+  color: var(--color-gray);
+}
+
 .status-badge {
   display: inline-block;
-  padding: var(--spacing-xs) var(--spacing-md);
+  padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
   font-weight: 500;
@@ -72,18 +227,19 @@
 
 .action-buttons {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .action-buttons button {
   background: var(--color-dark-card);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--color-gray-light);
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -123,13 +279,18 @@
 
 @media (max-width: 768px) {
   .table-container {
+    width: 100%;
     overflow-x: auto;
+  }
+
+  .client-table {
+    min-width: 1000px;
   }
 
   .client-table th,
   .client-table td {
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: var(--font-size-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
   }
 
   .action-buttons {
@@ -137,8 +298,57 @@
   }
 
   .action-buttons button {
-    width: 32px;
-    height: 32px;
-    font-size: var(--font-size-sm);
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
   }
+
+  .otw-category-select,
+  .otw-subcategory-select,
+  .otw-etc-input {
+    font-size: 10px;
+    padding: 3px 5px;
+  }
+}
+
+/* Editable Organizer */
+.editable-organizer {
+  cursor: pointer;
+  position: relative;
+}
+
+.editable-organizer:hover .organizer-name {
+  color: #fbbf24;
+}
+
+.editable-organizer:hover::after {
+  content: '✏️';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.editable-organizer:hover::after {
+  opacity: 0.5;
+}
+
+.organizer-edit-input {
+  background: var(--color-dark-bg);
+  border: 1px solid var(--color-primary);
+  color: var(--color-white);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.organizer-edit-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
 }

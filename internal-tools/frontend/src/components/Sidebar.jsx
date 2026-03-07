@@ -43,22 +43,30 @@ export default function Sidebar() {
         <nav className="sidebar-nav">
           <div className="sidebar-section">
             {!collapsed && <div className="sidebar-section-label">Tools</div>}
-            <NavLink to="/cci" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} title="CCI">
-              <span className="sidebar-icon">🏢</span>
+            <NavLink to="/cci" end className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} title="CCI">
+              <span className="sidebar-icon">{'\u{1F3E2}'}</span>
               {!collapsed && <span>CCI</span>}
             </NavLink>
+            <NavLink to="/cci/testing" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} title="CCI Testing" style={{paddingLeft: collapsed ? undefined : '36px'}}>
+              <span className="sidebar-icon" style={{fontSize:'14px'}}>{'\u{1F9EA}'}</span>
+              {!collapsed && <span style={{fontSize:'13px'}}>Testing</span>}
+            </NavLink>
             <NavLink to="/techsprint" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} title="TechSprint">
-              <span className="sidebar-icon">⚡</span>
+              <span className="sidebar-icon">{'\u26A1'}</span>
               {!collapsed && <span>TechSprint</span>}
             </NavLink>
             <NavLink to="/mou" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} title="MoU Maker">
-              <span className="sidebar-icon">📄</span>
+              <span className="sidebar-icon">{'\u{1F4C4}'}</span>
               {!collapsed && <span>MoU Maker</span>}
+            </NavLink>
+            <NavLink to="/calendar" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} title="Calendar">
+              <span className="sidebar-icon">{'\u{1F4C5}'}</span>
+              {!collapsed && <span>Calendar</span>}
             </NavLink>
           </div>
         </nav>
         <button className="sidebar-collapse-btn" onClick={() => setCollapsed(c => !c)} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-          <span className={`collapse-arrow ${collapsed ? 'flipped' : ''}`}>‹</span>
+          <span className={`collapse-arrow ${collapsed ? 'flipped' : ''}`}>{'\u2039'}</span>
         </button>
       </aside>
     </>

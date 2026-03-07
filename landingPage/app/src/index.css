@@ -3,12 +3,19 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    @apply h-full;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
   body {
     @apply m-0 min-h-screen font-sans;
     overflow-x: hidden;
   }
 
-  html {
+  /* Ensure landing page container doesn't create nested scroll */
+  .landing-page-container {
     overflow-x: hidden;
   }
 }

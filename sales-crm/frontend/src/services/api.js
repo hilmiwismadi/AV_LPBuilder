@@ -29,7 +29,11 @@ export const clientAPI = {
   update: (id, data) => api.put("/clients/" + id, data),
   delete: (id) => api.delete("/clients/" + id),
   assign: (postId, picId) => api.post('/clients/assign', { postId, picId }),
+  bulkAssign: (sessionSlug, csIds) => api.post('/clients/bulk-assign', { sessionSlug, csIds }),
+  bulkUnassign: (sessionSlug) => api.post('/clients/bulk-unassign', { sessionSlug }),
   checkAssignment: (postId) => api.get('/clients/check-assignment/' + postId),
+  updateOtwStatus: (clientId, status, reason) => api.post("/clients/update-otw-status", { clientId, status, reason }),
+  updatePreviousPhone: (clientId, previousPhone) => api.post("/clients/update-previous-phone", { clientId, previousPhone }),
 };
 
 export const buildDemoAPI = {

@@ -2,7 +2,7 @@ import axios from 'axios';
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { standardizePhoneNumber } from '../utils/phoneUtils.js';
-import { authenticate } from '../middleware/auth.middleware.js';
+import { authenticate, authorize } from '../middleware/auth.middleware.js';
 import { createConfiguration, buildDemoConfiguration, generateSlug } from '../services/landingPageService.js';
 
 const router = express.Router();
@@ -14,6 +14,23 @@ const standardizePhoneMiddleware = (req, res, next) => {
     req.body.phoneNumber = standardizePhoneNumber(req.body.phoneNumber);
   }
   next();
+};
+
+// Helper function to update client OTW status
+const updateClientOtwStatus = async (clientId, status, reason) => {
+  try {
+    await prisma.client.update({
+      where: { id: clientId },
+      data: {
+        otwStatus: status,
+        ...(reason && { otwReason: reason })
+      }
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating client OTW status:', error);
+    throw error;
+  }
 };
 
 router.get('/', authenticate, async (req, res) => {
@@ -72,7 +89,6 @@ router.get('/', authenticate, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch clients' });
   }
 });
-
 
 // PATCH /api/clients/internal/clear-demo/:slug
 // Internal endpoint: called by LP backend when a DEMO config is deleted from /saved
@@ -151,6 +167,7 @@ router.delete('/:id', async (req, res) => {
     });
     res.json({ message: 'Client deleted successfully' });
   } catch (error) {
+    console.error('Error deleting client:', error);
     res.status(500).json({ error: 'Failed to delete client' });
   }
 });
@@ -257,23 +274,28 @@ router.get('/check-assignment/:postId', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'Scraped post not found' });
     }
 
-    // Check if client exists for this phone
+    // Check if client exists - always use scrapedPostId as lookup key
     const phoneToUse = scrapedPost.phoneNumber1 || scrapedPost.phoneNumber2;
+    let client;
+
     if (!phoneToUse) {
-      return res.json({ assigned: false, reason: 'no_phone' });
+      // For posts without phone, check by scrapedPostId
+      client = await prisma.client.findFirst({
+        where: {
+          scrapedPostId: scrapedPost.id,
+          startup: 'NOVAGATE'
+        }
+      });
+    } else {
+      // For posts with phone, check by phone number
+      const standardizedPhone = standardizePhoneNumber(phoneToUse);
+      client = await prisma.client.findFirst({
+        where: {
+          phoneNumber: standardizedPhone,
+          startup: 'NOVAGATE'
+        }
+      });
     }
-
-    const standardizedPhone = standardizePhoneNumber(phoneToUse);
-
-    const client = await prisma.client.findFirst({
-      where: {
-        phoneNumber: standardizedPhone,
-        startup: 'NOVAGATE'
-      },
-      include: {
-        // We'll manually fetch admin details
-      }
-    });
 
     if (!client || !client.pic) {
       return res.json({ assigned: false });
@@ -293,6 +315,314 @@ router.get('/check-assignment/:postId', authenticate, async (req, res) => {
   } catch (error) {
     console.error('Error checking assignment:', error);
     res.status(500).json({ error: 'Failed to check assignment' });
+  }
+});
+
+// POST /api/clients/bulk-assign - Bulk assign ALL scraped posts to CS team members
+router.post('/bulk-assign', authenticate, authorize('SUPERADMIN'), async (req, res) => {
+  try {
+    const { sessionSlug, csIds } = req.body;
+    const currentUser = req.user;
+
+    // Validate input
+    if (!sessionSlug) {
+      return res.status(400).json({ error: 'sessionSlug is required' });
+    }
+    if (!csIds || !Array.isArray(csIds) || csIds.length === 0) {
+      return res.status(400).json({ error: 'csIds is required and must be a non-empty array' });
+    }
+
+    // Fetch the scraping session with ALL posts (no phone filter)
+    const session = await prisma.scrapingSession.findUnique({
+      where: { slug: sessionSlug },
+      include: {
+        scrapedPosts: {
+          orderBy: { postIndex: 'asc' }
+        }
+      }
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: 'Scraping session not found' });
+    }
+
+    const postsToAssign = session.scrapedPosts;
+    if (postsToAssign.length === 0) {
+      return res.status(400).json({ error: 'No posts found in this session' });
+    }
+
+    // Distribute posts evenly among CS members using round-robin
+    const results = {
+      totalPosts: postsToAssign.length,
+      assigned: 0,
+      skipped: 0,
+      updated: 0,
+      noPhone: 0,
+      assignments: {},
+      errors: []
+    };
+
+    // Initialize assignment counts for each CS
+    csIds.forEach(csId => {
+      results.assignments[csId] = 0;
+    });
+
+    for (let i = 0; i < postsToAssign.length; i++) {
+      const post = postsToAssign[i];
+      const csId = csIds[i % csIds.length]; // Round-robin distribution
+
+      try {
+        const phoneToUse = post.phoneNumber1 || post.phoneNumber2;
+        let client;
+
+        // Track if post has no phone
+        if (!phoneToUse) {
+          results.noPhone++;
+        }
+
+        // ALWAYS use scrapedPostId as the lookup key for ALL posts
+        client = await prisma.client.findFirst({
+          where: {
+            scrapedPostId: post.id,
+            startup: 'NOVAGATE'
+          }
+        });
+
+        if (client) {
+          // Update existing client's PIC if different, AND update phone if it changed
+          const updateData = {
+            pic: csId,
+            assignedBy: currentUser.id,
+            assignedAt: new Date()
+          };
+
+          // Update phone number if available (in case it changed from original scrape)
+          if (phoneToUse) {
+            updateData.phoneNumber = standardizePhoneNumber(phoneToUse);
+            updateData.cp1st = post.phoneNumber1 || '';
+            updateData.cp2nd = post.phoneNumber2 || '';
+          }
+
+          // Also update other fields that might have changed
+          updateData.eventOrganizer = post.eventOrganizer || client.eventOrganizer;
+          updateData.igLink = post.postUrl || client.igLink;
+          updateData.location = post.location || client.location;
+          updateData.nextEventDate = post.nextEventDate || client.nextEventDate;
+          updateData.eventType = post.eventTitle || client.eventType;
+
+          if (client.pic !== csId || phoneToUse) {
+            client = await prisma.client.update({
+              where: { id: client.id },
+              data: updateData
+            });
+            results.updated++;
+          } else {
+            results.skipped++;
+            continue;
+          }
+        } else {
+          // Create new client from scraped data
+          client = await prisma.client.create({
+            data: {
+              phoneNumber: phoneToUse ? standardizePhoneNumber(phoneToUse) : null,
+              scrapedPostId: post.id,
+              eventOrganizer: post.eventOrganizer || '',
+              igLink: post.postUrl || '',
+              cp1st: post.phoneNumber1 || '',
+              cp2nd: post.phoneNumber2 || '',
+              location: post.location || '',
+              nextEventDate: post.nextEventDate || null,
+              eventType: post.eventTitle || '',
+              pic: csId,
+              assignedBy: currentUser.id,
+              assignedAt: new Date(),
+              status: 'TODO',
+              startup: 'NOVAGATE',
+              otwStatus: 'OTW_PROSPECT',
+              otwReason: '',
+              previousPhone: ''
+            }
+          });
+        }
+
+        results.assigned++;
+        results.assignments[csId]++;
+      } catch (error) {
+        console.error('Error assigning post ' + post.id + ':', error);
+        results.errors.push({
+          postId: post.id,
+          error: error.message
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      data: results
+    });
+  } catch (error) {
+    console.error('Error in bulk assign:', error);
+    res.status(500).json({ error: 'Failed to bulk assign clients' });
+  }
+});
+
+// POST /api/clients/bulk-unassign - Clear assignment status for clients from a session
+router.post('/bulk-unassign', authenticate, authorize('SUPERADMIN'), async (req, res) => {
+  try {
+    const { sessionSlug } = req.body;
+    const currentUser = req.user;
+
+    // Validate input
+    if (!sessionSlug) {
+      return res.status(400).json({ error: 'sessionSlug is required' });
+    }
+
+    // Fetch the scraping session
+    const session = await prisma.scrapingSession.findUnique({
+      where: { slug: sessionSlug },
+      include: {
+        scrapedPosts: {
+          orderBy: { postIndex: 'asc' }
+        }
+      }
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: 'Scraping session not found' });
+    }
+
+    const posts = session.scrapedPosts;
+    if (posts.length === 0) {
+      return res.status(400).json({ error: 'No posts found in this session' });
+    }
+
+    // Results tracking
+    const results = {
+      totalPosts: posts.length,
+      unassigned: 0,
+      notAssigned: 0,
+      noPhone: 0,
+      errors: []
+    };
+
+    for (const post of posts) {
+      try {
+        const phoneToUse = post.phoneNumber1 || post.phoneNumber2;
+
+        // Track if post has no phone
+        if (!phoneToUse) {
+          results.noPhone++;
+        }
+
+        // ALWAYS use scrapedPostId as the lookup key for ALL posts
+        const client = await prisma.client.findFirst({
+          where: {
+            scrapedPostId: post.id,
+            startup: 'NOVAGATE'
+          }
+        });
+
+        if (!client) {
+          results.notAssigned++;
+          continue;
+        }
+
+        if (!client.pic) {
+          results.notAssigned++;
+          continue;
+        }
+
+        // Clear assignment
+        const updated = await prisma.client.update({
+          where: { id: client.id },
+          data: {
+            pic: null,
+            assignedBy: null,
+            assignedAt: null,
+            otwStatus: 'OTW_PROSPECT',
+            otwReason: ''
+          }
+        });
+
+        results.unassigned++;
+      } catch (error) {
+        console.error('Error unassigning post ' + post.id + ':', error);
+        results.errors.push({
+          postId: post.id,
+          error: error.message
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      data: results
+    });
+  } catch (error) {
+    console.error('Error in bulk unassign:', error);
+    res.status(500).json({ error: 'Failed to bulk unassign clients' });
+  }
+});
+
+// POST /api/clients/update-otw-status - Update OTW status for a client
+router.post('/update-otw-status', authenticate, async (req, res) => {
+  try {
+    const { clientId, status, reason } = req.body;
+    const currentUser = req.user;
+
+    // Validate input
+    if (!clientId) {
+      return res.status(400).json({ error: 'clientId is required' });
+    }
+
+    // SUPERADMIN can change any status, others can only mark as OTW_PROSPECT
+    if (currentUser.role !== 'SUPERADMIN' && status !== 'OTW_PROSPECT') {
+      return res.status(403).json({ error: 'Only SUPERADMIN can set OTW_PROSPECT status' });
+    }
+
+    const success = await updateClientOtwStatus(clientId, status, reason);
+
+    if (success) {
+      res.json({ success: true, message: 'OTW status updated successfully' });
+    } else {
+      res.status(400).json({ error: 'Failed to update OTW status' });
+    }
+  } catch (error) {
+    console.error('Error updating client OTW status:', error);
+    res.status(500).json({ error: 'Failed to update OTW status' });
+  }
+});
+
+// POST /api/clients/update-previous-phone - Set previous phone number
+router.post('/update-previous-phone', authenticate, async (req, res) => {
+  try {
+    const { clientId, previousPhone } = req.body;
+    const currentUser = req.user;
+
+    // Validate input
+    if (!clientId) {
+      return res.status(400).json({ error: 'clientId is required' });
+    }
+
+    // Validate phone format (should be a number)
+    if (previousPhone && !/^\d+$/.test(previousPhone)) {
+      return res.status(400).json({ error: 'Previous phone number must contain only digits' });
+    }
+
+    const success = await updateClientOtwStatus(
+      clientId,
+      'OTW_PROSPECT',
+      previousPhone || 'Previous Phone Number = ' + previousPhone
+    );
+
+    if (success) {
+      res.json({ success: true, message: 'Previous phone number saved' });
+    } else {
+      res.status(400).json({ error: 'Failed to save previous phone number' });
+    }
+  } catch (error) {
+    console.error('Error updating previous phone:', error);
+    res.status(500).json({ error: 'Failed to save previous phone number' });
   }
 });
 
@@ -366,7 +696,6 @@ router.post('/:id/build-demo', authenticate, async (req, res) => {
             configData.heroText.title = configData.name;
           }
         } else {
-          // Other error, don't retry
           throw error;
         }
       }
@@ -428,73 +757,3 @@ router.post('/:id/build-demo', authenticate, async (req, res) => {
 });
 
 export default router;
-
-// DELETE /api/clients/:id/delete-demo - Delete demo landing page
-router.delete('/:id/delete-demo', authenticate, async (req, res) => {
-  try {
-    const clientId = req.params.id;
-
-    // Fetch client
-    const client = await prisma.client.findUnique({
-      where: { id: clientId }
-    });
-
-    if (!client) {
-      return res.status(404).json({ error: 'Client not found' });
-    }
-
-    if (!client.linkDemo) {
-      return res.status(400).json({ error: 'No demo to delete' });
-    }
-
-    // Extract slug from linkDemo URL
-    const slug = client.linkDemo.split('.webbuild.arachnova.id')[0].split('//')[1];
-
-    console.log('[Delete Demo] Deleting configuration for slug:', slug);
-
-    // Delete configuration from Landing Page API
-    try {
-      await axios.delete(
-        `${process.env.LANDING_PAGE_API_URL || 'https://webbuild.arachnova.id/api'}/configurations/by-slug/${slug}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${process.env.LANDING_PAGE_AUTH_TOKEN}`,
-            'Content-Type': 'application/json'
-          },
-          timeout: 30000
-        }
-      );
-      console.log('[Delete Demo] Configuration deleted from Landing Page');
-    } catch (error) {
-      console.error('[Delete Demo] Error deleting from Landing Page:', error.message);
-      // Continue to update client even if Landing Page deletion fails
-    }
-
-    // Update client to remove demo data
-    const updatedClient = await prisma.client.update({
-      where: { id: clientId },
-      data: {
-        linkDemo: null,
-        imgLogo: null,
-        imgPoster: null,
-        colorPalette: null,
-        eventType: null
-      }
-    });
-
-    console.log('[Delete Demo] Client demo data cleared');
-
-    res.json({
-      success: true,
-      message: 'Demo deleted successfully',
-      client: updatedClient
-    });
-
-  } catch (error) {
-    console.error('[Delete Demo] Error:', error);
-    return res.status(500).json({
-      error: 'Failed to delete demo',
-      details: error.message
-    });
-  }
-});

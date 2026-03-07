@@ -38,10 +38,11 @@ function App() {
   // Initialize AOS
   useEffect(() => {
     AOS.init({
+      startEvent: "DOMContentLoaded",
       duration: 600,
-      once: false,
-      mirror: true,
-      offset: 120,
+      once: window.innerWidth < 768,
+      mirror: window.innerWidth >= 768,
+      offset: window.innerWidth < 768 ? 50 : 120,
       easing: 'ease-in-out',
       anchorPlacement: 'center-bottom',
       disable: false,

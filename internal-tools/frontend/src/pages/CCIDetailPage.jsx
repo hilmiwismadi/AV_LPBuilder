@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { cci } from '../services/api.js';
+import { cci, deadlines as deadlinesApi } from '../services/api.js';
 import NotesPanel from '../components/NotesPanel.jsx';
 import '../styles/cci.css';
 
@@ -8,6 +8,26 @@ const DEAL_STAGES = ['Prospect', 'Negotiation', 'Closed Won', 'Closed Lost', 'On
 const RISK_LEVELS = ['Low', 'Medium', 'High'];
 const LINK_TYPES = ['MOU', 'EVENT', 'PAYMENT', 'DRIVE', 'WA_GROUP', 'CUSTOM'];
 const LINK_ICONS = { MOU: '\u{1F4C4}', EVENT: '\u{1F3AB}', PAYMENT: '\u{1F4B3}', DRIVE: '\u{1F4C1}', WA_GROUP: '\u{1F4AC}', CUSTOM: '\u{1F517}' };
+const DEADLINE_TYPE_COLORS = {
+  event: '#818cf8',
+  task: '#f59e0b',
+  followup: '#10b981',
+  meeting: '#3b82f6',
+  general: '#94a3b8',
+};
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  const datePart = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const h = d.getHours(), m = d.getMinutes();
+  if (h === 0 && m === 0) return datePart;
+  return datePart + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function isOverdue(dateStr) {
+  return new Date(dateStr) < new Date();
+}
 
 export default function CCIDetailPage() {
   const { id } = useParams();
@@ -35,7 +55,13 @@ export default function CCIDetailPage() {
     setSaving(true);
     try {
       const value = editing[field];
-      await cci.update(id, { [field]: field === 'expectedVolume' ? (value ? parseInt(value) : null) : field === 'platformFee' ? parseFloat(value) : field === 'customDevRequired' ? value === 'true' : value || null });
+      let parsed;
+      if (field === 'expectedVolume') parsed = value ? parseInt(value) : null;
+      else if (field === 'platformFee') parsed = parseFloat(value);
+      else if (field === 'customDevRequired') parsed = value === 'true';
+      else if (field === 'targetDate') parsed = value || null;
+      else parsed = value || null;
+      await cci.update(id, { [field]: parsed });
       await load();
       cancelEdit(field);
     } finally {
@@ -68,6 +94,17 @@ export default function CCIDetailPage() {
     load();
   };
 
+  const handleToggleDeadline = async (deadline) => {
+    await deadlinesApi.update(deadline.id, { completed: !deadline.completed });
+    load();
+  };
+
+  const handleDeleteDeadline = async (deadlineId) => {
+    if (!confirm('Delete this deadline?')) return;
+    await deadlinesApi.delete(deadlineId);
+    load();
+  };
+
   const renderField = (field, label, type = 'text', options = null) => {
     const isEditing = field in editing;
     return (
@@ -94,7 +131,11 @@ export default function CCIDetailPage() {
             </div>
           ) : (
             <span onClick={() => startEdit(field)} style={{cursor:'pointer',borderBottom:'1px dashed var(--border-color)',paddingBottom:'1px'}}>
-              {type === 'checkbox' ? (client[field] ? 'Yes' : 'No') : client[field] || <span style={{color:'var(--text-muted)'}}>Click to edit</span>}
+              {type === 'checkbox'
+                ? (client[field] ? 'Yes' : 'No')
+                : type === 'datetime-local'
+                  ? (client[field] ? formatDate(client[field]) : <span style={{color:'var(--text-muted)'}}>Click to set</span>)
+                  : client[field] || <span style={{color:'var(--text-muted)'}}>Click to edit</span>}
             </span>
           )}
         </div>
@@ -106,15 +147,22 @@ export default function CCIDetailPage() {
   const mous = client.mouDrafts || [];
   const notes = client.clientNotes || [];
   const links = client.links || [];
+  const clientDeadlines = client.deadlines || [];
 
   return (
     <div>
       <div className="page-header">
-        <div>
-          <div style={{color:'var(--text-muted)',fontSize:'13px',marginBottom:'4px'}}>
-            <Link to="/cci" style={{color:'var(--color-primary)'}}>CCI</Link> / {client.clientName}
+        <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
+          <button onClick={() => navigate('/cci')} className="btn btn-ghost btn-sm"
+            style={{display:'flex',alignItems:'center',gap:'4px',padding:'6px 10px'}}>
+            {'\u2190'} Back
+          </button>
+          <div>
+            <div style={{color:'var(--text-muted)',fontSize:'13px',marginBottom:'4px'}}>
+              <Link to="/cci" style={{color:'var(--color-primary)'}}>CCI</Link> / {client.clientName}
+            </div>
+            <h1 className="page-title">{client.clientName}</h1>
           </div>
-          <h1 className="page-title">{client.clientName}</h1>
         </div>
         <button className="btn btn-danger btn-sm" onClick={handleDelete}>Delete Client</button>
       </div>
@@ -128,6 +176,7 @@ export default function CCIDetailPage() {
         {renderField('riskLevel', 'Risk Level', 'select', RISK_LEVELS)}
         {renderField('platformFee', 'Platform Fee (%)', 'number')}
         {renderField('timeline', 'Timeline')}
+        {renderField('targetDate', 'Target Date', 'datetime-local')}
         {renderField('ticketCategories', 'Ticket Categories')}
         {renderField('negotiationStatus', 'Negotiation Status')}
         {renderField('customDevRequired', 'Custom Dev Required', 'checkbox')}
@@ -149,6 +198,35 @@ export default function CCIDetailPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Deadlines Section */}
+      <div className="section-card">
+        <h3>Deadlines ({clientDeadlines.length})</h3>
+        {clientDeadlines.length === 0 ? (
+          <div className="empty-state" style={{padding:'16px'}}>No deadlines yet</div>
+        ) : (
+          clientDeadlines.map(dl => (
+            <div key={dl.id} className={"deadline-row" + (dl.completed ? ' completed' : '')}>
+              <input
+                type="checkbox"
+                checked={dl.completed}
+                onChange={() => handleToggleDeadline(dl)}
+                style={{cursor:'pointer',accentColor:'var(--color-primary)'}}
+              />
+              <div className="deadline-title" style={dl.completed ? {textDecoration:'line-through',opacity:0.5} : {}}>
+                {dl.title}
+              </div>
+              <span className={"deadline-due" + (!dl.completed && isOverdue(dl.dueDate) ? ' overdue' : '')}>
+                {formatDate(dl.dueDate)}
+              </span>
+              <span className="deadline-type-chip" style={{background: (DEADLINE_TYPE_COLORS[dl.type] || '#94a3b8') + '22', color: DEADLINE_TYPE_COLORS[dl.type] || '#94a3b8'}}>
+                {dl.type}
+              </span>
+              <button className="icon-btn" title="Delete" onClick={() => handleDeleteDeadline(dl.id)}>{'\u{1F5D1}\uFE0F'}</button>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Links Section */}

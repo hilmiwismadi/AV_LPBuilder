@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { scraperAPI, clientAPI } from '../services/api';
 import AssignModal from '../components/AssignModal';
+import BulkAssignModal from '../components/BulkAssignModal';
+import BulkUnassignModal from '../components/BulkUnassignModal';
 import './ScraperSessionDetailPage.css';
 
 const ScraperSessionDetailPage = () => {
@@ -14,6 +16,8 @@ const ScraperSessionDetailPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [phoneFilter, setPhoneFilter] = useState('all');
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showBulkAssignModal, setShowBulkAssignModal] = useState(false);
+  const [showBulkUnassignModal, setShowBulkUnassignModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [assignments, setAssignments] = useState({}); // Track assignment status
 
@@ -29,7 +33,7 @@ const ScraperSessionDetailPage = () => {
       setSession(data);
       setPosts(data?.scrapedPosts || []);
 
-      // Check assignment status for all posts
+      // Check assignment status for ALL posts (not just those with phone)
       if (data?.scrapedPosts) {
         checkAssignments(data.scrapedPosts);
       }
@@ -45,16 +49,14 @@ const ScraperSessionDetailPage = () => {
   const checkAssignments = async (postsToCheck) => {
     const assignmentData = {};
 
-    // Check each post for assignment status
+    // Check assignment status for ALL posts (removed phone number filter)
     for (const post of postsToCheck) {
-      if (post.phoneNumber1 || post.phoneNumber2) {
-        try {
-          const response = await clientAPI.checkAssignment(post.id);
-          assignmentData[post.id] = response.data;
-        } catch (error) {
-          console.error(`Failed to check assignment for post ${post.id}:`, error);
-          assignmentData[post.id] = { assigned: false };
-        }
+      try {
+        const response = await clientAPI.checkAssignment(post.id);
+        assignmentData[post.id] = response.data;
+      } catch (error) {
+        console.error(`Failed to check assignment for post ${post.id}:`, error);
+        assignmentData[post.id] = { assigned: false };
       }
     }
 
@@ -118,6 +120,42 @@ const ScraperSessionDetailPage = () => {
     alert('Client assigned successfully!');
   };
 
+  const handleBulkAssignClick = () => {
+    setShowBulkAssignModal(true);
+  };
+
+  const handleBulkAssigned = (result) => {
+    setShowBulkAssignModal(false);
+    // Refresh assignments
+    checkAssignments(posts);
+
+    // Show summary
+    const summary = 'Bulk assignment completed!\nTotal: ' + result.totalPosts + '\nAssigned: ' + result.assigned + '\nUpdated: ' + result.updated + '\nSkipped: ' + result.skipped + '\nNo Phone: ' + (result.noPhone || 0) + '\nErrors: ' + result.errors.length;
+    alert(summary);
+  };
+
+  const handleBulkCloseModal = () => {
+    setShowBulkAssignModal(false);
+  };
+
+  const handleBulkUnassignClick = () => {
+    setShowBulkUnassignModal(true);
+  };
+
+  const handleBulkUnassigned = (result) => {
+    setShowBulkUnassignModal(false);
+    // Refresh assignments
+    checkAssignments(posts);
+
+    // Show summary
+    const summary = 'Bulk unassignment completed!\nTotal: ' + result.totalPosts + '\nUnassigned: ' + result.unassigned + '\nNot Assigned: ' + result.notAssigned + '\nNo Phone: ' + (result.noPhone || 0) + '\nErrors: ' + result.errors.length;
+    alert(summary);
+  };
+
+  const handleBulkUnassignCloseModal = () => {
+    setShowBulkUnassignModal(false);
+  };
+
   const handleCloseModal = () => {
     setShowAssignModal(false);
     setSelectedPost(null);
@@ -155,6 +193,12 @@ const ScraperSessionDetailPage = () => {
           <p>@{session?.username} • {formatDate(session?.createdAt)}</p>
         </div>
         <div className="header-actions">
+          <button className="action-btn bulk-assign-btn" onClick={handleBulkAssignClick}>
+            Bulk Assign
+          </button>
+          <button className="action-btn bulk-unassign-btn" onClick={handleBulkUnassignClick}>
+            Bulk Unassign
+          </button>
           <button className="action-btn" onClick={exportToCSV}>
             Export CSV
           </button>
@@ -270,6 +314,24 @@ const ScraperSessionDetailPage = () => {
           postTitle={selectedPost.eventTitle || 'Untitled'}
           onClose={handleCloseModal}
           onAssigned={handleAssigned}
+        />
+      )}
+
+      {showBulkAssignModal && (
+        <BulkAssignModal
+          sessionSlug={slug}
+          postCount={posts.length}
+          onClose={handleBulkCloseModal}
+          onBulkAssigned={handleBulkAssigned}
+        />
+      )}
+
+      {showBulkUnassignModal && (
+        <BulkUnassignModal
+          sessionSlug={slug}
+          postCount={posts.length}
+          onClose={handleBulkUnassignCloseModal}
+          onBulkUnassigned={handleBulkUnassigned}
         />
       )}
     </div>
