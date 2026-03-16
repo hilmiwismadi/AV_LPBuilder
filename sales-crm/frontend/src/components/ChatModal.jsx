@@ -253,12 +253,12 @@ const ChatModal = ({ client, onClose }) => {
       return;
     }
 
-    const template = chatTemplates.find(t => t.id === templateId);
+    const template = templates.find(t => t.id === templateId);
     if (!template) return;
 
     const variables = getTemplateVariables(client);
 
-    let message = template.template;
+    let message = template.message;
     Object.keys(variables).forEach(key => {
       const placeholder = '{' + key + '}';
       const value = variables[key] || '';

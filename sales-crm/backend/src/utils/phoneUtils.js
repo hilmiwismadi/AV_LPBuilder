@@ -21,6 +21,70 @@ export function standardizePhoneNumber(phone) {
     cleaned = '62' + cleaned;
   }
   
+  // Handle WhatsApp phone numbers with extra digits
+  // Indonesian phone numbers should be 11-13 digits after country code (62)
+  // WhatsApp sometimes includes extra digits at the end (internal IDs)
+  // Extract only the valid phone number portion
+  if (cleaned.startsWith('62') && cleaned.length > 13) {
+    // Country code (62) + area code (8) + 7-10 digits = 11-13 total
+    // Take first 13 digits max (62 + 11 digits number)
+    cleaned = cleaned.substring(0, 13);
+  }
+  
+  return cleaned;
+}
+
+/**
+ * Extract clean phone number from WhatsApp Web.js message object
+ * WhatsApp Web.js can return phone numbers with internal IDs
+ * This function extracts the actual phone number
+ * 
+ * @param {object} message - WhatsApp Web.js message object
+ * @returns {string} Clean phone number in standard format
+ */
+export function extractWhatsAppPhoneNumber(message) {
+  if (!message) return '';
+  
+  // Get the phone number from message object
+  let phoneNumber = message.from || message.to || message.number;
+  
+  if (!phoneNumber) return '';
+  
+  // Remove the @c.us suffix
+  phoneNumber = phoneNumber.replace('@c.us', '').replace('@g.us', '').replace('@s.whatsapp.net', '');
+  
+  // WhatsApp Web.js might return numbers in different formats
+  // Try to extract just the phone number portion
+  
+  // Remove all non-digit characters
+  let cleaned = phoneNumber.replace(/\D/g, '');
+  
+  // Handle leading 0
+  if (cleaned.startsWith('0')) {
+    cleaned = cleaned.substring(1);
+  }
+  
+  // Ensure 62 country code
+  if (!cleaned.startsWith('62')) {
+    cleaned = '62' + cleaned;
+  }
+  
+  // Extract only valid Indonesian phone number (11-13 digits total)
+  if (cleaned.startsWith('62') && cleaned.length > 13) {
+    // Try different lengths to find valid phone number
+    // Indonesian mobile numbers typically start with 8, followed by 8-10 digits
+    for (let len = 13; len >= 11; len--) {
+      if (cleaned.length >= len) {
+        const candidate = cleaned.substring(0, len);
+        // Check if it starts with 628 (valid Indonesian mobile prefix)
+        if (candidate.startsWith('628')) {
+          cleaned = candidate;
+          break;
+        }
+      }
+    }
+  }
+  
   return cleaned;
 }
 
