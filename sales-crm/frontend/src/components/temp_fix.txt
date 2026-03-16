@@ -1,0 +1,24 @@
+const handleTemplateSelect = (e) => {
+    const templateId = e.target.value;
+    setSelectedTemplate(templateId);
+
+    if (!templateId || !client) {
+      return;
+    }
+
+    const template = templates.find(t => t.id === templateId);
+    if (!template) return;
+
+    const variables = getTemplateVariables(client);
+
+    let message = template.message;
+    Object.keys(variables).forEach(key => {
+      const placeholder = '{' + key + '}';
+      const value = variables[key] || '';
+      message = message.replace(new RegExp(placeholder, 'g'), value);
+    });
+
+    setNewMessage(message);
+  };
+
+export default handleTemplateSelect;

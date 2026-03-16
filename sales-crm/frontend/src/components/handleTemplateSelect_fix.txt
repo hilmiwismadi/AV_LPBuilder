@@ -1,0 +1,25 @@
+const handleTemplateSelect = (e) => {
+    const templateId = e.target.value;
+    setSelectedTemplate(templateId);
+
+    // Fetch the selected template details
+    const template = templates.find(t => t.id === templateId);
+    if (!template) return;
+
+    // Get template variables
+    const variables = getTemplateVariables(client);
+
+    // Replace variables in the template message
+    let message = template.message;
+    Object.keys(variables).forEach(key => {
+      const placeholder = '{' + key + '}';
+      const value = variables[key] || '';
+      message = message.replace(new RegExp(placeholder, 'g'), value);
+    });
+
+    // Auto-populate text box
+    setNewMessage(message);
+    setSelectedTemplate('');  // Reset selection
+  };
+
+export default handleTemplateSelect;

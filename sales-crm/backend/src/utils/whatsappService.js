@@ -89,7 +89,7 @@ class WhatsAppService {
         }
 
         const isOutgoing = message.fromMe;
-        const phoneNumber = isOutgoing ? message.to : message.from;
+        const phoneNumber = extractWhatsAppPhoneNumber(message);
         const standardizedPhone = standardizePhoneNumber(phoneNumber);
         const phoneHash = crypto.createHash('md5').update(standardizedPhone).digest('hex');
 

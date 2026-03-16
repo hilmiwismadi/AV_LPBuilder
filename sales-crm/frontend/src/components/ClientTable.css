@@ -378,3 +378,52 @@
 .client-table tbody tr:has(.otw-category-select[value='Not Checked']):hover {
   background: rgba(220, 53, 69, 0.1);
 }
+/* Assignee Badge Styling */
+.assignee-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 120px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.assignee-badge.unassigned {
+  background: #9ca3af;
+  color: white;
+}
+
+.assignee-badge.assigned {
+  background: #10b981;
+  color: white;
+}
+
+.assignee-badge.you {
+  background: #22c55e;
+  color: white;
+}
+
+/* Column Styling */
+.col-assignee {
+  width: 150px;
+  text-align: center;
+}
+
+/* Button Styling */
+.btn-assign {
+  background: #8b5cf6;
+  color: white;
+}
+
+.btn-assign:hover {
+  background: #9b5cf6;
+}
+
+@media (max-width: 768px) {
+  .col-assignee {
+    width: 100px;
+    min-width: 100px;
+  }
+}
