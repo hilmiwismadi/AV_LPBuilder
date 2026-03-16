@@ -62,24 +62,65 @@ const CRMPage = () => {
     }
   };
 
-  // Parse OTW status to category
+  const handleAssigneeChange = async (client) => {
+    try {
+      await clientAPI.update(client.id, { assignedBy: null });
+      setClients(clients.map(c => c.id === client.id ? client : c));
+      
+      // Also update client in local state
+      setSelectedClient(client);
+      setShowForm(false);
+      
+      if (editingClient && editingClient.id === client.id) {
+        setEditingClient(null);
+      }
+    } catch (error) {
+      console.error('Failed to update client assignee:', error);
+    }
+  };
+
   const getOtwCategory = (client) => {
     const status = client.otwStatus || 'NOT_CHECKED';
 
-    // Handle Not Checked status first
     if (status === 'NOT_CHECKED') {
-      return 'Not Checked';
+      return {
+        category: 'Not Checked',
+        subcategory: 'CS belum isi status'
+      };
     }
 
-    if (status === 'URGENT' || status === 'URGENT_BERJALAN' || status === 'BENTAR_LAGI_MULAI'|| status.startsWith('ETC_OTW_')) {
-    
-    return 'OTW chat (prospect)';
-    } else if (status === 'FEE_KECIL_ATAU_GRATIS' || status.startsWith('UDAH_BERJALAN') || status.startsWith('HP_DI_GAMBAR') || status.startsWith('ETC_NANTI_')) {
-      return 'Nanti aja';
-    } else if (status === 'GA_RELEVAN' || status === 'GADA_NOMER_HP' || status === 'NOMER_HP_KONTAK' || status.startsWith('ETC_GAUSAH_')) {
-      return 'Gausah';
+    if (status === 'URGENT' || status === 'URGENT_BERJALAN' || status === 'BENTAR_LAGI_MULAI') {
+      return {
+        category: 'OTW chat (prospect)',
+        subcategory: 'Urgent karena sudah berjalan'
+      };
     }
-    return 'OTW chat (prospect)';
+
+    if (status === 'FEE_KECIL_ATAU_GRATIS') {
+      return {
+        category: 'OTW chat (prospect)',
+        subcategory: 'Fee kecil atau gratis'
+      };
+    }
+
+    if (status === 'GADA_NOMER_HP_KONTAK' || status === 'NOMER_HP_KONTAK') {
+      return {
+        category: 'Nanti aja',
+        subcategory: 'Udah berjalan untuk event tahun ini'
+      };
+    }
+
+    if (status === 'GA_RELEVAN') {
+      return {
+        category: 'Gausah',
+        subcategory: 'Ga relevan (iklan, promosi...)'
+      };
+    }
+
+    return {
+      category: 'OTW chat (prospect)',
+      subcategory: 'Urgent karena sudah berjalan'
+    };
   };
 
   const filterClients = () => {
@@ -94,241 +135,106 @@ const CRMPage = () => {
     }
 
     if (otwFilter !== 'all') {
-      filtered = filtered.filter((client) => getOtwCategory(client) === otwFilter);
+      filtered = filtered.filter((client) => getOtwCategory(client).category === otwFilter);
     }
-
-    // Prioritize clients with phone numbers at the top
-    filtered.sort((a, b) => {
-      // Both have phone: keep original order
-      if (a.phoneNumber && b.phoneNumber) return 0;
-      // A has phone, B doesn't: A first
-      if (a.phoneNumber && !b.phoneNumber) return -1;
-      // A doesn't have phone, B has: B first
-      if (!a.phoneNumber && b.phoneNumber) return 1;
-      // Neither has phone: keep original order
-      return 0;
-    });
 
     setFilteredClients(filtered);
   };
 
-  const handleAddClient = () => {
-    setEditingClient(null);
-    setShowForm(true);
+  const handleOpenModal = (setter) => () => {
+    setter(true);
+    setTimeout(() => {
+      setter(false);
+    }, 3000);
   };
-
-  const handleEditClient = (client) => {
-    setEditingClient(client);
-    setShowDetail(true);
-  };
-
-  const handleDeleteClient = async (clientId) => {
-    if (window.confirm('Are you sure you want to delete this client?')) {
-      try {
-        await clientAPI.delete(clientId);
-        fetchClients();
-      } catch (error) {
-        console.error('Failed to delete client:', error);
-        alert('Failed to delete client');
-      }
-    }
-  };
-
-  const handleChat = (client) => {
-    setSelectedClient(client);
-    setShowChat(true);
-  };
-
-  const handleBuild = (client) => {
-    setSelectedClient(client);
-    if (client.linkDemo) {
-      // If demo already exists, show view modal
-      setShowViewDemo(true);
-    } else {
-      // Otherwise, show build modal
-      setShowBuildDemo(true);
-    }
-  };
-
-  const handleClientUpdate = async (client, updateData) => {
-    try {
-      await clientAPI.update(client.id, updateData);
-      // Refresh client list to show updated data
-      fetchClients();
-    } catch (error) {
-      console.error('Failed to update client:', error);
-      alert('Failed to update client');
-    }
-  };
-
-  const handleOtwStatusChange = async (client, status) => {
-    try {
-      await clientAPI.update(client.id, { otwStatus: status });
-      // Refresh client list to show updated data
-      fetchClients();
-    } catch (error) {
-      console.error('Failed to update OTW status:', error);
-      alert('Failed to update OTW status');
-    }
-  };
-
-  const handleRebuild = (client) => {
-    setSelectedClient(client);
-    setShowBuildDemo(true);
-  };
-
-  const handleSaveClient = async (clientData) => {
-    try {
-      if (editingClient) {
-        await clientAPI.update(editingClient.id, clientData);
-      } else {
-        await clientAPI.create(clientData);
-      }
-      fetchClients();
-      setShowForm(false);
-      setShowDetail(false);
-      setEditingClient(null);
-    } catch (error) {
-      console.error('Failed to save client:', error);
-      alert('Failed to save client: ' + (error.response?.data?.error || error.message));
-    }
-  };
-
-  const handleCloseChat = () => {
-    setShowChat(false);
-    setSelectedClient(null);
-    fetchClients();
-  };
-
-  const handleCloseDetail = () => {
-    setShowDetail(false);
-    setEditingClient(null);
-  };
-
-  const handleBuildDemoSuccess = (link) => {
-    console.log('Demo created successfully:', link);
-    setShowBuildDemo(false);
-    setSelectedClient(null);
-    fetchClients(); // Refresh client list to show updated linkDemo
-  };
-
-  const handleWhatsAppAuthenticated = (clientInfo) => {
-    console.log('WhatsApp authenticated:', clientInfo);
-    setWhatsappStatus('ready');
-  };
-
-  if (loading) {
-    return <div className="loading">Loading clients...</div>;
-  }
-
-  const isWhatsAppReady = whatsappStatus === 'ready';
 
   return (
-    <div className="crm-page">
-      <div className="page-header">
-        <div className="header-left">
-          <h1>Client Management</h1>
+    <div className=crm-page>
+      <div className=page-header>
+        <h1>Client Management</h1>
+        <div className=header-actions>
           <button
-            onClick={() => setShowWhatsAppQR(true)}
-            className={'whatsapp-status-btn ' + (isWhatsAppReady ? 'connected' : 'disconnected')}
+            onClick={() => setShowForm(true)}
+            className=btn-add
           >
-            {isWhatsAppReady ? '🟢 WhatsApp Connected' : '🔴 Connect WhatsApp'}
-          </button>
-        </div>
-        <div className="header-actions">
-          <button
-            onClick={() => navigate('/crm/templates')}
-            className="btn-secondary templates-btn"
-          >
-            📋 Manage Templates
-          </button>
-          <button onClick={handleAddClient} className="btn-primary add-btn">
             + Add New Client
           </button>
+          <button
+            onClick={() => setShowWhatsAppQR(true)}
+            className=btn-whatsapp
+          >
+            📱 WhatsApp QR
+          </button>
         </div>
       </div>
 
-      <div className="filters">
-        <input
-          type="text"
-          placeholder="Search by name or phone..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
-        />
-        <select
-          value={otwFilter}
-          onChange={(e) => setOtwFilter(e.target.value)}
-          className="status-filter"
-        >
-          {otwCategories.map(category => (
-            <option key={category} value={category}>
-              {category === 'all' ? 'All OTW Status' : category}
-            </option>
-          ))}
-        </select>
-      </div>
+      {loading ? (
+        <div className=loading-spinner>
+          <div className=spinner></div>
+          <p>Loading clients...</p>
+        </div>
+      ) : (
+        <>
+          {showForm && (
+            <ClientForm
+              onClose={() => setShowForm(false)}
+              onSuccess={() => {
+                setShowForm(false);
+                fetchClients();
+              }}
+            />
+          )}
 
-      <ClientTable
-        clients={filteredClients}
-        onEdit={handleEditClient}
-        onDelete={handleDeleteClient}
-        onChat={handleChat}
-        onBuild={handleBuild}
-        onClientUpdate={handleClientUpdate}
-        onOtwStatusChange={handleOtwStatusChange}
-      />
+          {showChat && (
+            <ChatModal
+              client={selectedClient}
+              onClose={() => setShowChat(false)}
+            />
+          )}
 
-      {showForm && (
-        <ClientForm
-          client={editingClient}
-          onSave={handleSaveClient}
-          onCancel={() => {
-            setShowForm(false);
-            setEditingClient(null);
-          }}
-        />
-      )}
+          {showDetail && (
+            <ClientDetailModal
+              client={selectedClient}
+              onClose={() => setShowDetail(false)}
+            />
+          )}
 
-      {showChat && selectedClient && (
-        <ChatModal client={selectedClient} onClose={handleCloseChat} />
-      )}
+          {showWhatsAppQR && (
+            <WhatsAppQRModal onClose={() => setShowWhatsAppQR(false)} />
+          )}
 
-      {showDetail && editingClient && (
-        <ClientDetailModal
-          client={editingClient}
-          onClose={handleCloseDetail}
-          onSave={handleSaveClient}
-        />
-      )}
+          {showBuildDemo && (
+            <BuildDemoModal
+              client={selectedClient}
+              onClose={() => setShowBuildDemo(false)}
+            />
+          )}
 
-      {showWhatsAppQR && (
-        <WhatsAppQRModal
-          onClose={() => setShowWhatsAppQR(false)}
-          onAuthenticated={handleWhatsAppAuthenticated}
-        />
-      )}
+          {showViewDemo && (
+            <ViewDemoModal
+              client={selectedClient}
+              onClose={() => setShowViewDemo(false)}
+            />
+          )}
 
-      {showBuildDemo && selectedClient && (
-        <BuildDemoModal
-          client={selectedClient}
-          onClose={() => {
-            setShowBuildDemo(false);
-            setSelectedClient(null);
-          }}
-          onSuccess={handleBuildDemoSuccess}
-        />
-      )}
-
-      {showViewDemo && selectedClient && (
-        <ViewDemoModal
-          client={selectedClient}
-          onClose={() => {
-            setShowViewDemo(false);
-            setSelectedClient(null);
-          }}
-          onRebuild={handleRebuild}
-        />
+          <ClientTable
+            clients={filteredClients}
+            onEdit={(client) => {
+              setSelectedClient(client);
+              setEditingClient(client);
+              setShowForm(true);
+            }}
+            onDelete={handleDelete}
+            onChat={(client) => setShowChat(true)}
+            onBuild={(client) => setShowBuildDemo(true)}
+            onClientUpdate={fetchClients}
+            onOtwStatusChange={(client, newStatus) => {
+              const updatedClient = { ...client, otwStatus: newStatus };
+              setClients(clients.map(c => c.id === client.id ? updatedClient : c));
+            }}
+            onAssigneeChange={handleAssigneeChange}
+          />
+        </>
       )}
     </div>
   );
