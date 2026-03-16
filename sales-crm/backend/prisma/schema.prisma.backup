@@ -24,7 +24,8 @@ enum AdminRole {
 
 model Client {
   id                String         @id @default(uuid())
-  phoneNumber       String
+  phoneNumber       String?
+  scrapedPostId     String?         @map("scraped_post_id")
   eventOrganizer    String
   igLink            String?
   cp1st             String?
@@ -33,7 +34,9 @@ model Client {
   imgPoster         String?
   lastEvent         String?
   linkDemo          String?
-  lastSystem        String?
+  previousPhone     String?
+  otwStatus         OtwStatus      @default(NOT_CHECKED)
+  otwReason         String?
   colorPalette      String?
   dateEstimation    DateTime?
   igeventLink       String?
@@ -54,7 +57,6 @@ model Client {
   updatedAt         DateTime       @updatedAt
   chatHistory       ChatHistory[]
 
-  @@unique([phoneNumber, startup])
   @@map("clients")
 }
 
@@ -114,6 +116,20 @@ enum ClientStatus {
 enum StartupType {
   NOVAGATE
   NOVATIX
+}
+
+enum OtwStatus {
+  NOT_CHECKED
+  OTW_PROSPECT
+  URGENT
+  NANTI_AJA
+  FEE_KECIL_ATAU_GRATIS
+  URGENT_BERJALAN
+  GADA_NOMER_HP
+  NOMER_HP_KONTAK
+  GA_RELEVAN
+  GAUSAH
+  BENTAR_LAGI_MULAI
 }
 
 // ==================== SCRAPER MODELS ====================
