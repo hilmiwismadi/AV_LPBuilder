@@ -438,7 +438,7 @@ router.post('/bulk-assign', authenticate, authorize('SUPERADMIN'), async (req, r
               assignedAt: new Date(),
               status: 'TODO',
               startup: 'NOVAGATE',
-              otwStatus: 'OTW_PROSPECT',
+              otwStatus: 'NOT_CHECKED',
               otwReason: '',
               previousPhone: ''
             }
@@ -539,7 +539,7 @@ router.post('/bulk-unassign', authenticate, authorize('SUPERADMIN'), async (req,
             pic: null,
             assignedBy: null,
             assignedAt: null,
-            otwStatus: 'OTW_PROSPECT',
+            otwStatus: 'NOT_CHECKED',
             otwReason: ''
           }
         });

@@ -35,7 +35,7 @@ model Client {
   lastEvent         String?
   linkDemo          String?
   previousPhone     String?
-  otwStatus         OtwStatus      @default(OTW_PROSPECT)
+  otwStatus         String         @default("NOT_CHECKED")
   otwReason         String?
   colorPalette      String?
   dateEstimation    DateTime?
@@ -118,18 +118,6 @@ enum StartupType {
   NOVATIX
 }
 
-enum OtwStatus {
-  OTW_PROSPECT
-  URGENT
-  NANTI_AJA
-  FEE_KECIL_ATAU_GRATIS
-  URGENT_BERJALAN
-  GADA_NOMER_HP
-  NOMER_HP_KONTAK
-  GA_RELEVAN
-  GAUSAH
-  BENTAR_LAGI_MULAI
-}
 
 // ==================== SCRAPER MODELS ====================
 

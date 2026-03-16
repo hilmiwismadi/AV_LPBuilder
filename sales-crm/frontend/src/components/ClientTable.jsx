@@ -98,6 +98,11 @@ const ClientTable = ({ clients, onEdit, onDelete, onChat, onBuild, onClientUpdat
 
   // OTW Status categories and subcategories
   const otwCategories = {
+    'Not Checked': {
+      subcategories: ['CS belum isi status'],
+      color: '#dc3545',
+      backgroundColor: '#fee'
+    },
     'OTW chat (prospect)': {
       subcategories: ['Urgent karena sudah berjalan', 'Bentar lagi mulai', 'Etc']
     },
@@ -111,7 +116,15 @@ const ClientTable = ({ clients, onEdit, onDelete, onChat, onBuild, onClientUpdat
 
   // Parse current status to find category and subcategory
   const parseOtwStatus = (client) => {
-    const status = client.otwStatus || 'OTW_PROSPECT';
+    const status = client.otwStatus || 'NOT_CHECKED';
+
+    // Handle Not Checked status first
+    if (status === 'NOT_CHECKED') {
+      return {
+        category: 'Not Checked',
+        subcategory: 'CS belum isi status'
+      };
+    }
 
     // Map status to category/subcategory
     let category = 'OTW chat (prospect)';
@@ -157,6 +170,11 @@ const ClientTable = ({ clients, onEdit, onDelete, onChat, onBuild, onClientUpdat
 
   // Generate status value for storage
   const generateStatusValue = (category, subcategory, customText) => {
+    // Handle Not Checked category
+    if (category === 'Not Checked') {
+      return 'NOT_CHECKED';
+    }
+
     if (subcategory === 'Etc' && customText) {
       // Store as ETC_TEXT_[categoryNum]_[timestamp]_[text]
       const categoryNum = category === 'OTW chat (prospect)' ? '0' :

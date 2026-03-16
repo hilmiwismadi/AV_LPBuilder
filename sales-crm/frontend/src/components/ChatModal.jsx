@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { whatsappAPI, chatAPI } from '../services/api';
-import { chatTemplates, getTemplateVariables } from '../data/chatTemplates';
+import { whatsappAPI, chatAPI, templateAPI } from '../services/api';
+import { getTemplateVariables } from '../data/chatTemplates';
 import './ChatModal.css';
 
 const ChatModal = ({ client, onClose }) => {
@@ -11,19 +11,62 @@ const ChatModal = ({ client, onClose }) => {
   const [whatsappStatus, setWhatsappStatus] = useState('unknown');
   const [error, setError] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [templates, setTemplates] = useState([]);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
   const [userScrolled, setUserScrolled] = useState(false);
   const [pendingMessageId, setPendingMessageId] = useState(null);
   const messagesContainerRef = useRef(null);
   const messagesEndRef = useRef(null);
   const refreshIntervalRef = useRef(null);
 
+  const fetchTemplates = async () => {
+    try {
+      setTemplatesLoading(true);
+      const response = await templateAPI.getAll();
+      console.log("Templates response:", response);
+      const allTemplates = [];
+      if (response.data && response.data.templates) {
+        const templateArray = Object.values(response.data.templates).flat();
+        allTemplates.push(...templateArray);
+      }
+      const enabledTemplates = allTemplates.filter(t => t.enabled === true);
+      console.log("Filtered enabled templates:", enabledTemplates);
+      setTemplates(enabledTemplates);
+    } catch (error) {
+      console.error("Failed to fetch templates:", error);
+      setTemplates([]);
+    } finally {
+      setTemplatesLoading(false);
+    }
+  };
+  const fetchChatHistory = async (silent = false) => {
+    if (!silent) setLoading(true);
+    try {
+      const response = await chatAPI.getHistory(client.id);
+      const serverMessages = response.data.messages || [];
+      setMessages((prev) => {
+        if (pendingMessageId) {
+          const filteredServer = serverMessages.filter(m => m.id !== pendingMessageId);
+          return [...prev.filter(m => m.id !== pendingMessageId), ...filteredServer];
+        }
+        return serverMessages;
+      });
+    } catch (error) {
+      console.error("Failed to fetch chat history:", error);
+      if (!silent) setError("Failed to load chat history");
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  };
   useEffect(() => {
     fetchChatHistory();
     checkWhatsAppStatus();
+    fetchTemplates();
 
     refreshIntervalRef.current = setInterval(() => {
       fetchChatHistory(true);
       checkWhatsAppStatus();
+    fetchTemplates();
     }, 3000);
 
     return () => {
@@ -63,10 +106,6 @@ const ChatModal = ({ client, onClose }) => {
     } catch (err) {
       console.error('Error checking WhatsApp status:', err);
     }
-  };
-
-  const fetchChatHistory = async (silent = false) => {
-    if (!silent) setLoading(true);
     try {
       const response = await chatAPI.getHistory(client.id);
       const serverMessages = response.data.messages || [];
@@ -298,14 +337,16 @@ const ChatModal = ({ client, onClose }) => {
               value={selectedTemplate}
               onChange={handleTemplateSelect}
               className='template-dropdown'
+              disabled={templatesLoading}
             >
               <option value=''>-- Select a template --</option>
-              {chatTemplates.map(template => (
+              {templates.map(template => (
                 <option key={template.id} value={template.id}>
                   {template.category} - {template.name}
                 </option>
               ))}
             </select>
+            {templatesLoading && <span className="templates-loading">Loading...</span>}
           </div>
 
           <textarea

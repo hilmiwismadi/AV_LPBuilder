@@ -28,7 +28,7 @@ const CRMPage = () => {
   const [loading, setLoading] = useState(true);
 
   // OTW Status categories for filter
-  const otwCategories = ['all', 'OTW chat (prospect)', 'Nanti aja', 'Gausah'];
+  const otwCategories = ['all', 'Not Checked', 'OTW chat (prospect)', 'Nanti aja', 'Gausah'];
 
   useEffect(() => {
     fetchClients();
@@ -64,10 +64,16 @@ const CRMPage = () => {
 
   // Parse OTW status to category
   const getOtwCategory = (client) => {
-    const status = client.otwStatus || 'OTW_PROSPECT';
+    const status = client.otwStatus || 'NOT_CHECKED';
 
-    if (status === 'URGENT' || status === 'URGENT_BERJALAN' || status === 'BENTAR_LAGI_MULAI' || status === 'OTW_PROSPECT' || status.startsWith('ETC_OTW_')) {
-      return 'OTW chat (prospect)';
+    // Handle Not Checked status first
+    if (status === 'NOT_CHECKED') {
+      return 'Not Checked';
+    }
+
+    if (status === 'URGENT' || status === 'URGENT_BERJALAN' || status === 'BENTAR_LAGI_MULAI'|| status.startsWith('ETC_OTW_')) {
+    
+    return 'OTW chat (prospect)';
     } else if (status === 'FEE_KECIL_ATAU_GRATIS' || status.startsWith('UDAH_BERJALAN') || status.startsWith('HP_DI_GAMBAR') || status.startsWith('ETC_NANTI_')) {
       return 'Nanti aja';
     } else if (status === 'GA_RELEVAN' || status === 'GADA_NOMER_HP' || status === 'NOMER_HP_KONTAK' || status.startsWith('ETC_GAUSAH_')) {
