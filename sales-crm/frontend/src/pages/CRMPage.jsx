@@ -166,22 +166,48 @@ if (chatStatusFilter !== 'all') {      filtered = filtered.filter((client) => (c
   };
 
   const handleOtwStatusChange = async (client, status) => {
+    const previousStatus = client.otwStatus;
+
+    // Optimistic UI update: reflect selection immediately
+    setClients((prev) =>
+      prev.map((item) =>
+        item.id === client.id ? { ...item, otwStatus: status } : item
+      )
+    );
+
     try {
       await clientAPI.update(client.id, { otwStatus: status });
-      // Refresh client list to show updated data
-      fetchClients();
     } catch (error) {
+      // Rollback if API fails
+      setClients((prev) =>
+        prev.map((item) =>
+          item.id === client.id ? { ...item, otwStatus: previousStatus } : item
+        )
+      );
       console.error('Failed to update OTW status:', error);
       alert('Failed to update OTW status');
     }
   };
 
   const handleStatusChange = async (client, newStatus) => {
+    const previousStatus = client.status;
+
+    // Optimistic UI update: reflect selection immediately
+    setClients((prev) =>
+      prev.map((item) =>
+        item.id === client.id ? { ...item, status: newStatus } : item
+      )
+    );
+
     try {
       await clientAPI.update(client.id, { status: newStatus });
-      // Refresh client list to show updated data
-      fetchClients();
     } catch (error) {
+      // Rollback if API fails
+      setClients((prev) =>
+        prev.map((item) =>
+          item.id === client.id ? { ...item, status: previousStatus } : item
+        )
+      );
       console.error('Failed to update status:', error);
       alert('Failed to update status');
     }
