@@ -1,33 +1,3 @@
-/**
- * Standardize phone number to consistent format
- * Converts any phone number to format: 628xxxxxxxxxx
- * 
- * @param {string} phone - Phone number in any format
- * @returns {string} Standardized phone number (digits only, with 62 country code)
- */
-export function standardizePhoneNumber(phone) {
-  if (!phone) return '';
-  
-  // Remove all non-digit characters
-  let cleaned = phone.replace(/\D/g, '');
-  
-  // Remove leading 0 (Indonesian local format)
-  if (cleaned.startsWith('0')) {
-    cleaned = cleaned.substring(1);
-  }
-  
-  // Add 62 country code if not present
-  if (!cleaned.startsWith('62')) {
-    cleaned = '62' + cleaned;
-  }
-  
-  // Handle WhatsApp phone numbers with extra digits
-  // Indonesian phone numbers should be 11-13 digits after country code (62)
-  // WhatsApp sometimes includes extra digits at the end (internal IDs)
-  // Extract only the valid phone number portion
-  if (cleaned.startsWith('62') && cleaned.length > 13) {
-    // Country code (62) + area code (8) + 7-10 digits = 11-13 total
-    // Take first 13 digits max (62 + 11 digits number)
     cleaned = cleaned.substring(0, 13);
   }
   
