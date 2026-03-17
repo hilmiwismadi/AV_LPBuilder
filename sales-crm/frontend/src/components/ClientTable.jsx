@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import './ClientTable.css';
 
-const ClientTable = ({ clients, onEdit, onDelete, onChat, onBuild, onClientUpdate, onOtwStatusChange }) => {
+const ClientTable = ({ clients, onEdit, onDelete, onChat, onBuild, onClientUpdate, onOtwStatusChange, onStatusChange }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'TODO':
