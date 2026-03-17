@@ -151,3 +151,57 @@ export function phoneNumbersMatch(phone1, phone2) {
   const std2 = standardizePhoneNumber(phone2);
   return std1 === std2;
 }
+
+/**
+ * Extract WhatsApp phone number from message object
+ * Removes country codes, extra digits, handles various formats
+ *
+ * @param {object} message - WhatsApp Web.js message object
+ * @returns {string} Clean phone number in standard format
+ */
+export function extractWhatsAppPhoneNumber(message) {
+  if (!message) return '';
+  
+  // Get phone number from various possible fields
+  let phoneNumber = message.from || message.to || message.number;
+  
+  if (!phoneNumber) return '';
+  
+  // Remove @c.us suffix
+  phoneNumber = phoneNumber.replace('@c.us', '').replace('@g.us', '').replace('@s.whatsapp.net', '');
+  
+  // Handle array format (some messages have phone number in array)
+  if (Array.isArray(phoneNumber)) {
+    phoneNumber = phoneNumber[0] || '';
+  }
+  
+  // Remove all non-digit characters
+  let cleaned = phoneNumber.replace(/\D/g, '');
+  
+  // Handle leading zero
+  if (cleaned.startsWith('0')) {
+    cleaned = cleaned.substring(1);
+  }
+  
+  // Remove country code if present (WhatsApp sometimes adds +62)
+  if (cleaned.startsWith('62')) {
+    cleaned = cleaned.substring(2);
+  }
+  
+  // Handle Indonesian mobile numbers (typically 8-13 digits after country code)
+  // Indonesian numbers should start with 8, try  extract valid portion
+  if (cleaned.startsWith('628') || cleaned.startsWith('8')) {
+    // Try to extract 11-13 digit portion
+    for (let len = 13; len <= 11; len--) {
+      const candidate = cleaned.substring(0, len);
+      // Check if it starts with valid Indonesian mobile prefix (628, 8)
+      if (candidate.startsWith('628') || candidate.startsWith('8')) {
+        cleaned = candidate;
+        break;
+      }
+    }
+  }
+  
+  return cleaned;
+}
+
