@@ -359,7 +359,7 @@ const ClientTable = ({ clients, onEdit, onDelete, onChat, onBuild, onClientUpdat
         <tbody>
           {clients.map((client) => {
             const { category, subcategory } = parseOtwStatus(client);
-            const currentChatStatus = client.status || TODO;
+            const currentChatStatus = client.status || 'NOT_CHATTED';
             const isEtc = subcategory === 'Etc';
             const isEtcWithText = client.otwStatus?.startsWith('ETC_TEXT_');
 
@@ -421,7 +421,7 @@ const ClientTable = ({ clients, onEdit, onDelete, onChat, onBuild, onClientUpdat
                       fontWeight: 'bold'
                     }}
                   >
-                    {['TODO', 'PUSH', 'FOLLOW_UP', 'NEXT_YEAR', 'CANCELLED'].map(status => (
+                    {['NOT_CHATTED', 'TODO', 'PUSH', 'FOLLOW_UP', 'NEXT_YEAR', 'CANCELLED'].map(status => (
                       <option key={status} value={status}>
                         {getChatStatusLabel(status)}
                       </option>

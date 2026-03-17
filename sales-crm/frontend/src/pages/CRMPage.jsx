@@ -31,7 +31,7 @@ const CRMPage = () => {
   // OTW Status categories for filter
   const otwCategories = ['all', 'Not Checked', 'OTW chat (prospect)', 'Nanti aja', 'Gausah'];
   // Chat Status categories for filter
-  const chatStatusCategories = ['all', 'TODO', 'PUSH', 'FOLLOW_UP', 'NEXT_YEAR', 'CANCELLED'];
+  const chatStatusCategories = ['all', 'NOT_CHATTED', 'TODO', 'PUSH', 'FOLLOW_UP', 'NEXT_YEAR', 'CANCELLED'];
 
   useEffect(() => {
     fetchClients();
