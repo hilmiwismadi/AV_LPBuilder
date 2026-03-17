@@ -2,7 +2,7 @@ import pkg from 'whatsapp-web.js';
 const { Client, LocalAuth } = pkg;
 import qrcode from 'qrcode';
 import { PrismaClient } from '@prisma/client';
-import { standardizePhoneNumber } from './phoneUtils.js';
+import { standardizePhoneNumber, extractWhatsAppPhoneNumber } from './phoneUtils.js';
 import crypto from 'crypto';
 
 const prisma = new PrismaClient();

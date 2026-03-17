@@ -410,6 +410,8 @@ const ClientTable = ({ clients, onEdit, onDelete, onChat, onBuild, onClientUpdat
                         onChange={(e) => handleEtcTextChange(client, category, e.target.value)}
                       />
                     )}
+                  </div>
+                </td>
                 <td className="col-chat-status">
                   <select
                       className="chat-status-select"
@@ -427,8 +429,6 @@ const ClientTable = ({ clients, onEdit, onDelete, onChat, onBuild, onClientUpdat
                       </option>
                     ))}
                   </select>
-                </td>
-                  </div>
                 </td>
                 <td className="col-pic">{getPicDisplay(client)}</td>
                 <td className="col-last-contact">{formatDate(client.lastContact)}</td>
